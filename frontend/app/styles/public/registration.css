@@ -1,0 +1,315 @@
+/* Registration */
+.admission-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: -38px auto 0;
+  width: min(1100px, calc(100% - 44px));
+  position: relative;
+  z-index: 2;
+  background: var(--white);
+  box-shadow: 0 20px 60px rgba(15, 45, 55, 0.12);
+}
+.admission-summary article {
+  padding: 28px 34px;
+  border-right: 1px solid var(--line);
+}
+.admission-summary article:last-child {
+  border: 0;
+}
+.admission-summary span,
+.admission-summary strong,
+.admission-summary small {
+  display: block;
+}
+.admission-summary span {
+  color: #b46330;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.admission-summary strong {
+  margin: 9px 0 5px;
+  font-family: Georgia, serif;
+  font-size: 21px;
+}
+.admission-summary small {
+  color: #758589;
+}
+.admission-content {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  gap: clamp(50px, 8vw, 120px);
+  padding: 130px clamp(22px, 8vw, 135px);
+  align-items: start;
+}
+.admission-guide {
+  position: sticky;
+  top: 30px;
+}
+.admission-guide h2 {
+  margin: 14px 0 30px;
+  font-family: Georgia, serif;
+  font-size: 44px;
+  font-weight: 400;
+}
+.admission-guide ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.admission-guide li {
+  display: flex;
+  gap: 18px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.admission-guide li b {
+  color: #b46330;
+  font-family: Georgia, serif;
+}
+.help-card {
+  margin-top: 32px;
+  padding: 26px;
+  background: #dfe7e2;
+}
+.help-card p {
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.help-card a {
+  color: #b46330;
+  font-size: 12px;
+  font-weight: 800;
+}
+.registration-form {
+  padding: 48px;
+  background: var(--white);
+  box-shadow: 0 24px 70px rgba(15, 45, 55, 0.1);
+}
+.form-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+.form-heading span {
+  font-family: Georgia, serif;
+  font-size: 27px;
+}
+.form-heading strong {
+  color: #b46330;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.demo-alert {
+  margin: 22px 0;
+  padding: 12px 15px;
+  border-left: 3px solid var(--accent);
+  background: #faf4e8;
+  color: #695b49;
+  font-size: 11px;
+}
+.registration-progress {
+  display: grid;
+  grid-template-columns: auto minmax(40px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 8px;
+  color: #819095;
+  font-size: 10px;
+  font-weight: 750;
+}
+.registration-progress > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.registration-progress b {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cad5d1;
+  border-radius: 50%;
+  background: #f7f8f5;
+}
+.registration-progress span.active {
+  color: #365961;
+}
+.registration-progress span.active b {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: white;
+}
+.registration-progress > i {
+  height: 2px;
+  overflow: hidden;
+  background: #dce3df;
+}
+.registration-progress em {
+  display: block;
+  height: 100%;
+  background: #c87943;
+  transition: width 0.3s ease;
+}
+.registration-form fieldset {
+  margin: 34px 0 0;
+  padding: 0;
+  border: 0;
+}
+.registration-form legend {
+  width: 100%;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  color: #718186;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.form-grid .span-2 {
+  grid-column: span 2;
+}
+.registration-form label,
+.contact-form-section form label {
+  display: grid;
+  gap: 8px;
+  color: #526970;
+  font-size: 11px;
+  font-weight: 700;
+}
+.registration-form input,
+.registration-form select,
+.registration-form textarea,
+.contact-form-section input,
+.contact-form-section select,
+.contact-form-section textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid #d7ddda;
+  border-radius: 0;
+  background: #fbfaf6;
+  color: var(--ink);
+  font: inherit;
+  outline: none;
+}
+.registration-form input:focus,
+.registration-form select:focus,
+.registration-form textarea:focus,
+.contact-form-section input:focus,
+.contact-form-section textarea:focus {
+  border-color: #b46330;
+  box-shadow: 0 0 0 3px rgba(180, 99, 48, 0.08);
+}
+.consent {
+  display: flex !important;
+  grid-template-columns: 18px 1fr;
+  align-items: start;
+  margin: 30px 0 18px;
+  line-height: 1.5;
+}
+.consent input {
+  width: 16px;
+  min-height: 16px;
+}
+.submit-button {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+}
+.registration-form-actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+}
+.registration-back {
+  border: 1px solid #d4dcd8;
+  background: #f6f7f4;
+  color: #526970;
+  cursor: pointer;
+}
+.form-success {
+  padding: 70px 50px;
+  background: var(--white);
+  text-align: center;
+  box-shadow: 0 24px 70px rgba(15, 45, 55, 0.1);
+}
+.success-mark {
+  width: 65px;
+  height: 65px;
+  margin: 0 auto 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #d7e8de;
+  color: #276044;
+  font-size: 28px;
+}
+.form-success h2 {
+  font-family: Georgia, serif;
+  font-size: 40px;
+  font-weight: 400;
+}
+.form-success > strong {
+  display: inline-block;
+  margin: 8px 0 15px;
+  padding: 12px 18px;
+  background: #f6ead3;
+  font-family: monospace;
+  font-size: 19px;
+}
+.form-success > p {
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.form-success .button {
+  margin-top: 15px;
+  border: 0;
+  cursor: pointer;
+}
+.admission-steps {
+  background: #dfe7e2;
+}
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.step-grid article {
+  min-height: 220px;
+  padding: 28px;
+  border: 1px solid rgba(16, 47, 60, 0.13);
+  border-right: 0;
+}
+.step-grid article:last-child {
+  border-right: 1px solid rgba(16, 47, 60, 0.13);
+}
+.step-grid b {
+  color: #b46330;
+  font-family: Georgia, serif;
+}
+.step-grid h3 {
+  margin-top: 50px;
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+}
+.step-grid p {
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.6;
+}
+

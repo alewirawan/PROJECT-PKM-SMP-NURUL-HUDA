@@ -1,0 +1,144 @@
+/* Motion and micro-interactions */
+.reveal-ready {
+  opacity: 1;
+  transform: translateY(12px);
+  transition: transform 0.55s cubic-bezier(0.2, 0.72, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-ready.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.button,
+.text-link,
+.read-link {
+  position: relative;
+  overflow: hidden;
+}
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.2) 48%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.55s ease;
+}
+.button:hover::after {
+  transform: translateX(120%);
+}
+.text-link,
+.read-link {
+  transition:
+    color 0.2s ease,
+    gap 0.2s ease;
+}
+.text-link:hover,
+.read-link:hover {
+  color: #b46330;
+}
+.read-link:hover {
+  gap: 30px;
+}
+.hero-visual img,
+.about-image img,
+.experience-images img,
+.featured-post img,
+.principal-section img {
+  transition:
+    transform 0.8s cubic-bezier(0.2, 0.72, 0.2, 1),
+    filter 0.6s ease;
+}
+.hero-visual:hover img,
+.about-image:hover img,
+.featured-post > a:hover img {
+  transform: scale(1.025);
+  filter: saturate(0.95);
+}
+.program-card,
+.value-grid article,
+.step-grid article,
+.club-grid span {
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.value-grid article:hover,
+.step-grid article:hover,
+.club-grid span:hover {
+  position: relative;
+  z-index: 2;
+  transform: translateY(-5px);
+  background: var(--white);
+  box-shadow: 0 16px 40px rgba(16, 47, 60, 0.1);
+}
+.site-header:hover {
+  background: rgba(246, 243, 235, 0.99);
+}
+.hero-badge {
+  animation: softFloat 5s ease-in-out infinite;
+}
+.round-label {
+  animation: softFloat 6s ease-in-out -1s infinite;
+}
+@keyframes softFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+@keyframes adminViewIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes drawerIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes editorIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+

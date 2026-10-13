@@ -1,0 +1,352 @@
+/* Agenda, messages and settings */
+.agenda-workspace,
+.settings-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 18px;
+  margin: 0 38px;
+  align-items: start;
+}
+.admin-form-card {
+  padding: 25px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  background: white;
+}
+.admin-form-card > h2 {
+  margin: 5px 0 20px;
+  font-family: Georgia, serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+.admin-form-card > label {
+  margin-top: 14px;
+}
+.admin-form-card > .button {
+  width: 100%;
+  margin-top: 20px;
+  border: 0;
+  cursor: pointer;
+}
+.agenda-list {
+  padding: 22px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  background: white;
+}
+.agenda-list > article {
+  display: grid;
+  grid-template-columns: 28px 50px 1fr 28px;
+  gap: 14px;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf0ee;
+}
+.agenda-list > article.completed {
+  opacity: 0.5;
+}
+.agenda-list > article.completed h3 {
+  text-decoration: line-through;
+}
+.agenda-check {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #cbd6d2;
+  border-radius: 50%;
+  background: white;
+  color: #3c8557;
+  cursor: pointer;
+}
+.agenda-list time {
+  display: grid;
+  place-items: center;
+  height: 50px;
+  border-radius: 6px;
+  background: #f0f3f1;
+}
+.agenda-list time b {
+  font-family: Georgia, serif;
+  font-size: 18px;
+}
+.agenda-list time span {
+  color: #b46330;
+  font-size: 7px;
+  font-weight: 800;
+}
+.agenda-list h3 {
+  margin: 5px 0;
+  font-size: 12px;
+}
+.agenda-list p {
+  margin: 0;
+  color: #849397;
+  font-size: 9px;
+}
+.agenda-type {
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.type-ppdb {
+  color: #a8691e;
+}
+.type-akademik {
+  color: #39734d;
+}
+.type-kegiatan {
+  color: #3e7186;
+}
+.type-rapat {
+  color: #985d75;
+}
+.icon-danger {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #a94b3b;
+  cursor: pointer;
+}
+.message-workspace {
+  min-height: 570px;
+  display: grid;
+  grid-template-columns: 370px 1fr;
+  margin: 0 38px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+.message-list {
+  border-right: 1px solid #e5e9e7;
+}
+.message-list .filter-row {
+  padding: 12px;
+  margin: 0;
+  border-bottom: 1px solid #e5e9e7;
+  overflow-x: auto;
+}
+.message-list > button {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  gap: 11px;
+  align-items: start;
+  padding: 15px;
+  border: 0;
+  border-bottom: 1px solid #eef1ef;
+  background: white;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.message-list > button:hover,
+.message-list > button.active {
+  background: #f4f7f5;
+}
+.message-list > button.unread::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 25px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c06d35;
+}
+.message-list > button > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #dce8e4;
+  font-size: 9px;
+  font-weight: 800;
+}
+.message-list b,
+.message-list strong,
+.message-list small {
+  display: block;
+}
+.message-list b {
+  margin-bottom: 4px;
+  font-size: 10px;
+}
+.message-list strong {
+  margin-bottom: 4px;
+  color: #5d7479;
+  font-size: 9px;
+}
+.message-list small {
+  max-width: 210px;
+  overflow: hidden;
+  color: #93a0a2;
+  font-size: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.message-list time {
+  color: #98a5a7;
+  font-size: 7px;
+}
+.message-detail {
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+}
+.message-detail > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e7ebe9;
+}
+.message-detail h2 {
+  margin: 5px 0;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 400;
+}
+.message-detail header a {
+  color: #74868a;
+  font-size: 10px;
+}
+.message-body {
+  flex: 1;
+  padding: 30px 0;
+  color: #3c555e;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.8;
+}
+.message-detail > footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 20px;
+  border-top: 1px solid #e7ebe9;
+}
+.message-detail > footer .button {
+  min-height: 40px;
+  border: 0;
+  cursor: pointer;
+}
+.message-detail > footer .text-danger {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 9px;
+}
+.settings-layout {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+.settings-form {
+  padding: 30px;
+}
+.settings-form > .button {
+  width: auto;
+}
+.toggle-label {
+  align-self: end;
+  grid-template-columns: auto 1fr !important;
+  display: flex !important;
+  align-items: center;
+  gap: 9px !important;
+  min-height: 42px;
+}
+.toggle-label > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.toggle-label > span {
+  position: relative;
+  width: 39px;
+  height: 22px;
+  border-radius: 12px;
+  background: #cad3d0;
+  transition: background 0.2s ease;
+}
+.toggle-label > span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s ease;
+}
+.toggle-label > input:checked + span {
+  background: #4f9367;
+}
+.toggle-label > input:checked + span::after {
+  transform: translateX(17px);
+}
+.toggle-label b {
+  font-size: 9px;
+}
+.settings-side {
+  display: grid;
+  gap: 12px;
+}
+.settings-side article {
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #dde4e0;
+  border-radius: 8px;
+  background: white;
+}
+.settings-side article > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #e5eeeb;
+}
+.settings-side small,
+.settings-side strong {
+  display: block;
+}
+.settings-side small {
+  color: #879598;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.settings-side strong {
+  margin: 7px 0;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+.settings-side p {
+  margin: 0;
+  color: #879598;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.settings-side .danger-zone {
+  border-color: #ecd8d1;
+  background: #fbf5f2;
+}
+.danger-zone button {
+  margin-top: 15px;
+  padding: 8px 10px;
+  border: 1px solid #d9aaa0;
+  border-radius: 4px;
+  background: transparent;
+  color: #a14c3e;
+  font-size: 9px;
+  cursor: pointer;
+}
+

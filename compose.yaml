@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nurul_huda}
+      POSTGRES_USER: ${POSTGRES_USER:-nurul_huda}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib diisi}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [private]
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - path: backend/.env
+        required: false
+    environment:
+      HOST: 0.0.0.0
+      DATABASE_URL: postgres://${POSTGRES_USER:-nurul_huda}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD wajib diisi}@postgres:5432/${POSTGRES_DB:-nurul_huda}
+      UPLOAD_DIR: /srv/nurul-huda/private/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - private_uploads:/srv/nurul-huda/private/uploads
+    ports:
+      - "127.0.0.1:4000:4000"
+    networks: [private]
+
+volumes:
+  postgres_data:
+  private_uploads:
+
+networks:
+  private:

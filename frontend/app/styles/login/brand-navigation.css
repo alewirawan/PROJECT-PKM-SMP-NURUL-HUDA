@@ -1,0 +1,351 @@
+/* Brand system, admin analytics and mobile navigation polish */
+.brand-symbol {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50% 50% 44% 56%;
+  background: var(--ink);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: 700;
+}
+.brand-symbol::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(245, 173, 69, 0.28);
+  border-radius: 50%;
+  transform: translate(9px, -10px);
+}
+.brand-symbol > span {
+  transform: translateY(-1px);
+}
+.brand-symbol > i {
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  bottom: 9px;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.72;
+}
+.brand-symbol > i::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.mobile-menu-trigger {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+.mobile-nav-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 22px;
+  background: var(--paper);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(100%);
+  transition:
+    opacity 0.32s ease,
+    transform 0.42s cubic-bezier(0.2, 0.72, 0.2, 1),
+    visibility 0.42s;
+}
+.mobile-nav-panel.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+.mobile-nav-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.mobile-nav-panel > header > button {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.mobile-nav-panel > nav {
+  min-height: 0;
+  display: grid;
+  align-content: center;
+  overflow-y: auto;
+}
+.mobile-nav-panel > nav a {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--line);
+  color: #31505b;
+}
+.mobile-nav-panel > nav a small {
+  color: #b86b3d;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.mobile-nav-panel > nav a span {
+  font-family: Georgia, serif;
+  font-size: clamp(28px, 9vw, 42px);
+}
+.mobile-nav-panel > nav a.active span {
+  color: #bd6d3d;
+  font-style: italic;
+}
+.mobile-nav-panel > footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding-top: 20px;
+}
+.mobile-nav-panel > footer a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+}
+.mobile-nav-panel > footer > a:last-child {
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  color: #49636b;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-view {
+  width: 100%;
+  max-width: 1540px;
+  margin-inline: auto;
+}
+.admin-logo > .brand-symbol {
+  width: 39px;
+  height: 39px;
+  background: var(--accent);
+  color: var(--ink);
+  font-size: 21px;
+  box-shadow: none;
+}
+.admin-logo > .brand-symbol::before {
+  border-color: rgba(16, 47, 60, 0.23);
+}
+.admin-logo > .brand-symbol > i {
+  background: var(--ink);
+}
+.admin-sidebar nav button {
+  font-size: 13px;
+}
+.admin-sidebar nav button > svg {
+  flex: 0 0 auto;
+  color: #9ab0b2;
+}
+.admin-sidebar nav button.active > svg,
+.admin-sidebar nav button:hover > svg {
+  color: #f0b05d;
+}
+.admin-topbar {
+  color: #526b72;
+  font-size: 12px;
+}
+.admin-top-actions a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 650;
+}
+.admin-page-header > div > span {
+  color: #5e747a;
+  font-size: 13px;
+}
+.admin-page-header p,
+.admin-eyebrow {
+  font-size: 10px;
+}
+.metric-grid small {
+  color: #5f7378;
+  font-size: 11px;
+  font-weight: 650;
+}
+.metric-grid p {
+  color: #667b80;
+  font-size: 10px;
+}
+.metric-grid strong {
+  font-size: 34px;
+}
+.workspace-health li,
+.workspace-health li b {
+  font-size: 10px;
+}
+.enrollment-progress > p {
+  color: #63787e;
+  font-size: 10px;
+}
+.panel-heading h2 {
+  font-size: 16px;
+}
+.panel-heading p {
+  color: #6d8085;
+  font-size: 10px;
+}
+.panel-heading button,
+.panel-link {
+  font-size: 10px !important;
+}
+.admin-panel table {
+  font-size: 11px;
+}
+.admin-panel th {
+  padding-block: 12px;
+  color: #667a7f;
+  font-size: 9px;
+}
+.admin-panel td {
+  padding-block: 15px;
+  color: #4e6870;
+}
+.admin-panel td b {
+  font-size: 11px;
+}
+.admin-panel td small {
+  color: #778b90;
+  font-size: 9px;
+}
+.filter-row button {
+  font-size: 10px;
+}
+.admin-search input {
+  font-size: 12px;
+}
+.admin-quick-actions b {
+  font-size: 12px;
+}
+.admin-quick-actions small {
+  color: #687d82;
+  font-size: 10px;
+}
+.admin-quick-actions button > span {
+  color: #31535d;
+}
+.editor-grid label,
+.admin-form-card label {
+  font-size: 10px;
+}
+.editor-grid input,
+.editor-grid select,
+.editor-grid textarea,
+.admin-form-card input,
+.admin-form-card select,
+.admin-form-card textarea {
+  font-size: 12px;
+}
+.editor-grid small {
+  color: #6d8287;
+  font-size: 9px;
+}
+.content-row-copy > small,
+.row-actions button,
+.row-actions a {
+  font-size: 9px;
+}
+.agenda-list h3 {
+  font-size: 13px;
+}
+.agenda-list p {
+  color: #667b80;
+  font-size: 10px;
+}
+.agenda-type {
+  font-size: 8px;
+}
+.message-list b {
+  font-size: 11px;
+}
+.message-list strong {
+  font-size: 10px;
+}
+.message-list small {
+  color: #71868b;
+  font-size: 9px;
+}
+.message-list time {
+  color: #768b90;
+  font-size: 8px;
+}
+.settings-side small {
+  color: #667b80;
+  font-size: 9px;
+}
+.settings-side p {
+  color: #687d82;
+  font-size: 10px;
+}
+.icon-button,
+.admin-login-card form .button,
+.demo-credentials button,
+.danger-zone button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.password-field button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.admin-login-card > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.admin-login-card label {
+  font-size: 10px;
+}
+.admin-login-card > p:not(.section-kicker) {
+  color: #587078;
+}
+.admin-login-card input {
+  font-size: 11px;
+}
+

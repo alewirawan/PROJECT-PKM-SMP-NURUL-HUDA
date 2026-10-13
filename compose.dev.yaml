@@ -1,0 +1,21 @@
+# Local development only: API runs on the host, PostgreSQL runs in Docker.
+# Run with: docker compose --env-file backend/.env -f compose.dev.yaml up -d
+name: nurul-huda-local
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: nurul_huda
+      POSTGRES_USER: nurul_huda
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Isi POSTGRES_PASSWORD pada backend/.env}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nurul_huda -d nurul_huda"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  postgres_dev_data:

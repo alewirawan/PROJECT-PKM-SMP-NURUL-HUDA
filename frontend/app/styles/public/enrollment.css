@@ -1,0 +1,372 @@
+.registration-wizard {
+  min-width: 0;
+  scroll-margin-top: 104px;
+}
+.registration-wizard .registration-form-actions {
+  margin-top: 28px;
+}
+.wizard-progress {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 28px 0;
+}
+.wizard-progress li {
+  border-top: 3px solid #e1e6e1;
+  padding-top: 12px;
+  color: #778784;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.wizard-progress li.active {
+  border-color: #b56a36;
+  color: var(--ink);
+}
+.wizard-progress b {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  margin-bottom: 5px;
+}
+.form-help {
+  color: #536963;
+  line-height: 1.7;
+  font-size: 13px;
+}
+.form-error {
+  color: #94381e;
+  background: #fff1e9;
+  border-left: 3px solid #b14b2e;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.registration-upload-grid {
+  display: grid;
+  gap: 14px;
+}
+.upload-card {
+  border: 1px solid #d9e0d9;
+  border-radius: 12px;
+  padding: 20px;
+  background: #fcfbf7;
+  min-width: 0;
+}
+.upload-card.has-file {
+  border-color: #689783;
+  background: #f2f7f0;
+}
+.upload-card-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.upload-card h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.upload-card small {
+  color: #60766b;
+  line-height: 1.5;
+}
+.registration-wizard input[type="file"] {
+  padding: 8px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 12px;
+}
+.registration-wizard input::file-selector-button {
+  background: var(--ink);
+  color: white;
+  border: 0;
+  padding: 10px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+.selected-file {
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.selected-file small {
+  display: block;
+  margin-top: 4px;
+}
+.file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.file-actions button,
+.registration-review button,
+.document-review-card button,
+.catalog-records button,
+.catalog-editor > button:not(.button),
+.catalog-empty button {
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1px solid #c7d3ca;
+  color: var(--ink);
+  background: #fffdf8;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.registration-review h2 {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: 28px;
+}
+.registration-review article {
+  border-top: 1px solid var(--line);
+  padding-block: 16px;
+}
+.registration-review header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.registration-review h3 {
+  font-size: 15px;
+}
+.registration-review p {
+  color: #576d65;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.registration-review dt {
+  font-size: 11px;
+  color: #62796e;
+  margin-top: 12px;
+}
+.registration-review dd {
+  font-size: 14px;
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+.file-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  background: #102f3cc9;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 500;
+}
+.file-preview {
+  position: relative;
+  z-index: 1;
+  width: min(920px, 100%);
+  max-height: 90dvh;
+  overflow: auto;
+  padding: 24px;
+  background: #fffdf8;
+  border-radius: 16px;
+  min-width: 0;
+}
+.file-preview header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.file-preview h2 {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+.file-preview header > div {
+  min-width: 0;
+}
+.file-preview small {
+  color: #64786e;
+}
+.file-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 64dvh;
+  object-fit: contain;
+  margin: auto;
+}
+.file-preview iframe {
+  width: 100%;
+  height: 60dvh;
+  border: 1px solid #d8e0d8;
+}
+.file-preview p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.admission-guide {
+  top: 106px;
+}
+.profile-tabbar,
+.directory-tabbar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.profile-tabbar button,
+.directory-tabbar button {
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #61746f;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.profile-tabbar button[aria-selected="true"],
+.directory-tabbar button[aria-selected="true"] {
+  border-bottom-color: #b86b3d;
+  color: var(--ink);
+  font-weight: 700;
+}
+.directory-tabbar {
+  width: min(1180px, calc(100% - 36px));
+  margin: 36px auto 0;
+}
+.directory-demo-note {
+  width: min(1180px, calc(100% - 36px));
+  margin: 18px auto 0;
+  color: #6a786f;
+  font-size: 12px;
+}
+.public-directory-tabs [hidden],
+.student-profile-drawer [hidden] {
+  display: none !important;
+}
+.document-review-grid {
+  display: grid;
+  gap: 16px;
+}
+.document-review-card {
+  padding: 20px;
+  border: 1px solid #d5e0d7;
+  border-radius: 12px;
+  background: #fafbf7;
+}
+.document-review-card header {
+  display: flex;
+  align-items: start;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+}
+.document-review-card h4 {
+  margin: 0;
+}
+.document-badge {
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #85512e;
+  background: #f4e9d9;
+  border-radius: 5px;
+}
+.document-badge.verified {
+  color: #34654c;
+  background: #e0ecdf;
+}
+.document-review-card label,
+.student-profile-section > label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  margin-top: 14px;
+}
+.document-review-card select,
+.document-review-card textarea,
+.student-profile-section > label select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ced9d0;
+  font: inherit;
+  background: white;
+  color: var(--ink);
+}
+.document-review-card select:disabled {
+  opacity: 0.6;
+}
+.document-review-card > small {
+  display: block;
+  line-height: 1.6;
+  color: #6d7c72;
+}
+.profile-tabbar {
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.student-profile-drawer .student-profile-section > p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+@media (max-width: 1180px) {
+  .mobile-nav-panel.open {
+    display: grid;
+  }
+  .site-header {
+    grid-template-columns: 1fr auto;
+  }
+  .site-header nav,
+  .site-header .header-cta {
+    display: none;
+  }
+  .site-header .mobile-menu-trigger {
+    display: inline-flex;
+    justify-self: end;
+  }
+}
+@media (max-width: 620px) {
+  .wizard-progress {
+    gap: 5px;
+  }
+  .wizard-progress li {
+    font-size: 10px;
+  }
+  .registration-wizard {
+    padding: 24px 18px;
+    scroll-margin-top: 88px;
+  }
+  .registration-wizard .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .registration-wizard .form-grid .span-2 {
+    grid-column: auto;
+  }
+  .upload-card {
+    padding: 16px;
+  }
+  .file-preview-backdrop {
+    padding: 10px;
+  }
+  .file-preview {
+    padding: 16px;
+  }
+  .file-preview header {
+    flex-direction: column;
+  }
+  .profile-tabbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .profile-tabbar button {
+    padding-inline: 6px;
+  }
+  .directory-tabbar button {
+    flex: 1;
+    padding-inline: 8px;
+  }
+  .registration-form input,
+  .registration-form select,
+  .registration-form textarea {
+    font-size: 16px;
+  }
+}

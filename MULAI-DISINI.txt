@@ -1,0 +1,58 @@
+PAKET TIM PKM - SMP NURUL HUDA
+10 Oktober 2026
+
+CARA CEPAT MEMBUKA WEBSITE
+
+1. Pasang Node.js versi 22.13.0 atau lebih baru.
+2. Ekstrak seluruh ZIP.
+3. Buka folder smp-nurul-huda di VS Code.
+4. Pilih Terminal > New Terminal.
+5. Pastikan folder tersebut berisi package.json, frontend, dan backend.
+6. Jalankan:
+
+   npm ci
+   npm run dev
+
+7. Buka URL pada terminal, biasanya:
+   Website: http://localhost:3000
+   Admin:   http://localhost:3000/admin
+8. Pada admin pilih "Masuk ke mode demo".
+9. Hentikan server dengan Ctrl+C. Untuk menjalankan lagi cukup npm run dev.
+
+PENTING
+
+- Untuk demo tidak perlu database, Docker, atau file .env frontend.
+- Jangan aktifkan NEXT_PUBLIC_API_BASE_URL sebelum backend dan akun admin siap.
+- Gunakan data fiktif. Data demo tersimpan di browser masing-masing.
+- Backend masih fondasi; API seluruh menu belum selesai.
+- ZIP tidak berisi node_modules, .env pribadi, atau hasil build.
+- Pada Windows jika npm.ps1 diblokir, gunakan Command Prompt atau npm.cmd.
+
+PEMBARUAN FRONTEND 10 OKTOBER 2026
+
+- Halaman Prestasi dan pengelolaannya di admin.
+- Tab Struktur Organisasi dan Daftar Guru.
+- PPDB empat langkah dengan SKL, ijazah, KK, KTP orang tua, PIP/KIP,
+  dan akta kelahiran. PDF/JPG/PNG maksimal 5 MB per berkas.
+- Ekstrakurikuler menggantikan peminatan pada formulir dan data pendaftar.
+- Detail siswa bertab, status pemeriksaan berkas, dan catatan admin.
+- Gunakan berkas dummy. File hanya berada di memori browser dan tidak
+  diunggah ke server. Pratinjau hilang setelah refresh; buka admin melalui
+  tautan pada halaman sukses di tab yang sama untuk mencoba pratinjau.
+- Backend yang disertakan tetap fondasi sebelumnya, tidak ditambah pada
+  pembaruan ini. Dokumen pembagian tugas lama belum mencakup semua fitur baru.
+
+BACA SELANJUTNYA
+
+PANDUAN-INSTALASI.md
+  Tutorial lengkap Windows/macOS, backend opsional, dan troubleshooting.
+
+docs/README-TIM-PKM.md
+  Pembagian 10 anggota, path source, checklist, dan folder yang direncanakan.
+
+artifacts/Panduan-Kerja-Tim-PKM-SMP-Nurul-Huda.pdf
+  Versi PDF pembagian tugas. Dokumen ini disusun 25 September 2026;
+  untuk perintah instalasi terbaru gunakan PANDUAN-INSTALASI.md.
+
+Kerjakan perubahan pada branch masing-masing di repository tim setelah
+koordinator menyiapkannya. Jangan mengirim .env atau data pribadi ke grup.

@@ -1,0 +1,126 @@
+/* Public interactions */
+.inline-success {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.66);
+}
+.inline-success > span {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #d7e9de;
+  color: #35724a;
+}
+.inline-success b,
+.inline-success small {
+  display: block;
+}
+.inline-success b {
+  font-size: 11px;
+}
+.inline-success small {
+  margin-top: 3px;
+  color: #718388;
+  font-size: 8px;
+}
+.inline-success button {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #a75e35;
+  font-size: 9px;
+  cursor: pointer;
+}
+.contact-success {
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-height: 420px;
+  padding: 40px;
+  background: var(--white);
+  text-align: center;
+}
+.contact-success > span {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #d8e9df;
+  color: #337149;
+  font-size: 24px;
+}
+.contact-success h3 {
+  margin: 20px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: 400;
+}
+.contact-success p {
+  max-width: 420px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+.contact-success button {
+  margin-top: 12px;
+  border: 0;
+  cursor: pointer;
+}
+.share-buttons button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+.share-buttons button:hover {
+  transform: translateY(-2px);
+  background: var(--ink);
+  color: white;
+}
+.article-author {
+  display: block;
+  margin-top: 20px;
+  color: #718186;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.article-missing,
+.empty-public-state {
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding: 80px 22px;
+  text-align: center;
+}
+.article-missing h1,
+.empty-public-state h2 {
+  margin: 14px 0;
+  font-family: Georgia, serif;
+  font-size: clamp(42px, 6vw, 70px);
+  font-weight: 400;
+}
+.article-missing > p:not(.section-kicker),
+.empty-public-state p {
+  color: var(--ink-soft);
+}
+.article-missing .button {
+  margin-top: 22px;
+}
+

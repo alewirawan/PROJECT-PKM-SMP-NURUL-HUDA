@@ -1,0 +1,220 @@
+.admin-analytics-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 14px;
+  padding: 0 38px 22px;
+}
+.admin-analytics-grid > article {
+  min-width: 0;
+  padding: 24px 25px;
+  border: 1px solid #dce4e0;
+  border-radius: 8px;
+  background: white;
+}
+.admin-analytics-grid header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+.admin-analytics-grid h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+.trend-card header > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 14px;
+  background: #eef3f0;
+  color: #62787e;
+  font-size: 9px;
+  font-weight: 750;
+}
+.bar-chart {
+  height: 152px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  align-items: end;
+  margin-top: 20px;
+  padding: 0 8px;
+  border-bottom: 1px solid #dde4e1;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 37px,
+    #eff2f0 38px
+  );
+}
+.chart-column {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 18px 1fr 24px;
+  gap: 5px;
+  align-items: end;
+  text-align: center;
+}
+.chart-column > b {
+  color: #476069;
+  font-size: 10px;
+}
+.chart-column > div {
+  height: 100%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
+.chart-column span {
+  width: min(42px, 70%);
+  min-height: 10px;
+  display: block;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, #efb35f, #bd6b3a);
+  animation: chartGrow 0.7s cubic-bezier(0.2, 0.72, 0.2, 1) both;
+  transform-origin: bottom;
+}
+.chart-column small {
+  color: #6c8186;
+  font-size: 9px;
+}
+.funnel-card header > strong {
+  color: #bd6b3a;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  font-weight: 400;
+  text-align: right;
+}
+.funnel-card header > strong small {
+  display: block;
+  color: #7c8e92;
+  font:
+    8px Arial,
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.funnel-list {
+  display: grid;
+  gap: 13px;
+  margin-top: 24px;
+}
+.funnel-row > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 7px;
+  color: #536b72;
+  font-size: 10px;
+}
+.funnel-row > div b {
+  color: var(--ink);
+}
+.funnel-row > i {
+  display: block;
+  height: 8px;
+  border-radius: 5px;
+  background: #d5dedb;
+  transition: width 0.7s ease;
+}
+.funnel-row.registered > i {
+  background: #214c58;
+}
+.funnel-row.verified > i {
+  background: #5c8d82;
+}
+.funnel-row.interview > i {
+  background: #daa15b;
+}
+.funnel-row.accepted > i {
+  background: #b9633b;
+}
+@keyframes chartGrow {
+  from {
+    transform: scaleY(0.05);
+    opacity: 0.35;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.admin-empty {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding: 42px 24px;
+  border-radius: 8px;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(236, 241, 238, 0.88),
+    transparent 42%
+  );
+  text-align: center;
+}
+.empty-visual {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  border: 1px solid #cfdbd7;
+  border-radius: 50%;
+  background: #f8faf8;
+  color: #aa6941;
+}
+.empty-visual::before,
+.empty-visual::after,
+.empty-visual > i {
+  content: "";
+  position: absolute;
+  border: 1px solid #d8e1de;
+  border-radius: 50%;
+}
+.empty-visual::before {
+  inset: -8px;
+  border-style: dashed;
+}
+.empty-visual::after {
+  width: 7px;
+  height: 7px;
+  top: 1px;
+  right: 5px;
+  background: var(--accent);
+  border: 0;
+}
+.empty-visual > i {
+  width: 5px;
+  height: 5px;
+  bottom: 5px;
+  left: 2px;
+  background: #7fa197;
+  border: 0;
+}
+.admin-empty b {
+  margin-bottom: 7px;
+  font-size: 21px;
+}
+.admin-empty p {
+  max-width: 390px;
+  color: #687e83;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.empty-action {
+  margin-top: 18px;
+}
+.empty-action .button {
+  min-height: 42px;
+  border: 0;
+}
+.admin-mobile-more-backdrop {
+  display: none;
+}
+

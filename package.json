@@ -1,0 +1,24 @@
+{
+  "name": "smp-nurul-huda-workspace",
+  "version": "0.2.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@nurul-huda/frontend",
+    "dev:frontend": "npm run dev --workspace=@nurul-huda/frontend",
+    "dev:backend": "npm run dev --workspace=@nurul-huda/backend",
+    "build": "npm run build --workspace=@nurul-huda/frontend && npm run build --workspace=@nurul-huda/backend",
+    "start": "npm run start --workspace=@nurul-huda/frontend",
+    "start:backend": "npm run start --workspace=@nurul-huda/backend",
+    "test": "npm run test --workspace=@nurul-huda/frontend && npm run test --workspace=@nurul-huda/backend",
+    "lint": "npm run lint --workspace=@nurul-huda/frontend && npm run lint --workspace=@nurul-huda/backend",
+    "typecheck": "npm run typecheck --workspace=@nurul-huda/frontend && npm run typecheck --workspace=@nurul-huda/backend",
+    "check": "npm run lint && npm run typecheck && npm test"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}
