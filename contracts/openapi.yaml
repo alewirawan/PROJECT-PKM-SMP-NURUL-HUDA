@@ -1,64 +1,109 @@
 openapi: 3.1.0
 info:
   title: SMP Nurul Huda API
-  version: 1.0.0
-  description: Kontrak integrasi frontend dan backend; endpoint admin memakai session cookie HttpOnly.
-  license: { name: Proprietary, identifier: LicenseRef-Proprietary }
+  version: 1.2.0
+  description: >-
+    Kontrak target integrasi 15 Oktober 2026. Bukan daftar endpoint yang sudah berjalan. Auth
+    memiliki fondasi; resource sekolah dan upload berikut adalah pekerjaan tim. Perubahan kontrak
+    tidak menjalankan migration atau menambah backend. Endpoint admin wajib memeriksa session, role,
+    dan proteksi CSRF. Revisi kebutuhan pengguna: berkas wajib dapat diatur, PIP/KIP opsional,
+    jadwal manual, tanpa syarat usia/kelayakan tambahan, ekstrakurikuler multiselect opsional,
+    koreksi mandiri pendaftar dengan verifikasi admin, tanpa penghapusan otomatis.
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
 servers:
   - url: http://localhost:4000/api/v1
     description: Backend lokal
 tags:
-  - { name: Auth, description: Login dan session admin }
-  - { name: Applications, description: Pendaftaran dan dokumen siswa }
-  - { name: Directory, description: Struktur organisasi dan tenaga pendidik }
-  - { name: Content, description: "Artikel, agenda, dan pengaturan publik" }
-  - { name: Communication, description: Pesan masuk dan newsletter }
+  - name: Auth
+    description: Login dan session admin
+  - name: Applications
+    description: Pendaftaran dan dokumen siswa
+  - name: Directory
+    description: Struktur organisasi dan tenaga pendidik
+  - name: Content
+    description: Artikel, agenda, dan pengaturan publik
+  - name: Communication
+    description: Pesan masuk dan newsletter
+  - name: Catalog
+    description: Prestasi dan ekstrakurikuler
+  - name: Dashboard
+    description: Ringkasan admin tanpa data pribadi
 security: []
 paths:
   /auth/login:
     post:
-      tags: [Auth]
+      tags:
+        - Auth
       operationId: loginAdmin
       summary: Login admin
       requestBody:
         required: true
         content:
-          application/json:
-            schema: { $ref: "#/components/schemas/LoginRequest" }
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/LoginRequest" } },
+          }
       responses:
         "204": { description: Login berhasil }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "422": { $ref: "#/components/responses/ValidationError" }
         "429": { $ref: "#/components/responses/RateLimited" }
+      x-implementation-status: foundation
+      x-owner: 9
   /auth/session:
     get:
-      tags: [Auth]
+      tags:
+        - Auth
       operationId: getAdminSession
       summary: Validasi session admin
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "200":
-          description: Session aktif
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/AdminSession" }
+          {
+            description: Session aktif,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/AdminSession" } },
+              },
+          }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: foundation
+      x-owner: 9
+      x-roles:
+        - super_admin
+        - admin_ppdb
+        - editor
   /auth/logout:
     post:
-      tags: [Auth]
+      tags:
+        - Auth
       operationId: logoutAdmin
       summary: Hapus session admin
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "204": { description: Logout berhasil }
         "401": { $ref: "#/components/responses/Unauthorized" }
-
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: foundation
+      x-owner: 9
+      x-roles:
+        - super_admin
+        - admin_ppdb
+        - editor
   /applications:
     get:
-      tags: [Applications]
+      tags:
+        - Applications
       operationId: listApplications
       summary: Cari dan filter pendaftar
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       parameters:
         - { in: query, name: q, schema: { type: string, maxLength: 100 } }
         - {
@@ -77,38 +122,83 @@ paths:
             name: limit,
             schema: { type: integer, minimum: 1, maximum: 100, default: 25 },
           }
+        - {
+            in: query,
+            name: documents,
+            schema: { type: string, enum: [Lengkap, Belum lengkap] },
+            description: "Filter sebelum pagination berdasarkan snapshot documentRequirements setiap pendaftar. Status menunggu/terverifikasi dengan file atau bukti fisik; KIP opsional. Jika tidak ada jenis diwajibkan, tidak ada kekurangan berkas wajib.",
+          }
       responses:
         "200":
-          description: Daftar pendaftar
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ApplicationPage" }
+          {
+            description: Daftar pendaftar,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ApplicationPage" } },
+              },
+          }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
     post:
-      tags: [Applications]
+      tags:
+        - Applications
       operationId: createPublicApplication
       summary: Kirim formulir pendaftaran publik
       requestBody:
         required: true
         content:
-          application/json:
-            schema: { $ref: "#/components/schemas/ApplicationCreate" }
+          {
+            multipart/form-data:
+              {
+                schema: { $ref: "#/components/schemas/ApplicationMultipart" },
+                encoding: { data: { contentType: application/json } },
+              },
+          }
       responses:
         "201":
-          description: Pendaftaran dibuat
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ApplicationReceipt" }
+          {
+            description: Pendaftaran dibuat,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: "#/components/schemas/ApplicationReceipt" },
+                  },
+              },
+          }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "413": { description: Batas file/request terlampaui }
+        "415": { description: Jenis file tidak didukung }
         "422": { $ref: "#/components/responses/ValidationError" }
         "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      description: >-
+        Satu submit publik memuat data JSON dan berkas. Maksimum 6 file × 5 MiB; JSON maksimal 16
+        KiB; total request maksimal 32 MiB. Validasi seluruh input dan kebijakan berkas terkini
+        sebelum penerimaan; 201 hanya setelah metadata dan file tersimpan. Bersihkan file sementara
+        saat gagal. Akses koreksi sesudah submit hanya melalui session pendaftar terautentikasi,
+        bukan nomor pendaftaran saja. Terapkan rate limit, batas resource, dan deduplikasi retry.
+      x-implementation-status: planned
+      x-owner: 5
   /applications/{applicationId}:
     parameters:
       - $ref: "#/components/parameters/ApplicationId"
     get:
-      tags: [Applications]
+      tags:
+        - Applications
       operationId: getApplication
       summary: Ambil detail pendaftar
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "200":
           {
@@ -120,17 +210,27 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
+      x-implementation-status: planned
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
     patch:
-      tags: [Applications]
+      tags:
+        - Applications
       operationId: updateApplication
       summary: Perbarui data atau status pendaftar
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
-          application/json:
-            schema: { $ref: "#/components/schemas/ApplicationUpdate" }
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/ApplicationUpdate" } },
+          }
       responses:
         "200":
           {
@@ -142,34 +242,51 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationError" }
-    delete:
-      tags: [Applications]
-      operationId: deleteApplication
-      summary: Hapus pendaftar
-      security: [{ cookieSession: [] }]
-      responses:
-        "204": { description: Pendaftar dihapus }
-        "401": { $ref: "#/components/responses/Unauthorized" }
+      x-implementation-status: planned
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
   /applications/{applicationId}/documents:
     parameters:
       - $ref: "#/components/parameters/ApplicationId"
     post:
-      tags: [Applications]
+      tags:
+        - Applications
       operationId: uploadApplicationDocument
       summary: Unggah dokumen pendaftar
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
-          multipart/form-data:
-            schema:
-              type: object
-              required: [kind, file]
-              properties:
-                kind: { $ref: "#/components/schemas/DocumentKind" }
-                file: { type: string, format: binary }
+          {
+            multipart/form-data:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [kind, file],
+                    properties:
+                      {
+                        kind:
+                          { $ref: "#/components/schemas/UploadDocumentKind" },
+                        file:
+                          {
+                            type: string,
+                            format: binary,
+                            minLength: 1,
+                            x-max-bytes: 5242880,
+                          },
+                      },
+                    additionalProperties: false,
+                  },
+              },
+          }
       responses:
         "201":
           {
@@ -181,13 +298,49 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "413": { description: Ukuran file terlalu besar }
         "415": { description: Jenis file tidak didukung }
         "422": { $ref: "#/components/responses/ValidationError" }
-
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+      description: >-
+        Upload atau ganti satu jenis berkas oleh admin. Maksimum 5 MiB/file. Validasi signature;
+        simpan privat dengan nama acak. Penggantian mereset status ke Menunggu pemeriksaan dan
+        mencatat audit; versi lama yang sudah tersimpan tetap diarsipkan tanpa purge otomatis.
+      x-implementation-status: planned
+      x-owner: 7
+      x-roles:
+        - super_admin
+        - admin_ppdb
+    get:
+      tags:
+        - Applications
+      operationId: listApplicationDocuments
+      summary: Daftar metadata berkas privat
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/DocumentList" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 7
+      x-roles:
+        - super_admin
+        - admin_ppdb
   /directory:
     get:
-      tags: [Directory]
+      tags:
+        - Directory
       operationId: getSchoolDirectory
       summary: Ambil struktur organisasi dan guru
       responses:
@@ -201,16 +354,22 @@ paths:
               },
           }
         "429": { $ref: "#/components/responses/RateLimited" }
+      x-implementation-status: planned
+      x-owner: 3
     put:
-      tags: [Directory]
+      tags:
+        - Directory
       operationId: updateSchoolDirectory
       summary: Simpan struktur organisasi dan guru
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
-          application/json:
-            schema: { $ref: "#/components/schemas/SchoolDirectory" }
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/SchoolDirectory" } },
+          }
       responses:
         "200":
           {
@@ -222,11 +381,17 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "422": { $ref: "#/components/responses/ValidationError" }
-
+      x-implementation-status: planned
+      x-owner: 3
+      x-roles:
+        - super_admin
+        - editor
   /posts:
     get:
-      tags: [Content]
+      tags:
+        - Content
       operationId: listPosts
       summary: Ambil artikel publik
       responses:
@@ -246,11 +411,18 @@ paths:
               },
           }
         "429": { $ref: "#/components/responses/RateLimited" }
+      description: >-
+        Hanya status Terbit. Metadata halaman, sitemap, dan berita beranda memakai sumber artikel
+        terbit yang sama.
+      x-implementation-status: planned
+      x-owner: 4
     post:
-      tags: [Content]
+      tags:
+        - Content
       operationId: createPost
       summary: Buat artikel admin
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
@@ -269,15 +441,26 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: planned
+      x-owner: 4
+      x-roles:
+        - super_admin
+        - editor
   /posts/{postId}:
     parameters:
-      - { in: path, name: postId, required: true, schema: { type: string } }
+      - in: path
+        name: postId
+        required: true
+        schema: { type: string }
     patch:
-      tags: [Content]
+      tags:
+        - Content
       operationId: updatePost
       summary: Perbarui artikel
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
@@ -296,18 +479,32 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 4
+      x-roles:
+        - super_admin
+        - editor
     delete:
-      tags: [Content]
+      tags:
+        - Content
       operationId: deletePost
       summary: Hapus artikel
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "204": { description: Artikel dihapus }
         "401": { $ref: "#/components/responses/Unauthorized" }
-
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 4
+      x-roles:
+        - super_admin
+        - editor
   /agenda:
     get:
-      tags: [Content]
+      tags:
+        - Content
       operationId: listAgenda
       summary: Ambil agenda sekolah
       responses:
@@ -327,11 +524,18 @@ paths:
               },
           }
         "429": { $ref: "#/components/responses/RateLimited" }
+      description: >-
+        Hanya visibility=Publik. Rapat/internal tidak otomatis terbuka. UI lama perlu kontrol
+        visibilitas saat integrasi.
+      x-implementation-status: planned
+      x-owner: 2
     post:
-      tags: [Content]
+      tags:
+        - Content
       operationId: createAgenda
       summary: Tambah agenda
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
@@ -350,14 +554,25 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
   /agenda/{agendaId}:
     parameters:
-      - { in: path, name: agendaId, required: true, schema: { type: string } }
+      - in: path
+        name: agendaId
+        required: true
+        schema: { type: string }
     patch:
-      tags: [Content]
+      tags:
+        - Content
       operationId: updateAgenda
       summary: Perbarui agenda
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
@@ -376,21 +591,36 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
     delete:
-      tags: [Content]
+      tags:
+        - Content
       operationId: deleteAgenda
       summary: Hapus agenda
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "204": { description: Agenda dihapus }
         "401": { $ref: "#/components/responses/Unauthorized" }
-
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
   /messages:
     get:
-      tags: [Communication]
+      tags:
+        - Communication
       operationId: listMessages
       summary: Ambil pesan masuk
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "200":
           {
@@ -408,8 +638,15 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
     post:
-      tags: [Communication]
+      tags:
+        - Communication
       operationId: createMessage
       summary: Kirim pesan publik
       requestBody:
@@ -423,23 +660,38 @@ paths:
         "201": { description: Pesan diterima }
         "422": { $ref: "#/components/responses/ValidationError" }
         "429": { $ref: "#/components/responses/RateLimited" }
+      x-implementation-status: planned
+      x-owner: 8
   /messages/{messageId}:
     parameters:
-      - { in: path, name: messageId, required: true, schema: { type: string } }
+      - in: path
+        name: messageId
+        required: true
+        schema: { type: string }
     patch:
-      tags: [Communication]
+      tags:
+        - Communication
       operationId: updateMessage
       summary: Ubah status pesan
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
-          application/json:
-            schema:
-              type: object
-              required: [status]
-              properties:
-                { status: { type: string, enum: [Baru, Dibaca, Selesai] } }
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [status],
+                    properties:
+                      {
+                        status: { type: string, enum: [Baru, Dibaca, Selesai] },
+                      },
+                  },
+              },
+          }
       responses:
         "200":
           {
@@ -451,37 +703,63 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
     delete:
-      tags: [Communication]
+      tags:
+        - Communication
       operationId: deleteMessage
       summary: Hapus pesan
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       responses:
         "204": { description: Pesan dihapus }
         "401": { $ref: "#/components/responses/Unauthorized" }
-
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
   /newsletter-subscriptions:
     post:
-      tags: [Communication]
+      tags:
+        - Communication
       operationId: createNewsletterSubscription
       summary: Daftar newsletter
       requestBody:
         required: true
         content:
-          application/json:
-            schema:
-              type: object
-              required: [email]
-              properties:
-                { email: { type: string, format: email, maxLength: 254 } }
+          {
+            application/json:
+              {
+                schema:
+                  {
+                    type: object,
+                    required: [email],
+                    properties:
+                      {
+                        email: { type: string, format: email, maxLength: 254 },
+                      },
+                  },
+              },
+          }
       responses:
         "201": { description: Subscription tersimpan }
         "204": { description: Email sudah terdaftar }
         "422": { $ref: "#/components/responses/ValidationError" }
         "429": { $ref: "#/components/responses/RateLimited" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-phase: later
   /settings:
     get:
-      tags: [Content]
+      tags:
+        - Content
       operationId: getSchoolSettings
       summary: Ambil pengaturan publik
       responses:
@@ -495,11 +773,15 @@ paths:
               },
           }
         "429": { $ref: "#/components/responses/RateLimited" }
+      x-implementation-status: planned
+      x-owner: 9
     put:
-      tags: [Content]
+      tags:
+        - Content
       operationId: updateSchoolSettings
       summary: Perbarui pengaturan sekolah
-      security: [{ cookieSession: [] }]
+      security:
+        - { cookieSession: [] }
       requestBody:
         required: true
         content:
@@ -518,107 +800,853 @@ paths:
               },
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
         "422": { $ref: "#/components/responses/ValidationError" }
-
+      x-implementation-status: planned
+      x-owner: 9
+      x-roles:
+        - super_admin
+  /applications/offline:
+    post:
+      tags:
+        - Applications
+      operationId: createOfflineApplication
+      summary: Catat pendaftaran offline oleh admin
+      security:
+        - { cookieSession: [] }
+      parameters:
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              {
+                schema:
+                  { $ref: "#/components/schemas/ApplicationOfflineCreate" },
+              },
+          }
+      responses:
+        "201":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Application" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: planned
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /applications/{applicationId}/documents/{documentId}:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+      - in: path
+        name: documentId
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 100 }
+    patch:
+      tags:
+        - Applications
+      operationId: reviewApplicationDocument
+      summary: Periksa berkas dan simpan catatan
+      security:
+        - { cookieSession: [] }
+      description: >-
+        Server menetapkan reviewer dan waktu. Tolak review bila file maupun penerimaan fisik tidak
+        ada; catatan wajib saat perlu perbaikan. Nomor dokumen harus milik applicationId yang sama.
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/DocumentReviewInput" } },
+          }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/StudentDocument" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: planned
+      x-owner: 7
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /applications/{applicationId}/documents/{documentId}/download:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+      - in: path
+        name: documentId
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 100 }
+    get:
+      tags:
+        - Applications
+      operationId: downloadApplicationDocument
+      summary: Ambil file privat untuk download atau pratinjau admin
+      security:
+        - { cookieSession: [] }
+      description: >-
+        Periksa session, role, kepemilikan relasi, dan keberadaan file pada setiap request. Tidak
+        pernah static/public. Frontend mengambil blob terautentikasi, membuat objectURL lokal, lalu
+        revoke saat ditutup.
+      responses:
+        "200":
+          {
+            description: File dengan nama aman; tidak mengungkap path storage,
+            headers:
+              {
+                Cache-Control:
+                  { schema: { type: string, const: "private, no-store" } },
+                Content-Disposition: { schema: { type: string } },
+                X-Content-Type-Options:
+                  { schema: { type: string, const: nosniff } },
+              },
+            content:
+              {
+                application/pdf: { schema: { type: string, format: binary } },
+                image/jpeg: { schema: { type: string, format: binary } },
+                image/png: { schema: { type: string, format: binary } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+      x-implementation-status: planned
+      x-owner: 7
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /achievements:
+    get:
+      tags:
+        - Catalog
+      operationId: listPublicachievements
+      summary: Daftar prestasi terbit
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/AchievementList" } },
+              },
+          }
+        "429": { $ref: "#/components/responses/RateLimited" }
+      description: Hanya published=true; urut tahun terbaru. Draft tidak boleh bocor melalui parameter query.
+      x-implementation-status: planned
+      x-owner: 8
+    post:
+      tags:
+        - Catalog
+      operationId: createAchievement
+      summary: Tambah Achievement
+      security:
+        - { cookieSession: [] }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/AchievementInput" } },
+          }
+      responses:
+        "201":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Achievement" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
+  /admin/achievements:
+    get:
+      tags:
+        - Catalog
+      operationId: listAdminachievements
+      summary: Daftar admin termasuk nonaktif atau draft
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/AchievementList" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
+  /achievements/{achievementId}:
+    parameters:
+      - in: path
+        name: achievementId
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 100 }
+    patch:
+      tags:
+        - Catalog
+      operationId: updateAchievement
+      summary: Edit Achievement
+      security:
+        - { cookieSession: [] }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/AchievementUpdate" } },
+          }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Achievement" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
+    delete:
+      tags:
+        - Catalog
+      operationId: deleteAchievement
+      summary: Hapus prestasi
+      security:
+        - { cookieSession: [] }
+      responses:
+        "204": { description: Prestasi dihapus }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+      x-implementation-status: planned
+      x-owner: 8
+      x-roles:
+        - super_admin
+        - editor
+  /clubs:
+    get:
+      tags:
+        - Catalog
+      operationId: listPublicclubs
+      summary: Daftar kegiatan aktif
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ClubList" } },
+              },
+          }
+        "429": { $ref: "#/components/responses/RateLimited" }
+      description: Hanya active=true. Nama merupakan nilai pilihan frontend tahap pertama.
+      x-implementation-status: planned
+      x-owner: 2
+    post:
+      tags:
+        - Catalog
+      operationId: createClub
+      summary: Tambah Club
+      security:
+        - { cookieSession: [] }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/ClubInput" } },
+          }
+      responses:
+        "201":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Club" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
+  /admin/clubs:
+    get:
+      tags:
+        - Catalog
+      operationId: listAdminclubs
+      summary: Daftar admin termasuk nonaktif atau draft
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ClubList" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
+  /clubs/{clubId}:
+    parameters:
+      - in: path
+        name: clubId
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 100 }
+    patch:
+      tags:
+        - Catalog
+      operationId: updateClub
+      summary: Edit Club
+      security:
+        - { cookieSession: [] }
+      requestBody:
+        required: true
+        content:
+          {
+            application/json:
+              { schema: { $ref: "#/components/schemas/ClubUpdate" } },
+          }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Club" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      description: >-
+        Gunakan active=false, bukan hard delete. Nama pada daftar pilihan historis pendaftar tidak
+        ditimpa saat rename/nonaktif.
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
+  /admin/posts:
+    get:
+      tags:
+        - Content
+      operationId: listAdminPosts
+      summary: Daftar artikel admin termasuk draft
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/PostList" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 4
+      x-roles:
+        - super_admin
+        - editor
+  /posts/by-slug/{slug}:
+    parameters:
+      - in: path
+        name: slug
+        required: true
+        schema: { type: string, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
+    get:
+      tags:
+        - Content
+      operationId: getPublicPostBySlug
+      summary: Detail artikel terbit berdasarkan slug
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/Post" } },
+              },
+          }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+      description: Draft dan slug tidak ditemukan sama-sama 404 bagi pengunjung publik.
+      x-implementation-status: planned
+      x-owner: 4
+  /admin/agenda:
+    get:
+      tags:
+        - Content
+      operationId: listAdminAgenda
+      summary: Daftar seluruh agenda admin
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/AgendaList" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 2
+      x-roles:
+        - super_admin
+        - editor
+  /dashboard/summary:
+    get:
+      tags:
+        - Dashboard
+      operationId: getDashboardSummary
+      summary: Ringkasan admin tanpa mengambil seluruh biodata
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Berhasil,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/DashboardSummary" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: planned
+      x-owner: 10
+      x-roles:
+        - super_admin
+  /applicant/application:
+    get:
+      tags:
+        - Applications
+      security:
+        - { applicantSession: [] }
+      x-implementation-status: planned
+      x-roles:
+        - applicant
+      x-auth-flow-status: design-required
+      x-owner: 5
+      operationId: getOwnApplication
+      summary: Lihat status dan catatan berkas milik pendaftar sendiri
+      description: >-
+        applicationId diambil dari session terautentikasi, bukan input pengguna. Hanya
+        metadata/catatan milik sendiri; jangan tampilkan identitas pemeriksa, path storage, atau
+        data pendaftar lain. UI koreksi belum ada.
+      responses:
+        "200":
+          {
+            description: Status pribadi,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/ApplicantRecord" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /applicant/documents/{kind}:
+    parameters:
+      - in: path
+        name: kind
+        required: true
+        schema: { $ref: "#/components/schemas/UploadDocumentKind" }
+    put:
+      tags:
+        - Applications
+      security:
+        - { applicantSession: [] }
+      x-implementation-status: planned
+      x-roles:
+        - applicant
+      x-auth-flow-status: design-required
+      x-owner: 7
+      operationId: replaceOwnApplicationDocument
+      summary: Pendaftar memperbaiki atau melengkapi berkasnya
+      description: >-
+        Server mengambil pendaftaran dari session. Izinkan slot Belum ada atau Perlu perbaikan;
+        berkas Terverifikasi terkunci sampai admin meminta perbaikan. Setelah berhasil status
+        Menunggu pemeriksaan; status penerimaan tidak berubah. Berlaku meskipun pendaftaran baru
+        ditutup. Admin tetap satu-satunya pemeriksa. Simpan versi lama tanpa purge otomatis; file
+        sementara gagal boleh dibersihkan. Rate limit, validasi signature dan maksimum 5 MiB tetap
+        wajib.
+      requestBody:
+        required: true
+        content:
+          {
+            multipart/form-data:
+              {
+                schema:
+                  { $ref: "#/components/schemas/ApplicantDocumentReplacement" },
+              },
+          }
+      responses:
+        "200":
+          {
+            description: Berkas pengganti menunggu pemeriksaan,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: "#/components/schemas/ApplicantDocument" },
+                  },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+        "413": { description: File terlalu besar }
+        "415": { description: Jenis file tidak didukung }
+        "422": { $ref: "#/components/responses/ValidationError" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
 components:
   securitySchemes:
-    cookieSession: { type: apiKey, in: cookie, name: nh_admin_session }
+    cookieSession:
+      type: apiKey
+      in: cookie
+      name: nh_admin_session
+    applicantSession:
+      type: apiKey
+      in: cookie
+      name: nh_applicant_session
+      description: >-
+        Session privat terpisah dari session admin dan terikat ke satu pendaftaran. Mekanisme
+        penerbitan/pemulihan akses harus ditetapkan anggota 9 sebelum endpoint koreksi diaktifkan.
+        Nomor, NISN, tanggal lahir saja tidak boleh dianggap credential.
   parameters:
     ApplicationId:
       in: path
       name: applicationId
       required: true
-      schema: { type: string, pattern: "^NH-[A-Z0-9-]+$" }
+      schema:
+        type: string
+        pattern: ^NH-[A-Z0-9-]+$
+    IdempotencyKey:
+      in: header
+      name: Idempotency-Key
+      required: true
+      description: >-
+        UUID per percobaan submit logis. Pakai ulang saat retry dengan isi sama. Server menyimpan
+        hasil sukses 24 jam; isi berbeda memakai key sama menghasilkan 409. Key bukan izin akses dan
+        tidak dimasukkan URL/log.
+      schema:
+        type: string
+        format: uuid
   responses:
     Unauthorized:
-      {
-        description: Session tidak valid,
-        content:
-          {
-            application/json:
-              { schema: { $ref: "#/components/schemas/Error" } },
-          },
-      }
+      description: Session tidak valid
+      content:
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
     NotFound:
-      {
-        description: Data tidak ditemukan,
-        content:
-          {
-            application/json:
-              { schema: { $ref: "#/components/schemas/Error" } },
-          },
-      }
+      description: Data tidak ditemukan
+      content:
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
     ValidationError:
-      {
-        description: Data tidak valid,
-        content:
-          {
-            application/json:
-              { schema: { $ref: "#/components/schemas/Error" } },
-          },
-      }
+      description: Data tidak valid
+      content:
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
     RateLimited:
       description: Terlalu banyak permintaan
-      headers: { Retry-After: { schema: { type: integer } } }
+      headers:
+        Retry-After: { schema: { type: integer } }
       content:
-        { application/json: { schema: { $ref: "#/components/schemas/Error" } } }
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
+    Forbidden:
+      description: Izin ditolak, atau PPDB publik sedang ditutup
+      content:
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
+    Conflict:
+      description: Konflik data, versi, status, atau idempotency key
+      content:
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
+    ServiceUnavailable:
+      description: Penyimpanan sementara gagal; belum boleh menampilkan pendaftaran berhasil
+      content:
+        application/json: { schema: { $ref: "#/components/schemas/Error" } }
   schemas:
     LoginRequest:
       type: object
       additionalProperties: false
-      required: [email, password]
+      required:
+        - email
+        - password
       properties:
         email: { type: string, format: email, maxLength: 254 }
         password: { type: string, minLength: 8, maxLength: 128 }
     AdminSession:
       type: object
-      required: [user, expiresAt]
+      required:
+        - user
+        - expiresAt
       properties:
         user:
-          type: object
-          required: [id, name, role]
-          properties:
-            id: { type: string }
-            name: { type: string }
-            role: { type: string, enum: [super_admin, admin_ppdb, editor] }
+          {
+            type: object,
+            required: [id, name, role],
+            properties:
+              {
+                id: { type: string },
+                name: { type: string },
+                role: { type: string, enum: [super_admin, admin_ppdb, editor] },
+              },
+          }
         expiresAt: { type: string, format: date-time }
-    RegistrationSource: { type: string, enum: [Website, Offline] }
+    RegistrationSource:
+      type: string
+      enum:
+        - Website
+        - Offline
     ApplicationStatus:
-      {
-        type: string,
-        enum: [Verifikasi, Terverifikasi, Wawancara, Diterima, Ditolak],
-      }
-    DocumentKind: { type: string, enum: [kk, akta, ijazah, kip, photo] }
+      type: string
+      enum:
+        - Verifikasi
+        - Terverifikasi
+        - Wawancara
+        - Diterima
+        - Ditolak
+    DocumentKind:
+      type: string
+      enum:
+        - skl
+        - ijazah
+        - kk
+        - ktp
+        - kip
+        - akta
+        - photo
+      description: photo hanya untuk membaca metadata lama. Upload baru memakai UploadDocumentKind.
     StudentDocument:
       type: object
-      required: [id, kind, label, status]
+      additionalProperties: false
+      required:
+        - id
+        - kind
+        - label
+        - status
+        - hasFile
+        - receivedPhysically
       properties:
-        id: { type: string }
+        id: { type: string, minLength: 1, maxLength: 120 }
         kind: { $ref: "#/components/schemas/DocumentKind" }
-        label: { type: string }
-        status: { type: string, enum: [Terverifikasi, Diunggah, Belum ada] }
-        fileName: { type: string }
+        label: { type: string, minLength: 1, maxLength: 120 }
+        status: { $ref: "#/components/schemas/DocumentStatus" }
+        hasFile: { type: boolean }
+        receivedPhysically: { type: boolean }
+        fileName: { type: string, minLength: 1, maxLength: 255 }
         mimeType:
           { type: string, enum: [application/pdf, image/jpeg, image/png] }
         size: { type: integer, minimum: 1, maximum: 5242880 }
         uploadedAt: { type: string, format: date-time }
+        reviewNote: { type: string, maxLength: 400 }
+        reviewedAt: { type: [string, "null"], format: date-time }
+        reviewedBy: { type: [string, "null"], maxLength: 120 }
+      allOf:
+        - {
+            if: { properties: { hasFile: { const: true } } },
+            then:
+              {
+                required: [fileName, mimeType, size, uploadedAt],
+                properties:
+                  {
+                    fileName: { type: string, minLength: 1, maxLength: 255 },
+                    mimeType:
+                      {
+                        type: string,
+                        enum: [application/pdf, image/jpeg, image/png],
+                      },
+                    size: { type: integer, minimum: 1, maximum: 5242880 },
+                    uploadedAt: { type: string, format: date-time },
+                  },
+              },
+            else:
+              {
+                not:
+                  {
+                    anyOf:
+                      [
+                        {
+                          required: [fileName],
+                          properties:
+                            {
+                              fileName:
+                                { type: string, minLength: 1, maxLength: 255 },
+                            },
+                        },
+                        {
+                          required: [mimeType],
+                          properties:
+                            {
+                              mimeType:
+                                {
+                                  type: string,
+                                  enum:
+                                    [application/pdf, image/jpeg, image/png],
+                                },
+                            },
+                        },
+                        {
+                          required: [size],
+                          properties:
+                            {
+                              size:
+                                { type: integer, minimum: 1, maximum: 5242880 },
+                            },
+                        },
+                        {
+                          required: [uploadedAt],
+                          properties:
+                            { uploadedAt: { type: string, format: date-time } },
+                        },
+                      ],
+                  },
+              },
+          }
+        - {
+            if:
+              {
+                properties:
+                  {
+                    status:
+                      {
+                        enum:
+                          [
+                            Menunggu pemeriksaan,
+                            Terverifikasi,
+                            Perlu perbaikan,
+                          ],
+                      },
+                  },
+              },
+            then:
+              {
+                anyOf:
+                  [
+                    { properties: { hasFile: { const: true } } },
+                    { properties: { receivedPhysically: { const: true } } },
+                  ],
+              },
+          }
+        - {
+            if: { properties: { status: { const: Belum ada } } },
+            then:
+              {
+                properties:
+                  {
+                    hasFile: { const: false },
+                    receivedPhysically: { const: false },
+                  },
+              },
+          }
+        - {
+            if: { properties: { status: { const: Perlu perbaikan } } },
+            then:
+              {
+                required: [reviewNote],
+                properties:
+                  {
+                    reviewNote:
+                      {
+                        type: string,
+                        minLength: 1,
+                        maxLength: 400,
+                        pattern: \S,
+                      },
+                  },
+              },
+          }
+      description: >-
+        Metadata privat, tanpa storageKey/path server/URL publik. Slot kosong boleh memiliki id
+        internal stabil. Status review tidak mengubah status penerimaan.
     ApplicationCreate:
       type: object
       additionalProperties: false
       required:
-        [
-          studentName,
-          nisn,
-          originSchool,
-          birthPlace,
-          birthDate,
-          gender,
-          address,
-          parentName,
-          phone,
-          email,
-          program,
-        ]
+        - studentName
+        - nisn
+        - originSchool
+        - birthPlace
+        - birthDate
+        - gender
+        - address
+        - parentName
+        - phone
+        - email
       properties:
         studentName: { type: string, minLength: 2, maxLength: 120 }
         nisn: { type: string, pattern: "^[0-9]{10}$" }
@@ -626,50 +1654,109 @@ components:
         birthPlace: { type: string, minLength: 2, maxLength: 100 }
         birthDate: { type: string, format: date }
         gender: { type: string, enum: [Laki-laki, Perempuan] }
-        address: { type: string, minLength: 10, maxLength: 500 }
+        address: { type: string, minLength: 1, maxLength: 600 }
         parentName: { type: string, minLength: 2, maxLength: 120 }
         parentOccupation: { type: string, maxLength: 120 }
-        phone: { type: string, pattern: "^[0-9+() -]{8,20}$" }
+        phone: { type: string, pattern: "^[+]?[0-9 ]{8,20}$" }
         email: { type: string, format: email, maxLength: 254 }
-        program: { type: string, minLength: 2, maxLength: 100 }
-        notes: { type: string, maxLength: 1000 }
+        extracurriculars:
+          { $ref: "#/components/schemas/ExtracurricularSelections" }
+      description: >-
+        Data publik hanya identitas dan pilihan kegiatan. ID, nomor, source, status, waktu, dan
+        hasil pemeriksaan ditentukan server.
     ApplicationUpdate:
       type: object
       additionalProperties: false
-      minProperties: 1
       properties:
+        studentName: { type: string, minLength: 2, maxLength: 120 }
+        nisn: { type: string, pattern: "^[0-9]{10}$" }
+        originSchool: { type: string, minLength: 2, maxLength: 160 }
+        birthPlace: { type: string, minLength: 2, maxLength: 100 }
+        birthDate: { type: string, format: date }
+        gender: { type: string, enum: [Laki-laki, Perempuan] }
+        address: { type: string, minLength: 1, maxLength: 600 }
+        parentName: { type: string, minLength: 2, maxLength: 120 }
+        parentOccupation: { type: string, maxLength: 120 }
+        phone: { type: string, pattern: "^[+]?[0-9 ]{8,20}$" }
+        email: { type: string, format: email, maxLength: 254 }
         status: { $ref: "#/components/schemas/ApplicationStatus" }
         notes: { type: string, maxLength: 1000 }
-        studentName: { type: string, minLength: 2, maxLength: 120 }
-        originSchool: { type: string, minLength: 2, maxLength: 160 }
-        parentName: { type: string, minLength: 2, maxLength: 120 }
-        phone: { type: string, pattern: "^[0-9+() -]{8,20}$" }
-        email: { type: string, format: email, maxLength: 254 }
+        extracurriculars:
+          { $ref: "#/components/schemas/ExtracurricularSelections" }
+      minProperties: 1
+      description: >-
+        Allowlist perubahan admin. NISN, tanggal lahir, email, dan pilihan ekstrakurikuler tetap
+        divalidasi. Transisi status di service; ID/source/waktu tidak dapat diedit.
     Application:
-      allOf:
-        - { $ref: "#/components/schemas/ApplicationCreate" }
-        - type: object
-          required: [id, source, status, submittedAt, documents]
-          properties:
-            id: { type: string }
-            source: { $ref: "#/components/schemas/RegistrationSource" }
-            status: { $ref: "#/components/schemas/ApplicationStatus" }
-            submittedAt: { type: string, format: date-time }
-            documents:
-              {
-                type: array,
-                items: { $ref: "#/components/schemas/StudentDocument" },
-              }
+      type: object
+      additionalProperties: false
+      required:
+        - studentName
+        - nisn
+        - originSchool
+        - birthPlace
+        - birthDate
+        - gender
+        - address
+        - parentName
+        - phone
+        - email
+        - id
+        - source
+        - status
+        - submittedAt
+        - documents
+        - extracurriculars
+        - documentRequirements
+      properties:
+        studentName: { type: string, minLength: 2, maxLength: 120 }
+        nisn: { type: string, pattern: "^[0-9]{10}$" }
+        originSchool: { type: string, minLength: 2, maxLength: 160 }
+        birthPlace: { type: string, minLength: 2, maxLength: 100 }
+        birthDate: { type: string, format: date }
+        gender: { type: string, enum: [Laki-laki, Perempuan] }
+        address: { type: string, minLength: 1, maxLength: 600 }
+        parentName: { type: string, minLength: 2, maxLength: 120 }
+        parentOccupation: { type: string, maxLength: 120 }
+        phone: { type: string, pattern: "^[+]?[0-9 ]{8,20}$" }
+        email: { type: string, format: email, maxLength: 254 }
+        id: { type: string, pattern: "^NH-[A-Z0-9-]+$" }
+        source: { $ref: "#/components/schemas/RegistrationSource" }
+        status: { $ref: "#/components/schemas/ApplicationStatus" }
+        submittedAt: { type: string, format: date-time }
+        notes: { type: string, maxLength: 1000 }
+        documents:
+          {
+            type: array,
+            maxItems: 7,
+            items: { $ref: "#/components/schemas/StudentDocument" },
+          }
+        extracurriculars:
+          { $ref: "#/components/schemas/ExtracurricularSelections" }
+        documentRequirements:
+          {
+            $ref: "#/components/schemas/DocumentRequirements",
+            readOnly: true,
+            description: "Snapshot kebijakan saat pendaftaran. Filter kelengkapan dan pemeriksaan memakai snapshot ini, bukan pengaturan terbaru.",
+          }
+      description: >-
+        ID API adalah nomor pendaftaran NH-..., UUID database tidak dipakai sebagai nomor yang
+        ditampilkan. Satu record applications untuk online/offline. Jenis dokumen unik per
+        pendaftar; riwayat penggantian tersimpan internal.
     ApplicationReceipt:
       type: object
-      required: [id, status, submittedAt]
+      required:
+        - id
+        - status
+        - submittedAt
       properties:
         id: { type: string }
         status: { $ref: "#/components/schemas/ApplicationStatus" }
         submittedAt: { type: string, format: date-time }
     ApplicationPage:
       type: object
-      required: [items]
+      required:
+        - items
       properties:
         items:
           { type: array, items: { $ref: "#/components/schemas/Application" } }
@@ -677,19 +1764,24 @@ components:
     SchoolDirectory:
       type: object
       additionalProperties: false
-      required: [leaders, teachers]
+      required:
+        - leaders
+        - teachers
       properties:
         leaders:
-          type: array
-          maxItems: 100
-          contains:
-            {
-              type: object,
-              properties: { level: { const: principal } },
-              required: [level],
-            }
-          maxContains: 1
-          items: { $ref: "#/components/schemas/SchoolLeader" }
+          {
+            type: array,
+            maxItems: 100,
+            contains:
+              {
+                type: object,
+                properties: { level: { const: principal } },
+                required: [level],
+              },
+            maxContains: 1,
+            items: { $ref: "#/components/schemas/SchoolLeader" },
+            minContains: 0,
+          }
         teachers:
           {
             type: array,
@@ -699,7 +1791,15 @@ components:
     SchoolLeader:
       type: object
       additionalProperties: false
-      required: [id, name, role, initials, focus, tone, level, portraitIndex]
+      required:
+        - id
+        - name
+        - role
+        - initials
+        - focus
+        - tone
+        - level
+        - portraitIndex
       properties:
         id: { type: string }
         name: { type: string, minLength: 2, maxLength: 120 }
@@ -713,7 +1813,15 @@ components:
       type: object
       additionalProperties: false
       required:
-        [id, name, initials, subject, cluster, years, note, tone, portraitIndex]
+        - id
+        - name
+        - initials
+        - subject
+        - cluster
+        - years
+        - note
+        - tone
+        - portraitIndex
       properties:
         id: { type: string }
         name: { type: string, minLength: 2, maxLength: 120 }
@@ -727,7 +1835,15 @@ components:
         portraitIndex: { type: integer, minimum: 0, maximum: 7 }
     PostInput:
       type: object
-      required: [title, slug, category, image, excerpt, content, author, status]
+      required:
+        - title
+        - slug
+        - category
+        - image
+        - excerpt
+        - content
+        - author
+        - status
       properties:
         title: { type: string, minLength: 3, maxLength: 180 }
         slug: { type: string, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
@@ -756,14 +1872,23 @@ components:
           }
     AgendaInput:
       type: object
-      required: [title, date, time, location, type, completed]
+      required:
+        - title
+        - date
+        - time
+        - location
+        - type
+        - completed
+        - visibility
       properties:
         title: { type: string, minLength: 2, maxLength: 160 }
         date: { type: string, format: date }
-        time: { type: string, pattern: "^[0-2][0-9]:[0-5][0-9]$" }
+        time: { type: string, pattern: "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$" }
         location: { type: string, minLength: 2, maxLength: 160 }
         type: { type: string, enum: [Akademik, PPDB, Kegiatan, Rapat] }
         completed: { type: boolean }
+        visibility:
+          { type: string, enum: [Publik, Internal], default: Internal }
     Agenda:
       allOf:
         - { $ref: "#/components/schemas/AgendaInput" }
@@ -771,40 +1896,52 @@ components:
     ContactMessageInput:
       type: object
       additionalProperties: false
-      required: [name, email, topic, message]
+      required:
+        - name
+        - email
+        - topic
+        - message
       properties:
         name: { type: string, minLength: 2, maxLength: 120 }
         email: { type: string, format: email, maxLength: 254 }
         topic: { type: string, minLength: 2, maxLength: 120 }
         message: { type: string, minLength: 10, maxLength: 3000 }
     ContactMessage:
-      allOf:
-        - { $ref: "#/components/schemas/ContactMessageInput" }
-        - {
-            type: object,
-            required: [id, status, submittedAt],
-            properties:
-              {
-                id: { type: string },
-                status: { type: string, enum: [Baru, Dibaca, Selesai] },
-                submittedAt: { type: string, format: date-time },
-              },
-          }
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - email
+        - topic
+        - message
+        - id
+        - status
+        - submittedAt
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254 }
+        topic: { type: string, minLength: 2, maxLength: 120 }
+        message: { type: string, minLength: 10, maxLength: 3000 }
+        id: { type: string, minLength: 1, maxLength: 120 }
+        status: { type: string, enum: [Baru, Dibaca, Selesai] }
+        submittedAt: { type: string, format: date-time }
     SchoolSettings:
       type: object
       additionalProperties: false
       required:
-        [
-          schoolName,
-          tagline,
-          email,
-          ppdbEmail,
-          phone,
-          whatsapp,
-          address,
-          academicYear,
-          registrationOpen,
-        ]
+        - schoolName
+        - tagline
+        - email
+        - ppdbEmail
+        - phone
+        - whatsapp
+        - address
+        - academicYear
+        - registrationOpen
+        - documentRequirements
+        - registrationOpensAt
+        - registrationClosesAt
+        - dataRetention
       properties:
         schoolName: { type: string, minLength: 2, maxLength: 120 }
         tagline: { type: string, minLength: 2, maxLength: 160 }
@@ -814,10 +1951,35 @@ components:
         whatsapp: { type: string, minLength: 8, maxLength: 30 }
         address: { type: string, minLength: 10, maxLength: 500 }
         academicYear: { type: string, pattern: "^[0-9]{4}/[0-9]{4}$" }
-        registrationOpen: { type: boolean }
+        registrationOpen:
+          {
+            type: boolean,
+            description: Dibuka/ditutup manual oleh admin; bukan hasil scheduler otomatis.,
+          }
+        documentRequirements:
+          { $ref: "#/components/schemas/DocumentRequirements" }
+        registrationOpensAt:
+          {
+            type: [string, "null"],
+            format: date-time,
+            description: Informasi jadwal yang diisi admin. Tidak membuka pendaftaran otomatis.,
+          }
+        registrationClosesAt:
+          {
+            type: [string, "null"],
+            format: date-time,
+            description: Informasi jadwal yang diisi admin; harus sesudah tanggal buka jika keduanya terisi. Toggle registrationOpen tetap penentu buka/tutup.,
+          }
+        dataRetention:
+          {
+            type: string,
+            const: indefinite,
+            description: Tidak ada penghapusan otomatis data/berkas yang sudah tersimpan. Bukan jaminan data tidak dapat hilang; backup/restore dan kapasitas tetap diperlukan.,
+          }
     Error:
       type: object
-      required: [message]
+      required:
+        - message
       properties:
         message: { type: string }
         requestId: { type: string }
@@ -826,3 +1988,548 @@ components:
             type: object,
             additionalProperties: { type: array, items: { type: string } },
           }
+    UploadDocumentKind:
+      type: string
+      enum:
+        - skl
+        - ijazah
+        - kk
+        - ktp
+        - kip
+        - akta
+    DocumentStatus:
+      type: string
+      enum:
+        - Belum ada
+        - Menunggu pemeriksaan
+        - Terverifikasi
+        - Perlu perbaikan
+    ApplicationMultipart:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data: { $ref: "#/components/schemas/ApplicationCreate" }
+        skl:
+          {
+            type: string,
+            format: binary,
+            description: "PDF/JPG/PNG maksimum 5 MiB (5242880 byte). Server memeriksa signature file, bukan ekstensi saja.",
+            minLength: 1,
+            x-max-bytes: 5242880,
+          }
+        ijazah:
+          {
+            type: string,
+            format: binary,
+            description: "PDF/JPG/PNG maksimum 5 MiB (5242880 byte). Server memeriksa signature file, bukan ekstensi saja.",
+            minLength: 1,
+            x-max-bytes: 5242880,
+          }
+        kk:
+          {
+            type: string,
+            format: binary,
+            description: "PDF/JPG/PNG maksimum 5 MiB (5242880 byte). Server memeriksa signature file, bukan ekstensi saja.",
+            minLength: 1,
+            x-max-bytes: 5242880,
+          }
+        ktp:
+          {
+            type: string,
+            format: binary,
+            description: "PDF/JPG/PNG maksimum 5 MiB (5242880 byte). Server memeriksa signature file, bukan ekstensi saja.",
+            minLength: 1,
+            x-max-bytes: 5242880,
+          }
+        kip:
+          {
+            type: string,
+            format: binary,
+            description: "PDF/JPG/PNG maksimum 5 MiB (5242880 byte). Server memeriksa signature file, bukan ekstensi saja.",
+            minLength: 1,
+            x-max-bytes: 5242880,
+          }
+        akta:
+          {
+            type: string,
+            format: binary,
+            description: "PDF/JPG/PNG maksimum 5 MiB (5242880 byte). Server memeriksa signature file, bukan ekstensi saja.",
+            minLength: 1,
+            x-max-bytes: 5242880,
+          }
+      description: >-
+        Jenis wajib mengikuti DocumentRequirements dari settings di server. Schema hanya membatasi
+        bentuk multipart; server memeriksa kebijakan dinamis. PIP/KIP opsional. Sebelum submit, UI
+        membaca aturan terbaru; server menyimpan snapshot saat menerima pendaftaran.
+    ApplicationOfflineCreate:
+      type: object
+      additionalProperties: false
+      required:
+        - studentName
+        - nisn
+        - originSchool
+        - birthPlace
+        - birthDate
+        - gender
+        - address
+        - parentName
+        - phone
+        - email
+      properties:
+        studentName: { type: string, minLength: 2, maxLength: 120 }
+        nisn: { type: string, pattern: "^[0-9]{10}$" }
+        originSchool: { type: string, minLength: 2, maxLength: 160 }
+        birthPlace: { type: string, minLength: 2, maxLength: 100 }
+        birthDate: { type: string, format: date }
+        gender: { type: string, enum: [Laki-laki, Perempuan] }
+        address: { type: string, minLength: 1, maxLength: 600 }
+        parentName: { type: string, minLength: 2, maxLength: 120 }
+        parentOccupation: { type: string, maxLength: 120 }
+        phone: { type: string, pattern: "^[+]?[0-9 ]{8,20}$" }
+        email: { type: string, format: email, maxLength: 254 }
+        notes: { type: string, maxLength: 1000 }
+        receivedDocumentKinds:
+          {
+            type: array,
+            uniqueItems: true,
+            items: { $ref: "#/components/schemas/UploadDocumentKind" },
+            maxItems: 6,
+          }
+        extracurriculars:
+          { $ref: "#/components/schemas/ExtracurricularSelections" }
+      description: >-
+        Admin boleh mencatat dokumen belum lengkap. Checkbox menandai penerimaan fisik, bukan file
+        digital atau otomatis terverifikasi. Source Offline dan status Verifikasi ditentukan server.
+    DocumentList:
+      type: array
+      maxItems: 7
+      items:
+        $ref: "#/components/schemas/StudentDocument"
+    DocumentReviewInput:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - reviewNote
+      properties:
+        status:
+          {
+            type: string,
+            enum: [Menunggu pemeriksaan, Terverifikasi, Perlu perbaikan],
+          }
+        reviewNote: { type: string, maxLength: 400 }
+      allOf:
+        - {
+            if: { properties: { status: { const: Perlu perbaikan } } },
+            then: { properties: { reviewNote: { minLength: 1, pattern: \S } } },
+          }
+    AchievementInput:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - award
+        - level
+        - year
+        - category
+        - description
+        - image
+        - published
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+        award: { type: string, minLength: 1, maxLength: 120 }
+        level:
+          {
+            type: string,
+            enum: [Sekolah, Kecamatan, Kabupaten, Kota, Provinsi, Nasional],
+          }
+        year: { type: string, pattern: "^[0-9]{4}$" }
+        category:
+          {
+            type: string,
+            enum: [Akademik, Olahraga, Seni, Literasi, Keagamaan],
+          }
+        description: { type: string, minLength: 1, maxLength: 600 }
+        image:
+          {
+            type: string,
+            enum:
+              [
+                /images/science.jpg,
+                /images/students.jpg,
+                /images/library.jpg,
+                /images/campus.jpg,
+              ],
+          }
+        published: { type: boolean }
+    Achievement:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - award
+        - level
+        - year
+        - category
+        - description
+        - image
+        - published
+        - id
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+        award: { type: string, minLength: 1, maxLength: 120 }
+        level:
+          {
+            type: string,
+            enum: [Sekolah, Kecamatan, Kabupaten, Kota, Provinsi, Nasional],
+          }
+        year: { type: string, pattern: "^[0-9]{4}$" }
+        category:
+          {
+            type: string,
+            enum: [Akademik, Olahraga, Seni, Literasi, Keagamaan],
+          }
+        description: { type: string, minLength: 1, maxLength: 600 }
+        image:
+          {
+            type: string,
+            enum:
+              [
+                /images/science.jpg,
+                /images/students.jpg,
+                /images/library.jpg,
+                /images/campus.jpg,
+              ],
+          }
+        published: { type: boolean }
+        id: { type: string, minLength: 1, maxLength: 120 }
+    ClubInput:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - description
+        - active
+      properties:
+        name:
+          {
+            type: string,
+            minLength: 1,
+            maxLength: 80,
+            description: "Unik tanpa membedakan kapital/spasi tepi. Belum menentukan adalah pilihan khusus, bukan nama kegiatan.",
+          }
+        description: { type: string, minLength: 1, maxLength: 300 }
+        active: { type: boolean }
+    Club:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - description
+        - active
+        - id
+      properties:
+        name:
+          {
+            type: string,
+            minLength: 1,
+            maxLength: 80,
+            description: "Unik tanpa membedakan kapital/spasi tepi. Belum menentukan adalah pilihan khusus, bukan nama kegiatan.",
+          }
+        description: { type: string, minLength: 1, maxLength: 300 }
+        active: { type: boolean }
+        id: { type: string, minLength: 1, maxLength: 120 }
+    AchievementList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Achievement"
+    AchievementUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+        award: { type: string, minLength: 1, maxLength: 120 }
+        level:
+          {
+            type: string,
+            enum: [Sekolah, Kecamatan, Kabupaten, Kota, Provinsi, Nasional],
+          }
+        year: { type: string, pattern: "^[0-9]{4}$" }
+        category:
+          {
+            type: string,
+            enum: [Akademik, Olahraga, Seni, Literasi, Keagamaan],
+          }
+        description: { type: string, minLength: 1, maxLength: 600 }
+        image:
+          {
+            type: string,
+            enum:
+              [
+                /images/science.jpg,
+                /images/students.jpg,
+                /images/library.jpg,
+                /images/campus.jpg,
+              ],
+          }
+        published: { type: boolean }
+      minProperties: 1
+    ClubList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Club"
+    ClubUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          {
+            type: string,
+            minLength: 1,
+            maxLength: 80,
+            description: "Unik tanpa membedakan kapital/spasi tepi. Belum menentukan adalah pilihan khusus, bukan nama kegiatan.",
+          }
+        description: { type: string, minLength: 1, maxLength: 300 }
+        active: { type: boolean }
+      minProperties: 1
+    PostList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Post"
+    AgendaList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Agenda"
+    DashboardSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - totalApplications
+        - websiteApplications
+        - offlineApplications
+        - completeApplications
+        - byStatus
+        - publishedPosts
+        - unreadMessages
+        - generatedAt
+      properties:
+        totalApplications: { type: integer, minimum: 0 }
+        websiteApplications: { type: integer, minimum: 0 }
+        offlineApplications: { type: integer, minimum: 0 }
+        completeApplications: { type: integer, minimum: 0 }
+        byStatus:
+          {
+            type: object,
+            additionalProperties: false,
+            required: [Verifikasi, Terverifikasi, Wawancara, Diterima, Ditolak],
+            properties:
+              {
+                Verifikasi: { type: integer, minimum: 0 },
+                Terverifikasi: { type: integer, minimum: 0 },
+                Wawancara: { type: integer, minimum: 0 },
+                Diterima: { type: integer, minimum: 0 },
+                Ditolak: { type: integer, minimum: 0 },
+              },
+          }
+        publishedPosts: { type: integer, minimum: 0 }
+        unreadMessages: { type: integer, minimum: 0 }
+        generatedAt: { type: string, format: date-time }
+    ExtracurricularSelections:
+      type: array
+      uniqueItems: true
+      default: []
+      items:
+        type: string
+        minLength: 1
+        maxLength: 80
+      description: >-
+        Opsional, boleh kosong/lebih dari satu. Nama kegiatan aktif; Belum menentukan tidak dikirim
+        sebagai kegiatan. Normalisasi nama dan validasi aktif dilakukan server, pilihan historis
+        disimpan sebagai snapshot.
+    DocumentRequirements:
+      type: object
+      additionalProperties: false
+      properties:
+        requiredKinds:
+          {
+            type: array,
+            uniqueItems: true,
+            items: { type: string, enum: [skl, ijazah, kk, ktp, akta] },
+            default: [],
+          }
+        requireOneGraduationDocument: { type: boolean, default: false }
+      required:
+        - requiredKinds
+        - requireOneGraduationDocument
+      description: >-
+        Dapat diatur admin. requiredKinds mewajibkan semua jenis yang dipilih;
+        requireOneGraduationDocument meminta minimal satu SKL/ijazah. PIP/KIP selalu opsional; photo
+        lama tidak bisa diwajibkan. Konfigurasi baru hanya berlaku pada pendaftaran baru.
+    ApplicantRecord:
+      type: object
+      additionalProperties: false
+      properties:
+        id: { type: string, pattern: "^NH-[A-Z0-9-]+$" }
+        status: { $ref: "#/components/schemas/ApplicationStatus" }
+        documents: { $ref: "#/components/schemas/ApplicantDocumentList" }
+        documentRequirements:
+          { $ref: "#/components/schemas/DocumentRequirements" }
+      required:
+        - id
+        - status
+        - documents
+        - documentRequirements
+    ApplicantDocumentReplacement:
+      type: object
+      additionalProperties: false
+      properties:
+        file:
+          { type: string, format: binary, minLength: 1, x-max-bytes: 5242880 }
+      required:
+        - file
+    ApplicantDocument:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - kind
+        - label
+        - status
+        - hasFile
+        - receivedPhysically
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 120
+        kind:
+          $ref: "#/components/schemas/DocumentKind"
+        label:
+          type: string
+          minLength: 1
+          maxLength: 120
+        status:
+          $ref: "#/components/schemas/DocumentStatus"
+        hasFile:
+          type: boolean
+        receivedPhysically:
+          type: boolean
+        fileName:
+          type: string
+          minLength: 1
+          maxLength: 255
+        mimeType:
+          type: string
+          enum:
+            - application/pdf
+            - image/jpeg
+            - image/png
+        size:
+          type: integer
+          minimum: 1
+          maximum: 5242880
+        uploadedAt:
+          type: string
+          format: date-time
+        reviewNote:
+          type: string
+          maxLength: 400
+        reviewedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+      allOf:
+        - if:
+            properties: { hasFile: { const: true } }
+          then:
+            required: [fileName, mimeType, size, uploadedAt]
+            properties:
+              {
+                fileName: { type: string, minLength: 1, maxLength: 255 },
+                mimeType:
+                  {
+                    type: string,
+                    enum: [application/pdf, image/jpeg, image/png],
+                  },
+                size: { type: integer, minimum: 1, maximum: 5242880 },
+                uploadedAt: { type: string, format: date-time },
+              }
+          else:
+            not:
+              {
+                anyOf:
+                  [
+                    {
+                      required: [fileName],
+                      properties:
+                        {
+                          fileName:
+                            { type: string, minLength: 1, maxLength: 255 },
+                        },
+                    },
+                    {
+                      required: [mimeType],
+                      properties:
+                        {
+                          mimeType:
+                            {
+                              type: string,
+                              enum: [application/pdf, image/jpeg, image/png],
+                            },
+                        },
+                    },
+                    {
+                      required: [size],
+                      properties:
+                        {
+                          size: { type: integer, minimum: 1, maximum: 5242880 },
+                        },
+                    },
+                    {
+                      required: [uploadedAt],
+                      properties:
+                        { uploadedAt: { type: string, format: date-time } },
+                    },
+                  ],
+              }
+        - if:
+            properties:
+              {
+                status:
+                  {
+                    enum:
+                      [Menunggu pemeriksaan, Terverifikasi, Perlu perbaikan],
+                  },
+              }
+          then:
+            anyOf:
+              [
+                { properties: { hasFile: { const: true } } },
+                { properties: { receivedPhysically: { const: true } } },
+              ]
+        - if:
+            properties: { status: { const: Belum ada } }
+          then:
+            properties:
+              {
+                hasFile: { const: false },
+                receivedPhysically: { const: false },
+              }
+        - if:
+            properties: { status: { const: Perlu perbaikan } }
+          then:
+            required: [reviewNote]
+            properties:
+              {
+                reviewNote:
+                  { type: string, minLength: 1, maxLength: 400, pattern: \S },
+              }
+      description: Metadata berkas milik pendaftar sendiri; tanpa identitas pemeriksa atau lokasi storage.
+    ApplicantDocumentList:
+      type: array
+      maxItems: 7
+      items:
+        $ref: "#/components/schemas/ApplicantDocument"

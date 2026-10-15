@@ -40,9 +40,19 @@ PEMBARUAN FRONTEND 10 OKTOBER 2026
   diunggah ke server. Pratinjau hilang setelah refresh; buka admin melalui
   tautan pada halaman sukses di tab yang sama untuk mencoba pratinjau.
 - Backend yang disertakan tetap fondasi sebelumnya, tidak ditambah pada
-  pembaruan ini. Dokumen pembagian tugas lama belum mencakup semua fitur baru.
+  pembaruan frontend ini.
+
+PANDUAN TIM DIPERBARUI 15 OKTOBER 2026
+
+- Gunakan docs/README-TIM-PKM.md untuk pembagian 10 anggota dan path ADA/BARU.
+- contracts/openapi.yaml versi 1.2.0 adalah target API, bukan backend siap pakai.
+- Nama anggota, kemampuan, reviewer, dan tanggal sprint harus diisi tim.
+- PDF pembagian tugas lama dan ZIP terdahulu tetap arsip versi sebelumnya.
 
 BACA SELANJUTNYA
+
+docs/PANDUAN-ANGGOTA.md
+  Titik mulai pemula, latihan setiap anggota, penjelasan API, dan cara review.
 
 PANDUAN-INSTALASI.md
   Tutorial lengkap Windows/macOS, backend opsional, dan troubleshooting.

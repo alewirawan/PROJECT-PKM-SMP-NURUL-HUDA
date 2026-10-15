@@ -5,14 +5,24 @@ Project dipisahkan agar pengembangan frontend dan backend tidak saling menggangg
 Pertama kali menerima ZIP? Ikuti [Panduan Instalasi](PANDUAN-INSTALASI.md), mulai
 dari demo frontend tanpa database, atau baca `MULAI-DISINI.txt` untuk langkah cepat.
 
+Baru mulai mengerjakan project? Baca [Panduan Anggota](docs/PANDUAN-ANGGOTA.md):
+latihan pertama untuk 10 anggota, penjelasan API, cara membagi tugas kecil,
+dan cara menyerahkan perubahan. Panduan ini tidak memerlukan pemahaman seluruh
+backend untuk memulai tugas tampilan.
+
 Panduan pembagian 10 anggota PKM, path file, struktur folder yang direncanakan,
 dan urutan pengerjaan tersedia di [Panduan Kerja Tim PKM](docs/README-TIM-PKM.md).
+Gunakan revisi 15 Oktober 2026 yang mencakup Prestasi, Ekstrakurikuler, dan berkas
+PPDB. Kontrak target integrasi ada di [panduan API](contracts/README.md); endpoint
+berstatus planned masih harus dibuat tim. PDF pembagian tugas lama hanya arsip.
 
 ```text
 project-k/
 ├── frontend/      # Website publik dan dashboard admin
 ├── backend/       # Fastify API, PostgreSQL, dan Drizzle ORM
 ├── contracts/     # Kontrak OpenAPI frontend–backend
+├── docs/          # Panduan anggota dan pembagian fitur
+├── .github/       # Pemeriksaan otomatis, template tugas, dan template PR
 ├── artifacts/     # Arsip ZIP dan hasil export lama
 └── package.json   # Perintah workspace frontend dan backend
 ```

@@ -7,6 +7,7 @@ file utama kembali menjadi monolitik.
 frontend/app/
 ├── components/
 │   ├── admin/              # Modul per halaman dashboard admin
+│   ├── registration/       # Empat langkah PPDB, berkas, review, preview
 │   ├── school-directory/   # Struktur, guru, dan editor profil
 │   ├── student-records/    # Daftar, detail, dan form siswa offline
 │   └── *.tsx               # Komponen publik atau orchestrator fitur
@@ -18,7 +19,7 @@ frontend/app/
     ├── admin/              # Shell, CMS, artikel, dan operasional admin
     ├── directory/          # Organisasi, guru, siswa, dan responsive rules
     ├── login/              # Motion, login, analytics, dan mobile navigation
-    ├── public/             # Blog, program, pendaftaran, kontak, dan footer
+    ├── public/             # Blog, program, PPDB, prestasi, kontak, dan footer
     ├── base.css
     ├── accessibility.css
     └── *.css               # Aggregator import; jangan isi logic fitur di sini
@@ -30,12 +31,41 @@ frontend/app/
   `SchoolDirectoryModule.tsx` hanya mengatur state, navigasi, dan aliran data.
 - UI spesifik fitur ditempatkan di subfolder domain terkait.
 - Operasi data baru ditambahkan ke modul `lib/cms/` yang sesuai, kemudian
-  diekspor melalui `lib/local-cms.ts`.
+  diekspor melalui `lib/local-cms.ts` selama masih dalam mode simulasi. Integrasi
+  server memakai client async `lib/api/<fitur>.ts` yang direncanakan, melalui
+  `lib/api-client.ts`. Jangan menyimpan data produksi ke adapter mockup.
 - Style ditambahkan ke stylesheet domain yang paling dekat. Jangan kembalikan
   seluruh style ke `globals.css`.
 - Hindari import langsung lintas subfitur. Shared type dan helper ditempatkan
   pada `shared.ts` atau `types.ts` di dalam domain.
 - Jalankan `npm run check` dari root project sebelum merge atau membuat ZIP.
+
+## Pemilik modul terbaru
+
+Pembagian lengkap dan status path ADA/BARU ada di [panduan tim](README-TIM-PKM.md),
+versi 15 Oktober 2026. Struktur ini menjelaskan file yang sudah tersedia, bukan
+perintah membuat seluruh folder rencana sekaligus.
+
+- `registration/` dan `RegistrationForm.tsx`: anggota 5; client berkas dari 7.
+- `student-records/`: anggota 6. `DocumentReview.tsx` sudah ada; jangan membuat
+  panel dokumen kedua. `FilePreview.tsx` milik 5 dipakai bersama 6.
+- `Achievements.tsx` dan `admin/AchievementsModule.tsx`: anggota 8.
+- `ClubDirectory.tsx` dan `admin/ClubsModule.tsx`: anggota 2.
+- `lib/cms/catalog.ts`, `lib/use-catalog.ts`, dan `styles/admin/catalog.css`
+  digunakan anggota 2 dan 8. Perubahan lintas modul direview anggota 10.
+- API, schema database, dan migration untuk fitur baru belum dibuat. Mengubah
+  kontrak OpenAPI tidak mengubah runtime frontend/backend.
+
+Saat memakai API, tambah loading/empty/error pada pemilik fitur. Backend adalah
+sumber data; jangan fallback diam-diam ke seed jika request gagal. File biner
+memerlukan client blob terautentikasi, bukan `requestApi<T>` yang membaca JSON.
+Metadata pendaftar demo berada di sessionStorage dan File hanya di memori;
+penyimpanan ini tidak memenuhi kebutuhan upload production.
+
+Target revisi PPDB belum diterapkan pada UI: ekstrakurikuler multiselect opsional,
+persyaratan berkas dari Pengaturan, jadwal manual, dan area pribadi pendaftar untuk
+koreksi berkas. Path rencana dan pemiliknya tercantum di panduan tim; jangan
+menganggap keberadaan kontrak v1.2.0 berarti fitur tersebut sudah berjalan.
 
 ## Guardrail navigasi sticky
 

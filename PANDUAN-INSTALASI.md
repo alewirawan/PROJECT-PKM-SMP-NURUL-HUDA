@@ -2,6 +2,10 @@
 
 Panduan paket tim: 28 September 2026.
 
+Pembagian tugas dan kontrak diperbarui 15 Oktober 2026. Gunakan
+[panduan tim terkini](docs/README-TIM-PKM.md); PDF lama tetap arsip. Pembaruan
+dokumentasi tidak mengimplementasikan API fitur atau menjalankan database.
+
 **Untuk pertama kali, ikuti bagian A: demo frontend.** Backend dan database belum
 diperlukan hanya untuk melihat website serta mencoba menu admin simulasi.
 
@@ -112,11 +116,13 @@ dependency/lockfile berubah atau instalasi sebelumnya bermasalah.
 
 ### Yang bisa dicoba pada demo
 
-Beranda, Tentang, Program, Struktur & Guru, Blog, Kontak, Pendaftaran, serta menu
+Beranda, Tentang, Program, Struktur & Guru, Prestasi, Blog, Kontak, Pendaftaran, serta menu
 admin sudah memiliki tampilan. Perubahan masih disimpan dalam browser lokal;
 data pendaftar/pesan simulasi tidak menjadi database bersama antaranggota.
 Gunakan data fiktif. Menutup tab dapat menghapus data simulasi yang memakai
-sessionStorage. Login demo tidak berarti backend seluruh fitur sudah tersedia.
+sessionStorage. Pilihan ekstrakurikuler dan form PPDB empat langkah sudah tersedia;
+berkas dummy hanya dipilih/ditinjau lokal, bukan diunggah, dan hilang dari memori
+saat refresh. Login demo tidak berarti backend seluruh fitur sudah tersedia.
 
 ## B. Menjalankan backend — untuk anggota yang mengerjakan API
 
@@ -274,21 +280,21 @@ Untuk aktivitas coding sehari-hari cukup `npm run dev`.
 
 ## D. Kendala yang sering muncul
 
-| Pesan/gejala | Yang perlu diperiksa |
-| --- | --- |
-| ENOENT package.json | Terminal berada pada folder yang salah; cari folder yang berisi package.json root |
-| npm/node tidak dikenali | Instal Node.js dan buka ulang terminal |
-| npm.ps1 cannot be loaded | Pada Windows, gunakan terminal Command Prompt di VS Code atau jalankan npm.cmd; tidak perlu mengubah kebijakan keamanan global |
-| Dependency install gagal/ECONNRESET | Periksa koneksi, proxy, dan pesan error; simpan lockfile, coba npm ci kembali setelah koneksi pulih |
-| Port 3000 sudah dipakai | Buka URL yang dicetak terminal; jika memakai API, sesuaikan FRONTEND_ORIGINS dengan port tersebut |
-| Form admin meminta email/password padahal ingin demo | NEXT_PUBLIC_API_BASE_URL sudah diaktifkan; kosongkan lalu restart frontend |
-| Cannot find module | Pastikan npm ci selesai dari root dan Node memenuhi persyaratan |
-| docker tidak dikenali/daemon unavailable | Docker Desktop belum terpasang atau belum berjalan; frontend demo tidak memerlukan Docker |
-| Port database 5432 bentrok | Ada PostgreSQL lain; gunakan DB development yang sesuai, atau ubah port host di compose.dev.yaml dan DATABASE_URL bersama-sama |
-| Backend ready gagal | Periksa container, DATABASE_URL, port, dan kesamaan password |
-| Login gagal | Periksa migration, akun admin, kesamaan hostname, dan FRONTEND_ORIGINS |
-| Data berbeda antaranggota | Data mockup berada di browser masing-masing; tiap database lokal juga terpisah |
-| Ada peringatan audit/deprecation | Baca peringatannya; jangan menjalankan npm audit fix --force tanpa review koordinator |
+| Pesan/gejala                                         | Yang perlu diperiksa                                                                                                           |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| ENOENT package.json                                  | Terminal berada pada folder yang salah; cari folder yang berisi package.json root                                              |
+| npm/node tidak dikenali                              | Instal Node.js dan buka ulang terminal                                                                                         |
+| npm.ps1 cannot be loaded                             | Pada Windows, gunakan terminal Command Prompt di VS Code atau jalankan npm.cmd; tidak perlu mengubah kebijakan keamanan global |
+| Dependency install gagal/ECONNRESET                  | Periksa koneksi, proxy, dan pesan error; simpan lockfile, coba npm ci kembali setelah koneksi pulih                            |
+| Port 3000 sudah dipakai                              | Buka URL yang dicetak terminal; jika memakai API, sesuaikan FRONTEND_ORIGINS dengan port tersebut                              |
+| Form admin meminta email/password padahal ingin demo | NEXT_PUBLIC_API_BASE_URL sudah diaktifkan; kosongkan lalu restart frontend                                                     |
+| Cannot find module                                   | Pastikan npm ci selesai dari root dan Node memenuhi persyaratan                                                                |
+| docker tidak dikenali/daemon unavailable             | Docker Desktop belum terpasang atau belum berjalan; frontend demo tidak memerlukan Docker                                      |
+| Port database 5432 bentrok                           | Ada PostgreSQL lain; gunakan DB development yang sesuai, atau ubah port host di compose.dev.yaml dan DATABASE_URL bersama-sama |
+| Backend ready gagal                                  | Periksa container, DATABASE_URL, port, dan kesamaan password                                                                   |
+| Login gagal                                          | Periksa migration, akun admin, kesamaan hostname, dan FRONTEND_ORIGINS                                                         |
+| Data berbeda antaranggota                            | Data mockup berada di browser masing-masing; tiap database lokal juga terpisah                                                 |
+| Ada peringatan audit/deprecation                     | Baca peringatannya; jangan menjalankan npm audit fix --force tanpa review koordinator                                          |
 
 Launcher frontend paket ini tidak lagi memakai sintaks environment khusus Unix.
 Namun seluruh kombinasi sistem operasi anggota belum diuji. Jika ada error, kirim
@@ -302,7 +308,7 @@ pesan error dan versi Node/npm ke koordinator, tanpa isi `.env` atau data pribad
 - [Panduan backend](backend/README.md).
 - [Kontrak API](contracts/openapi.yaml).
 
-Panduan tugas dan PDF disusun 25 September 2026. Catatan setup di dokumen ini
-diperbarui 28 September 2026; gunakan dokumen ini untuk perintah menjalankan terbaru.
+Panduan tugas Markdown diperbarui 15 Oktober 2026; PDF tetap versi 25 September 2026. Catatan setup di dokumen ini diperbarui 28 September 2026; gunakan dokumen
+ini untuk perintah menjalankan, bukan PDF lama.
 Folder fitur baru dalam panduan tugas tetap rencana, bukan klaim telah dibuat.
 Arsip source ini untuk pengembangan lokal, belum merupakan paket siap production.

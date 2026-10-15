@@ -1,241 +1,131 @@
-# Panduan Kerja Tim PKM — Website SMP Nurul Huda
+# Panduan Kerja Tim PKM SMP Nurul Huda
 
-Tanggal penyusunan: 25 September 2026  
-Jumlah anggota: 10 orang  
-Tahap project: frontend mockup dan fondasi backend; implementasi fitur belum lengkap.
+Diperbarui: 15 Oktober 2026. Tim: 10 anggota. Repository:
+https://github.com/alewirawan/PROJECT-PKM-SMP-NURUL-HUDA
 
-Pembaruan paket 28 September 2026: launcher frontend lintas shell dan
-`compose.dev.yaml` untuk PostgreSQL lokal sudah ditambahkan. Gunakan
-[Panduan Instalasi terbaru](../PANDUAN-INSTALASI.md) untuk menjalankan paket.
-Analisis dan checklist di bawah merupakan acuan awal 25 September 2026;
-modul fitur yang ditandai baru tetap belum diimplementasikan.
+Panduan ini membagi pekerjaan berdasarkan menu dan hasil yang harus dapat
+didemonstrasikan. Frontend sudah berupa simulasi; backend baru fondasi. Anggota
+melanjutkan source yang tersedia, bukan membuat ulang website.
 
-> Dokumen ini adalah panduan pembagian pekerjaan. Path bertanda **baru** merupakan
-> rencana yang belum dibuat. Pembuatan panduan ini tidak menjalankan database,
-> mengimplementasikan fitur, atau melakukan deployment.
+Nama anggota, kemampuan, dan jadwal diisi saat rapat awal. Nomor di bawah adalah
+peran kerja, bukan nama orang atau penilaian kemampuan. Penugasan teknis ini masih
+perlu dipasangkan dengan anggota yang mampu atau mendapatkan pendamping.
 
-## Daftar isi
+## Cara mulai
 
-1. [Cara menggunakan panduan](#cara-menggunakan-panduan)
-2. [Status project dan batas lingkup](#status-project-dan-batas-lingkup)
-3. [Persiapan sebelum kerja paralel](#persiapan-sebelum-kerja-paralel)
-4. [Peta pembagian 10 anggota](#peta-pembagian-10-anggota)
-5. [Struktur folder dan fungsi file](#struktur-folder-dan-fungsi-file)
-6. [Anggota 1 — Beranda, Tentang, frontend Pengaturan](#anggota-1)
-7. [Anggota 2 — Program dan Agenda](#anggota-2)
-8. [Anggota 3 — Struktur dan Guru](#anggota-3)
-9. [Anggota 4 — Blog dan Artikel](#anggota-4)
-10. [Anggota 5 — Pendaftaran online dan Pendaftar](#anggota-5)
-11. [Anggota 6 — Data siswa dan pendaftaran offline](#anggota-6)
-12. [Anggota 7 — Backend dokumen](#anggota-7)
-13. [Anggota 8 — Kontak, Pesan, pengujian](#anggota-8)
-14. [Anggota 9 — Login, izin akses, backend Pengaturan](#anggota-9)
-15. [Anggota 10 — Dashboard, setup, integrasi](#anggota-10)
-16. [Kepemilikan file bersama](#kepemilikan-file-bersama)
-17. [Kontrak API yang perlu disepakati](#kontrak-api-yang-perlu-disepakati)
-18. [Urutan pengerjaan dan belajar](#urutan-pengerjaan-dan-belajar)
-19. [Alur Git dan kriteria selesai](#alur-git-dan-kriteria-selesai)
+Untuk anggota yang belum terbiasa dengan API atau struktur project, mulai dari
+[Panduan Anggota](PANDUAN-ANGGOTA.md). Latihan awal di sana bukan target integrasi
+lengkap pada tabel pembagian di bawah. Kerjakan satu kartu kecil bersama reviewer,
+bukan seluruh daftar tugas anggota dalam satu perubahan.
 
-## Cara menggunakan panduan
+1. Koordinator mengisi nama, kemampuan, reviewer, dan target sprint pada tabel tim.
+2. Setiap anggota mengikuti [panduan instalasi](../PANDUAN-INSTALASI.md).
+3. Buka menu yang ditugaskan dan baca file berstatus **ADA** sebelum menulis kode.
+4. Baca bagian sendiri, aturan file bersama, dan [kontrak integrasi](../contracts/README.md).
+5. Buat satu issue kecil, branch, implementasi, test, lalu pull request.
+6. Mulai dari hasil pertama pada tabel, bukan mengerjakan seluruh modul sekaligus.
 
-Root project pada komputer penyusun:
+Perintah demo dari folder yang berisi package.json:
 
-```text
-/Users/vwxyesa/Project/project-k/
+```bash
+npm ci
+npm run dev
 ```
 
-Semua path di dokumen ini relatif terhadap root tersebut. Pada komputer anggota
-lain, lokasi root boleh berbeda. Contohnya, `frontend/app/page.tsx` berarti membuka
-folder project, kemudian `frontend`, `app`, dan file `page.tsx`.
+Buka http://localhost:3000 dan /admin, lalu pilih mode demo. Demo tidak membutuhkan
+database atau konfigurasi API. Backend hanya diaktifkan oleh anggota yang mulai
+mengerjakan integrasi, mengikuti panduan instalasi. Jangan membagikan .env.
 
-Urutan membaca untuk anggota:
+Semua path berikut relatif terhadap root repository:
 
-1. Baca status project dan persiapan bersama.
-2. Temukan nomor anggota dan isi nama penanggung jawab pada tabel pembagian.
-3. Buka file yang sudah ada di bagian tugasnya.
-4. Kerjakan tugas pertama, lalu lanjutkan checklist fungsi.
-5. Periksa ketergantungan dan kriteria selesai sebelum mengajukan penggabungan.
+- **ADA**: file/folder tersedia; baca, pakai kembali, lalu ubah sesuai tugas.
+- **BARU**: rencana file yang dibuat saat issue terkait dikerjakan, bukan file yang sudah tersedia.
+- Folder tidak dinamai anggota; pergantian penanggung jawab tidak memindahkan kode.
 
-Istilah yang digunakan:
+## Status yang menjadi dasar pekerjaan
 
-| Istilah | Makna |
-| --- | --- |
-| Frontend | Tampilan dan interaksi website yang digunakan pengunjung/admin |
-| Backend | Proses server yang menerima request, memeriksa data dan izin, lalu mengakses database |
-| API | Jalur komunikasi frontend dengan backend |
-| Schema tabel | Rancangan kolom, tipe data, dan hubungan tabel database |
-| Migration | Riwayat perubahan struktur database yang dijalankan secara berurutan |
-| CRUD | Membuat, membaca, mengubah, dan menghapus data |
-| Mockup | Simulasi tampilan/fungsi yang belum sepenuhnya memakai sistem sebenarnya |
-| Session | Informasi yang membuktikan admin sudah login |
-| Pull request | Permintaan untuk memeriksa dan menggabungkan perubahan kode |
+| Bagian     | Sudah tersedia                                                                                       | Masih dikerjakan tim                                              |
+| ---------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Website    | Beranda, Tentang, Program, Struktur dan Guru, Prestasi, Blog, Kontak, PPDB                           | Data API, loading/error, konten sekolah yang disetujui            |
+| Admin      | Modul artikel, direktori, agenda, prestasi, ekstrakurikuler, pesan, pengaturan, pendaftar/data siswa | Integrasi dan penyimpanan database per menu                       |
+| PPDB       | Empat langkah, pilihan ekstrakurikuler, enam jenis berkas, review                                    | Validasi server, nomor server, submit dan file nyata              |
+| Berkas     | Pemilihan/preview lokal dan catatan/status pemeriksaan simulasi                                      | Storage privat, akses berizin, pencatatan pemeriksa/waktu         |
+| Backend    | Auth, health, konfigurasi, schema awal, migration, error handler                                     | API seluruh resource sekolah, otorisasi per fitur, test integrasi |
+| Setup      | compose.dev.yaml dengan port PostgreSQL loopback sudah ada                                           | Membuktikan setup database/login di komputer anggota              |
+| Git        | main mengikuti repo tim                                                                              | Issue, branch, review, dan kebiasaan kerja tim                    |
+| Production | Rancangan Compose/Docker                                                                             | Uji runtime, HTTPS, backup/restore dan izin sebelum VPS           |
 
-Bahasa utama frontend dan backend adalah TypeScript. Frontend menggunakan React;
-backend menggunakan Fastify, PostgreSQL, dan Drizzle ORM.
+Endpoint fondasi: GET /health, GET /ready, POST /auth/login,
+GET /auth/session, POST /auth/logout, dengan prefix /api/v1.
+Keberadaan kode bukan bukti login/database telah diuji end-to-end.
 
-## Status project dan batas lingkup
+Kontrak OpenAPI 1.2.0 adalah target implementasi. Label planned tidak berarti
+endpoint sudah berjalan. Frontend masih memakai penyimpanan browser; file pilihan
+hanya berada di memori dan tidak diunggah. Gunakan data dummy.
 
-### Yang sudah tersedia
+Scope tahap utama: informasi satu sekolah dan penerimaan calon siswa. Bukan nilai,
+absensi, pembagian kelas, atau sistem akademik siswa aktif. Newsletter, upload foto
+publik guru/artikel, dan penghapusan permanen pendaftar adalah tahap lanjutan;
+jangan mendahulukannya dari alur PPDB. Foto ilustrasi yang ada boleh dipakai dahulu.
 
-| Bagian | Status nyata |
-| --- | --- |
-| Website publik | Beranda, Tentang, Program, Struktur & Guru, Blog, Kontak, Pendaftaran sudah memiliki tampilan |
-| Dashboard admin | Dashboard, Pendaftar, Data siswa, Struktur & guru, Artikel, Agenda, Pesan, Pengaturan sudah memiliki tampilan |
-| Penyimpanan mockup | Data publik menggunakan penyimpanan browser; data pribadi simulasi menggunakan sessionStorage |
-| Server backend | Konfigurasi environment, koneksi database, error handler, dan middleware dasar tersedia |
-| Auth | Kode login, cek session, logout, serta script pembuatan admin tersedia |
-| Database | Definisi tabel admins, admin_sessions, applications, application_documents dan migration awal tersedia |
-| Health | Endpoint pengecekan proses API dan kesiapan koneksi database tersedia |
-| Pengujian backend | Tiga test dasar: health, endpoint tidak ditemukan, dan payload login tidak valid |
-| Deployment | Dockerfile dan Compose awal tersedia; belum dianggap teruji untuk deployment |
+## Pembagian dan kapasitas tim
 
-Endpoint yang sudah diimplementasikan pada kode, dengan awalan `/api/v1`:
+| Anggota | Nama dan kemampuan | Bagian                                 | Reviewer utama                        | Hasil pertama                                                 |
+| ------- | ------------------ | -------------------------------------- | ------------------------------------- | ------------------------------------------------------------- |
+| 1       | Diisi saat rapat   | Beranda, Tentang, frontend Pengaturan  | 9 untuk settings; 10 untuk layout     | Daftar field sekolah konsisten dan konten profil rapi         |
+| 2       | Diisi saat rapat   | Program, Ekstrakurikuler, Agenda       | 5 untuk pilihan PPDB; 10 untuk schema | Kegiatan aktif dari API muncul pada pilihan PPDB              |
+| 3       | Diisi saat rapat   | Struktur organisasi dan Guru           | 4; 9 untuk izin                       | Satu guru dari database tampil di website                     |
+| 4       | Diisi saat rapat   | Blog dan Artikel admin                 | 3                                     | Artikel terbit dari API; draft tidak terlihat publik          |
+| 5       | Diisi saat rapat   | PPDB online dan menu Pendaftar         | 6 dan 7                               | Submit data dan berkas dummy mendapat bukti server            |
+| 6       | Diisi saat rapat   | Data siswa, pencarian, input offline   | 5 dan 7                               | Daftar/detail pendaftar dari API                              |
+| 7       | Diisi saat rapat   | Penyimpanan dan pemeriksaan berkas     | 9 dan 6                               | Satu file dummy tersimpan privat dan akses tanpa izin ditolak |
+| 8       | Diisi saat rapat   | Kontak, Pesan, Prestasi                | 4                                     | Pesan Kontak tampil di admin; berikutnya satu prestasi terbit |
+| 9       | Diisi saat rapat   | Auth, hak akses, backend Pengaturan    | 10                                    | Login, session, logout diuji dengan database                  |
+| 10      | Diisi saat rapat   | Dashboard, setup, koordinasi integrasi | 9                                     | Setup berhasil di komputer anggota lain                       |
 
-```text
-GET  /health
-GET  /ready
-POST /auth/login
-GET  /auth/session
-POST /auth/logout
-```
+Anggota 2 dan 8 memegang dua modul CRUD; kerjakan berurutan, bukan sekaligus.
+Anggota 5–7 dan 9 memiliki risiko teknis lebih tinggi dan perlu pendampingan.
+Anggota 10 mengoordinasikan integrasi, bukan mengambil alih seluruh implementasi.
+Reviewer adalah pasangan review yang diusulkan; tugas keamanan perlu reviewer
+yang benar-benar memahami autentikasi dan penyimpanan privat.
 
-Migration, login, dan container belum divalidasi lengkap dengan PostgreSQL nyata
-pada tahap fondasi. File schema tersedia tidak berarti tabel sudah terbentuk.
+Setiap anggota menguji serta memperbaiki fiturnya sendiri. Pengujian lintas menu
+dilakukan berpasangan; tidak ditumpuk pada anggota 8. Pemula dapat mulai dari
+konten, tampilan, kasus uji, dan satu request baca dengan pendamping, kemudian
+mengambil issue menulis data yang kecil. Beban baru dapat disebut seimbang setelah
+kemampuan dan waktu tersedia diketahui.
 
-### Yang belum selesai
-
-- API fitur pendaftaran, dokumen, direktori, artikel, agenda, pesan, dan pengaturan.
-- Integrasi data fitur sekolah dari frontend ke database.
-- Pembatasan tindakan berdasarkan role pada seluruh endpoint admin.
-- Upload dan download dokumen nyata.
-- Dashboard dengan data server, identitas session, dan indikator yang terverifikasi.
-- Pengujian alur lengkap, kesiapan VPS, HTTPS, dan backup yang teruji.
-
-### Batas tahap pertama
-
-- Satu website untuk satu sekolah.
-- Menu Data siswa saat ini adalah data **calon siswa/pendaftar**, bukan sistem
-  akademik siswa aktif. Nilai, absensi, pembagian kelas, dan jadwal pelajaran tidak
-  otomatis termasuk lingkup.
-- Program dan narasi profil boleh tetap statis. Editor seluruh isi Beranda,
-  Tentang, dan Program merupakan tambahan jika nanti diperlukan.
-- Foto guru dan ilustrasi artikel memakai aset contoh dahulu.
-- Upload dokumen tahap pertama dilakukan admin. Upload mandiri oleh calon siswa
-  membutuhkan mekanisme pembuktian kepemilikan pendaftaran tersendiri.
-- Newsletter, jika dilanjutkan, mulai dari pencatatan langganan. Pengiriman email
-  massal bukan pekerjaan yang sudah tersedia.
-- Gunakan data dan dokumen fiktif untuk pengembangan serta demonstrasi.
-
-## Persiapan sebelum kerja paralel
-
-Pembagian menu sudah dapat menjadi acuan, tetapi beberapa file dan kontrak harus
-dirapikan terlebih dahulu agar 10 orang tidak saling menimpa pekerjaan.
-
-| Persiapan | Penanggung jawab | Bukti selesai |
-| --- | --- | --- |
-| Setup PostgreSQL lokal dan migration | 10, dibantu 9 | Instalasi bersih berhasil; endpoint ready mengonfirmasi koneksi |
-| Verifikasi login dan izin dasar | 9 | Login, cek session, logout, dan penolakan akses tanpa session teruji |
-| Batas data tiap menu admin | 10 dan pemilik menu | Modul mengurus request fiturnya; shell admin tidak menampung semua data |
-| Pisahkan schema pendaftar/dokumen | 5 dan 7, review 10 | File terpisah tanpa mengganti nama atau membuat ulang tabel |
-| Sepakati kontrak pendaftar dan dokumen | 5, 6, 7 | ID, field, status, ukuran file, dan endpoint tambahan tertulis |
-| Sepakati frontend/backend Pengaturan | 1 dan 9 | Bentuk respons serta pemilik setiap file jelas |
-| Tetapkan alur migration dan merge | 10 | Semua anggota memahami branch, review, dan urutan migration |
-
-Temuan setup yang perlu dibereskan: Compose saat ini tidak membuka port PostgreSQL
-ke host, sedangkan panduan menjalankan backend langsung pada Mac. Untuk development,
-anggota 10 dapat membuat `compose.dev.yaml` yang membuka port database hanya ke
-loopback. Alternatifnya adalah menjalankan backend bersama database dalam jaringan
-container. Pilih satu alur utama dan tulis panduan yang sudah diuji.
-
-Periksa juga Docker build context agar `.env`, dependency lokal, dan output build
-tidak ikut tersalin. Audit terdahulu menunjukkan dependency runtime bersih, tetapi
-masih ada advisory development pada tool migration. Status dependency perlu dicek
-lagi pada saat integrasi/deploy; jangan memakai downgrade otomatis tanpa review.
-
-## Peta pembagian 10 anggota
-
-| Anggota | Nama | Menu utama | Bantuan/ketergantungan |
-| --- | --- | --- | --- |
-| 1 | Belum ditentukan | Beranda, Tentang, frontend Pengaturan | API artikel dari 4, direktori dari 3, pengaturan dari 9 |
-| 2 | Belum ditentukan | Program dan Agenda | Izin akses dari 9 |
-| 3 | Belum ditentukan | Struktur organisasi dan Guru | Izin akses dari 9; aset foto contoh dahulu |
-| 4 | Belum ditentukan | Blog dan Artikel & berita | Menyediakan data berita terbaru untuk 1 |
-| 5 | Belum ditentukan | Pendaftaran online dan menu Pendaftar | Berbagi data dengan 6; pengaturan PPDB dari 9 |
-| 6 | Belum ditentukan | Data siswa, pencarian, input offline, UI dokumen | Pembuat nomor/status dari 5; API dokumen dari 7 |
-| 7 | Belum ditentukan | Backend dokumen | ID pendaftar dari 5–6; izin dari 9; tampilan oleh 6 |
-| 8 | Belum ditentukan | Kontak, Pesan, pengujian lintas menu | Pemilik fitur memperbaiki bug yang ditemukan |
-| 9 | Belum ditentukan | Login, hak akses, backend Pengaturan | Frontend Pengaturan oleh 1; setup bersama 10 |
-| 10 | Belum ditentukan | Dashboard ringkasan, setup, koordinasi integrasi | Setiap anggota menyelesaikan integrasi dan bug menunya sendiri |
-
-Beban belum tentu sama karena kemampuan anggota belum dipetakan. Anggota 1 cocok
-untuk pemula. Pendaftaran, dokumen, autentikasi, dan koordinasi teknis membutuhkan
-anggota yang lebih siap atau pendampingan. Anggota 10 bukan penanggung jawab untuk
-menyelesaikan semua fitur yang tertinggal.
-
-## Struktur folder dan fungsi file
-
-Struktur target tingkat utama:
+## Struktur target
 
 ```text
-project-k/
-├── frontend/
-│   ├── app/
-│   │   ├── page.tsx dan folder halaman   sudah ada
-│   │   ├── components/                 sudah ada; tambah komponen bila perlu
-│   │   ├── lib/
-│   │   │   ├── api-client.ts            sudah ada: request HTTP bersama
-│   │   │   ├── api/                     BARU: request per fitur
-│   │   │   ├── content/                 BARU: konten statis per halaman
-│   │   │   └── cms/                     sudah ada: mockup sementara
-│   │   └── styles/                     sudah ada: CSS per bagian
-│   └── tests/
-├── backend/
-│   ├── src/
-│   │   ├── modules/                    auth/health ada; modul lain baru
-│   │   ├── db/schema/                  schema per domain
-│   │   ├── shared/
-│   │   ├── config/
-│   │   ├── app.ts
-│   │   └── index.ts
-│   ├── drizzle/
-│   └── tests/
-├── contracts/openapi.yaml
-├── docs/
-├── compose.yaml
-└── package.json
+frontend/app/components/                 ADA
+frontend/app/components/admin/           ADA
+frontend/app/components/registration/    ADA
+frontend/app/components/school-directory/ ADA
+frontend/app/components/student-records/ ADA
+frontend/app/lib/cms/                    ADA, adapter simulasi
+frontend/app/lib/api-client.ts           ADA, HTTP helper bersama
+frontend/app/lib/api/                    BARU, client per fitur
+frontend/app/lib/content/                BARU bila konten statis perlu dipisah
+frontend/app/styles/                     ADA, CSS berdasarkan domain
+backend/src/modules/auth/                ADA
+backend/src/modules/health/              ADA
+backend/src/modules/                     BARU untuk modul fitur lain
+backend/src/db/schema/                   ADA; tambah schema per domain
+backend/drizzle/                        ADA; migration dikoordinasikan
+contracts/openapi.yaml                   ADA, acuan target API
 ```
 
-Tidak membuat folder berdasarkan nama anggota. Folder mengikuti fungsi, sehingga
-pemindahan penanggung jawab tidak memerlukan pemindahan source code.
+Backend memakai pola routes → service → repository. File _.schema.ts di modul
+memvalidasi request; file db/schema/_.ts mendefinisikan tabel. Frontend mengakses
+API, tidak mengimpor repository atau schema database.
 
-Pola standar modul backend:
+Folder lib/api tidak menggantikan seluruh lib/cms sekaligus. Migrasikan per fitur;
+jika API gagal, tampilkan error, bukan diam-diam mengembalikan seed demo.
 
-```text
-backend/src/modules/posts/
-├── post.routes.ts       menerima request dan mengirim response
-├── post.schema.ts       memvalidasi input request
-├── post.service.ts      menjalankan aturan/proses bisnis
-└── post.repository.ts   membaca dan menulis database
+## Anggota 1 Beranda Tentang dan frontend Pengaturan
 
-backend/src/db/schema/posts.ts   mendefinisikan tabel artikel
-```
-
-`post.schema.ts` berbeda dengan `db/schema/posts.ts`: yang pertama memeriksa request,
-yang kedua mendefinisikan tabel. Frontend mengakses backend lewat API, bukan dengan
-mengimpor repository/database backend.
-
-Frontend memakai `lib/api/<fitur>.ts` untuk fungsi request dan tipe respons yang
-relevan. Jika tipe berkembang panjang, pisahkan di dekat modulnya. Tidak perlu
-menambah package bersama atau library state baru hanya untuk membuat folder.
-
-Migrasi mockup dilakukan per menu. Saat menu sudah memakai API, kegagalan API harus
-ditampilkan sebagai error; jangan menggantinya diam-diam dengan data demo. Ubah
-proses sinkron menjadi async, termasuk keadaan loading, kosong, gagal, dan submit.
-
-<a id="anggota-1"></a>
-## Anggota 1 — Beranda, Tentang, frontend Pengaturan
-
-### File yang sudah ada
+**ADA — baca dan ubah sesuai kebutuhan:**
 
 ```text
 frontend/app/page.tsx
@@ -246,88 +136,82 @@ frontend/app/components/admin/SettingsModule.tsx
 frontend/app/components/SiteHeader.tsx
 frontend/app/components/SiteFooter.tsx
 frontend/app/styles/public/editorial.css
+frontend/app/styles/public/inner-pages.css
 ```
 
-Header/footer adalah komponen bersama; perubahan link dan navigasinya direview
-bersama anggota 10. CSS Tentang yang sekarang bercampur di stylesheet publik dapat
-dipindahkan bertahap, tanpa menggandakan selector.
-
-### File baru yang disarankan
+**BARU — dibuat saat mulai integrasi:**
 
 ```text
+frontend/app/lib/api/settings.ts
 frontend/app/lib/content/home.ts
 frontend/app/lib/content/about.ts
-frontend/app/lib/api/settings.ts
-frontend/app/styles/public/about.css
 ```
 
-### Checklist pekerjaan
+- [ ] Pisahkan konten profil yang panjang tanpa membuat editor seluruh halaman.
+- [ ] Hubungkan Pengaturan ke API 9: identitas, daftar berkas wajib, jadwal manual, dan toggle PPDB.
+- [ ] PIP/KIP tetap opsional; perubahan syarat hanya berlaku pada pendaftaran baru.
+- [ ] HomeNews memakai artikel terbit dari anggota 4.
+- [ ] Ringkasan prestasi memakai komponen/data anggota 8, bukan API kedua.
+- [ ] Koordinasikan perubahan navigasi dengan 10; pertahankan guardrail sticky.
+- [ ] Uji mobile/desktop, data kosong, dan kegagalan membaca Pengaturan.
 
-- [ ] Pisahkan konten panjang Beranda/Tentang dari komponen tampilannya.
-- [ ] Sesuaikan visi, misi, foto, dan informasi contoh dengan konten yang disepakati.
-- [ ] Hubungkan HomeNews ke fungsi API artikel anggota 4.
-- [ ] Hubungkan SettingsModule dan SchoolSettingsProvider ke API anggota 9.
-- [ ] Pastikan perubahan identitas sekolah konsisten pada header/footer dan halaman terkait.
-- [ ] Ambil nama kepala sekolah dari direktori jika bagian itu dibuat dinamis.
-- [ ] Periksa kedua halaman di mobile dan desktop.
+**Batas:** backend settings milik 9. Tidak membuat backend home/about.
+**Selesai jika:** pengaturan tersimpan di server dan informasi tampil konsisten;
+berita/prestasi beranda mengikuti publikasi pemilik modul.
 
-Tidak perlu membuat backend home/about pada tahap ini. Narasi profil boleh statis;
-Pengaturan saat ini tidak mencakup editor seluruh isi halaman.
+## Anggota 2 Program Ekstrakurikuler dan Agenda
 
-**Tugas pertama:** rapikan konten Beranda/Tentang dan catat field yang harus mengikuti Pengaturan.
-
-**Selesai jika:** informasi sekolah konsisten, berita mengikuti artikel terbit, dan
-perubahan Pengaturan tetap tersedia setelah halaman dibuka ulang.
-
-<a id="anggota-2"></a>
-## Anggota 2 — Program dan Agenda
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/program/page.tsx
-frontend/app/data.ts
+frontend/app/components/ClubDirectory.tsx
+frontend/app/components/admin/ClubsModule.tsx
 frontend/app/components/admin/AgendaModule.tsx
+frontend/app/lib/cms/catalog.ts
 frontend/app/lib/cms/agenda.ts
+frontend/app/lib/use-catalog.ts
 frontend/app/styles/public/programs.css
+frontend/app/styles/admin/catalog.css
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
-frontend/app/lib/content/programs.ts
+frontend/app/lib/api/clubs.ts
 frontend/app/lib/api/agenda.ts
-frontend/app/styles/admin/agenda.css
+backend/src/modules/clubs/club.routes.ts
+backend/src/modules/clubs/club.schema.ts
+backend/src/modules/clubs/club.service.ts
+backend/src/modules/clubs/club.repository.ts
 backend/src/modules/agenda/agenda.routes.ts
 backend/src/modules/agenda/agenda.schema.ts
 backend/src/modules/agenda/agenda.service.ts
 backend/src/modules/agenda/agenda.repository.ts
+backend/src/db/schema/clubs.ts
 backend/src/db/schema/agenda.ts
+backend/tests/clubs.test.ts
 backend/tests/agenda.test.ts
 ```
 
-### Checklist pekerjaan
+- [ ] Kerjakan klub dahulu: daftar aktif, daftar admin, tambah/edit/nonaktif.
+- [ ] Nama kegiatan unik; pilihan Belum menentukan bukan record kegiatan.
+- [ ] Sediakan client multiselect opsional untuk 5 dan 6; daftar pilihan historis tidak ikut berubah saat rename.
+- [ ] Setelah klub selesai, kerjakan Agenda dan kontrol Publik/Internal di UI admin.
+- [ ] Rapat/internal tidak boleh bocor dari endpoint publik.
+- [ ] Gunakan API dan izin role; narasi Program boleh tetap statis.
 
-- [ ] Pindahkan data program ke content/programs.ts, koordinasikan import Beranda dengan anggota 1.
-- [ ] Buat tabel agenda dan API daftar, tambah, edit, hapus, serta perubahan status.
-- [ ] Hubungkan AgendaModule ke API dan izin akses anggota 9.
-- [ ] Tampilkan loading, data kosong, dan kegagalan penyimpanan.
-- [ ] Tentukan data agenda mana yang publik; rapat/internal tidak otomatis dibuka ke pengunjung.
+**Batas:** jangan edit field PPDB milik 5/6 tanpa koordinasi. catalog.ts dan
+use-catalog.ts dipakai juga oleh 8; perubahan bersama direview 10.
+**Selesai jika:** pilihan kegiatan konsisten dan admin agenda/klub tersimpan di server.
 
-Program tetap konten statis dahulu. Editor Program tidak wajib dibuat pada tahap ini.
+## Anggota 3 Struktur organisasi dan Guru
 
-**Tugas pertama:** tampilkan daftar agenda dari database.
-
-**Selesai jika:** agenda yang dikelola admin tersimpan dan dapat dibuka dari browser lain.
-
-<a id="anggota-3"></a>
-## Anggota 3 — Struktur dan Guru
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/struktur/page.tsx
-frontend/app/school-directory-data.ts
+frontend/app/components/DirectoryTabs.tsx
 frontend/app/components/OrganizationDirectory.tsx
 frontend/app/components/TeacherDirectory.tsx
 frontend/app/components/SchoolDirectoryModule.tsx
@@ -335,12 +219,13 @@ frontend/app/components/school-directory/DirectoryEditor.tsx
 frontend/app/components/school-directory/DirectoryStructureTab.tsx
 frontend/app/components/school-directory/DirectoryTeachersTab.tsx
 frontend/app/components/school-directory/shared.ts
+frontend/app/school-directory-data.ts
 frontend/app/styles/directory/organization.css
 frontend/app/styles/directory/teachers.css
 frontend/app/styles/directory/admin-directory.css
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/directory.ts
@@ -352,40 +237,34 @@ backend/src/db/schema/directory.ts
 backend/tests/directory.test.ts
 ```
 
-### Checklist pekerjaan
+- [ ] Simpan profil guru/pimpinan, urutan, level, dan foto contoh.
+- [ ] Hubungkan halaman publik dan editor admin ke API yang sama.
+- [ ] Izinkan nol atau satu kepala sekolah; tolak dua kepala sekolah.
+- [ ] Uji tambah/hapus profil, pindah level, dan seluruh tingkat kosong.
+- [ ] Direktori publik hanya memuat field yang layak dipublikasikan.
+- [ ] Cegah simpan direktori sebagian saat salah satu operasi gagal.
 
-- [ ] Buat tabel profil guru dan pimpinan/jabatan, termasuk urutan serta tingkat struktur.
-- [ ] Hubungkan editor admin dan halaman publik ke API direktori.
-- [ ] Terapkan maksimal satu kepala sekolah, dengan keadaan kosong tetap diperbolehkan.
-- [ ] Uji tambah/hapus profil, pemindahan tingkat, dan tingkat tanpa anggota.
-- [ ] Sesuaikan kontrak contains/minContains agar nol kepala sekolah tidak ditolak.
-- [ ] Atur penyimpanan konsisten; pertimbangkan versi data agar edit dua admin tidak saling menimpa.
+**Selesai jika:** perubahan struktur tersimpan, muncul di publik, dan tidak merusak
+layout ketika jumlah anggota berubah. Upload foto nyata bukan tugas berkas privat 7.
 
-Foto contoh tetap digunakan dahulu. Upload foto publik guru merupakan fitur berbeda
-dari dokumen siswa yang privat. Data guru yang tidak perlu diketahui publik jangan
-ikut dimasukkan ke respons direktori publik.
+## Anggota 4 Blog dan Artikel admin
 
-**Tugas pertama:** tampilkan satu guru dari database pada halaman Struktur.
-
-**Selesai jika:** perubahan profil/jabatan dari admin muncul pada website, termasuk struktur kosong.
-
-<a id="anggota-4"></a>
-## Anggota 4 — Blog dan Artikel
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/blog/page.tsx
 frontend/app/blog/[slug]/page.tsx
 frontend/app/components/PublicBlog.tsx
 frontend/app/components/BlogDetailView.tsx
+frontend/app/components/HomeNews.tsx
 frontend/app/components/admin/PostsModule.tsx
 frontend/app/lib/cms/posts.ts
+frontend/app/sitemap.ts
 frontend/app/styles/public/blog.css
 frontend/app/styles/admin/articles.css
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/posts.ts
@@ -397,47 +276,50 @@ backend/src/db/schema/posts.ts
 backend/tests/posts.test.ts
 ```
 
-### Checklist pekerjaan
+- [ ] Buat daftar publik terbit, daftar admin termasuk draft, dan detail slug.
+- [ ] Tambah/edit/hapus artikel dengan slug unik dan otorisasi.
+- [ ] Artikel baru dapat dibuka melalui URL langsung, bukan hanya daftar seed.
+- [ ] Metadata dan sitemap mengikuti sumber terbit yang sama.
+- [ ] Sediakan fungsi artikel terbaru untuk 1; koordinasikan HomeNews.
 
-- [ ] Buat tabel dan API artikel, termasuk aturan slug unik.
-- [ ] Bedakan daftar publik dan daftar admin yang boleh memuat draft.
-- [ ] Hubungkan editor, daftar artikel, dan halaman detail ke API.
-- [ ] Sediakan fungsi artikel terbaru untuk anggota 1.
-- [ ] Ganti sumber metadata judul/deskripsi pada blog/[slug]/page.tsx yang masih memakai contoh.
-- [ ] Pastikan artikel baru dapat dibuka langsung melalui URL tanpa bergantung pada daftar seed.
-- [ ] Tambahkan kebutuhan daftar admin dan detail berdasarkan slug ke kontrak API.
+**Selesai jika:** publish muncul di blog dan beranda; draft/slug tidak ada tidak
+mengungkap isi artikel privat. Gambar memakai aset yang tersedia dahulu.
 
-Gambar memakai aset yang tersedia dahulu. Jangan membuka draft melalui API publik
-hanya karena tombol di frontend disembunyikan.
+## Anggota 5 PPDB online dan menu Pendaftar
 
-**Tugas pertama:** tampilkan daftar artikel terbit dari database.
-
-**Selesai jika:** artikel baru bisa diterbitkan, dibuka melalui URL, muncul di Beranda;
-draft hanya bisa dibaca admin yang berhak.
-
-<a id="anggota-5"></a>
-## Anggota 5 — Pendaftaran online dan Pendaftar
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/pendaftaran/page.tsx
 frontend/app/components/RegistrationForm.tsx
+frontend/app/components/registration/StudentFields.tsx
+frontend/app/components/registration/DocumentFields.tsx
+frontend/app/components/registration/RegistrationReview.tsx
+frontend/app/components/registration/FilePreview.tsx
 frontend/app/components/admin/ApplicationsModule.tsx
+frontend/app/lib/registration-files.ts
 frontend/app/styles/public/registration.css
+frontend/app/styles/public/enrollment.css
 backend/src/db/schema/admissions.ts
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/applications/submission.ts
 frontend/app/lib/api/applications/types.ts
-frontend/app/styles/admin/applications.css
+frontend/app/pendaftar/page.tsx
+frontend/app/components/registration/ApplicantPortal.tsx
+frontend/app/lib/api/applications/self-service.ts
 backend/src/modules/applications/submission.routes.ts
 backend/src/modules/applications/submission.schema.ts
 backend/src/modules/applications/submission.service.ts
 backend/src/modules/applications/submission.repository.ts
+backend/src/modules/applications/self-service.routes.ts
+backend/src/modules/applications/self-service.schema.ts
+backend/src/modules/applications/self-service.service.ts
+backend/src/modules/applications/self-service.repository.ts
+backend/tests/application-self-service.test.ts
 backend/src/modules/applications/registration-number.ts
 backend/src/modules/applications/application.mapper.ts
 backend/src/modules/applications/application-status.service.ts
@@ -445,51 +327,45 @@ backend/src/db/schema/applications.ts
 backend/tests/application-submission.test.ts
 ```
 
-applications.ts pada schema berasal dari pemisahan admissions.ts; bukan tabel
-pendaftar tambahan. Pemisahan dikoordinasikan dengan anggota 7 dan 10.
+- [ ] Gunakan empat langkah yang ada; ubah pilihan kegiatan menjadi multiselect opsional.
+- [ ] Baca aturan berkas wajib dari settings; jangan menanam daftar wajib tetap di UI.
+- [ ] Buat area pribadi untuk melihat catatan dan memperbaiki berkas, memakai akses dari 9.
+- [ ] POST /applications menerima multipart: data JSON dan enam slot berkas.
+- [ ] Validasi identitas, pilihan kegiatan aktif, PPDB dibuka, dan berkas wajib di server.
+- [ ] Nomor pendaftaran unik dibuat server; dukung retry tanpa pendaftar ganda.
+- [ ] Gunakan service berkas 7; sukses hanya setelah data dan file tersimpan.
+- [ ] Menu Pendaftar membaca daftar/detail dan perubahan status melalui API 6.
+- [ ] CSV mengekspor hasil filter secara jelas; jangan diam-diam hanya satu halaman.
+- [ ] Pertahankan isian saat gagal, disable submit saat request berjalan, tampilkan error.
 
-### Checklist pekerjaan
+**Batas:** bukan pemilik endpoint daftar/detail/offline. Schema applications.ts
+adalah pemisahan admissions.ts, bukan tabel pendaftar baru. UI FilePreview dipakai
+juga oleh 6, perubahan harus direview bersama.
+**Selesai jika:** submit lengkap mendapat bukti minimal, muncul di admin, dan retry
+tidak menggandakan pendaftaran. Pendaftar memperbaiki berkas sendiri dan admin
+memeriksa ulang; nomor pendaftaran bukan password atau token akses.
 
-- [ ] Buat API pendaftaran publik dengan validasi server dan batas request.
-- [ ] Buat nomor pendaftaran unik di server, bukan dari timestamp browser.
-- [ ] Periksa PPDB dibuka/ditutup menggunakan pengaturan yang disepakati dengan anggota 9.
-- [ ] Kembalikan bukti pendaftaran tanpa data pribadi yang tidak diperlukan.
-- [ ] Hubungkan menu Pendaftar ke API daftar anggota 6.
-- [ ] Buat aturan perubahan status yang digunakan endpoint edit anggota 6.
-- [ ] Pastikan ekspor CSV jelas: halaman saat ini atau seluruh hasil filter; jangan terpotong diam-diam.
-- [ ] Sepakati field/type respons dan pemetaan database bersama anggota 6–7.
+## Anggota 6 Data calon siswa dan pendaftaran offline
 
-Anggota 5 memiliki helper nomor pendaftaran dan pemetaan data aplikasi. Perubahan
-helper yang dipakai bersama harus direview anggota 6. Hindari validasi duplikat yang
-berbeda antara pendaftaran online dan offline.
-
-**Tugas pertama:** simpan satu pendaftaran publik dan kembalikan nomor dari server.
-
-**Selesai jika:** isian valid tersimpan, isian salah ditolak, pendaftar muncul di admin,
-dan perubahan status tersimpan melalui aturan backend.
-
-<a id="anggota-6"></a>
-## Anggota 6 — Data siswa dan pendaftaran offline
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/components/StudentRecordsModule.tsx
 frontend/app/components/student-records/StudentProfileDrawer.tsx
 frontend/app/components/student-records/OfflineStudentForm.tsx
+frontend/app/components/student-records/DocumentReview.tsx
 frontend/app/components/student-records/shared.tsx
-frontend/app/styles/directory/students.css
+frontend/app/lib/cms/applications.ts
+frontend/app/lib/cms/student-documents.ts
 frontend/app/styles/directory/student-ledger.css
 frontend/app/styles/directory/student-profile.css
 frontend/app/styles/directory/student-entry.css
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/applications/records.ts
-frontend/app/components/student-records/StudentIdentityForm.tsx
-frontend/app/components/student-records/StudentDocumentsPanel.tsx
 backend/src/modules/applications/records.routes.ts
 backend/src/modules/applications/records.schema.ts
 backend/src/modules/applications/records.service.ts
@@ -497,49 +373,31 @@ backend/src/modules/applications/records.repository.ts
 backend/tests/application-records.test.ts
 ```
 
-### Checklist pekerjaan
+- [ ] Daftar, pencarian, sumber, status, kelengkapan, dan pagination dilakukan server.
+- [ ] Buat detail, edit identitas, serta input offline dengan izin admin PPDB.
+- [ ] Input offline memakai multiselect opsional dan snapshot kebijakan berkas saat dicatat.
+- [ ] Gunakan generator nomor dan aturan status dari 5.
+- [ ] Pakai DocumentReview.tsx yang sudah ada, bukan membuat StudentDocumentsPanel kedua.
+- [ ] Hubungkan status/catatan dan download melalui client dokumen 7.
+- [ ] Bedakan berkas fisik diterima, file digital tersedia, dan hasil verifikasi.
+- [ ] Uji data tidak ditemukan, akses ditolak, serta sinkronisasi dua menu pendaftar.
 
-- [ ] Buat API daftar/pencarian/filter/pagination untuk kedua menu admin pendaftar.
-- [ ] Buat API detail, edit identitas, dan input offline dengan pemeriksaan izin.
-- [ ] Gunakan helper nomor pendaftaran anggota 5.
-- [ ] Pada endpoint edit, perubahan status menggunakan aturan anggota 5.
-- [ ] Pisahkan UI dokumen ke StudentDocumentsPanel.tsx dan hubungkan API anggota 7.
-- [ ] Uji kelengkapan dokumen berdasarkan jenis yang wajib, bukan sekadar jumlah file.
-- [ ] Bedakan pencatatan berkas fisik offline dengan file digital yang benar-benar sudah diunggah.
+**Selesai jika:** data online/offline bisa dicari dan diedit melalui satu tabel
+applications. Jangan membuat tabel students untuk menduplikasi calon siswa.
 
-### Batas dengan anggota 5
+## Anggota 7 Penyimpanan dan pemeriksaan berkas
 
-| Operasi | Pemilik |
-| --- | --- |
-| POST pendaftaran online | 5 |
-| GET daftar dan GET detail | 6; digunakan juga menu anggota 5 |
-| POST pendaftaran offline | 6 |
-| PATCH data/status | Endpoint dimiliki 6; aturan status menggunakan service anggota 5 |
-| Schema tabel dan mapper aplikasi | 5 sebagai pemilik, perubahan disepakati dengan 6 |
-
-Jangan mendaftarkan dua handler untuk HTTP method dan path yang sama. Jangan membuat
-tabel students untuk menduplikasi applications. Penghapusan pendaftar, jika dimasukkan
-ke tahap implementasi, harus disepakati bersama terkait relasi dokumen dan retensi.
-
-**Tugas pertama:** tampilkan daftar/detail pendaftar melalui API.
-
-**Selesai jika:** data online/offline dapat dicari dan diperbarui, konsisten di kedua menu,
-dan panel dokumen menggunakan API file yang sebenarnya.
-
-<a id="anggota-7"></a>
-## Anggota 7 — Backend dokumen
-
-### Acuan yang sudah ada
+**ADA sebagai acuan tanpa mengambil alih UI:**
 
 ```text
 backend/src/db/schema/admissions.ts
 frontend/app/lib/cms/student-documents.ts
-frontend/app/components/student-records/StudentProfileDrawer.tsx
+frontend/app/lib/registration-files.ts
+frontend/app/components/registration/DocumentFields.tsx
+frontend/app/components/student-records/DocumentReview.tsx
 ```
 
-File frontend di atas dipelajari sebagai acuan. UI detail dikerjakan anggota 6.
-
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/documents.ts
@@ -553,96 +411,99 @@ backend/src/db/schema/documents.ts
 backend/tests/documents.test.ts
 ```
 
-Folder runtime lokal: `backend/uploads/`. Folder ini tidak masuk Git dan tidak
-diletakkan di frontend/public. Schema documents.ts berasal dari pemisahan admissions.ts.
+- [ ] Validasi ukuran maksimal 5 MiB, signature PDF/JPG/PNG, jumlah dan jenis berkas.
+- [ ] Simpan nama internal acak pada direktori privat, bukan frontend/public.
+- [ ] Sediakan service submit publik 5, endpoint upload admin, dan koreksi berkas pemilik terautentikasi.
+- [ ] Pendaftar mengirim file pengganti; status menjadi Menunggu pemeriksaan, bukan langsung terverifikasi.
+- [ ] Jangan hapus otomatis berkas yang sudah tersimpan/versi lama. Cleanup hanya file sementara gagal.
+- [ ] Jangan menerima upload publik ke applicationId yang sudah ada hanya berdasarkan nomor.
+- [ ] Metadata, penggantian file, cleanup kegagalan, serta idempotency dikerjakan bersama 5.
+- [ ] Download memeriksa session, role, dan relasi dokumen-pendaftar.
+- [ ] PATCH review mencatat status, catatan, pemeriksa, dan waktu server.
+- [ ] Sediakan client blob download; jangan pakai helper JSON untuk membaca file biner.
+- [ ] Uji berkas kosong/palsu/terlalu besar, akses lintas pendaftar, gagal simpan, dan file pengganti.
 
-### Checklist pekerjaan
+**Batas:** UI form milik 5, UI detail milik 6, autentikasi milik 9.
+Schema documents.ts berasal dari pemisahan admissions.ts. Jangan drop/recreate
+tabel lama hanya untuk memindahkan file schema.
+**Selesai jika:** file nyata dapat ditinjau admin setelah refresh, tidak bocor ke publik,
+dan kegagalan tidak meninggalkan metadata yang mengaku memiliki file padahal tidak ada.
 
-- [ ] Simpan file dengan nama internal yang dibuat server, terhubung ke pendaftar yang benar.
-- [ ] Validasi jenis dan ukuran file; jangan hanya mempercayai nama ekstensi.
-- [ ] Buat download dengan pemeriksaan login dan izin pada setiap request.
-- [ ] Buat perubahan status verifikasi beserta pemeriksa dan waktunya.
-- [ ] Tangani kegagalan penyimpanan agar metadata tidak menunjuk file yang tidak ada.
-- [ ] Tentukan perilaku mengganti file lama dan pembersihan file yang gagal disimpan.
-- [ ] Sediakan fungsi client documents.ts untuk dipakai anggota 6.
-- [ ] Lengkapi kontrak daftar dokumen, download, dan verifikasi.
+## Anggota 8 Kontak Pesan dan Prestasi
 
-Nomor pendaftaran bukan bukti izin mengunggah atau mengunduh. Tahap pertama memakai
-upload oleh admin terautentikasi. Portal upload mandiri calon siswa perlu rancangan
-akses tambahan sebelum diimplementasikan.
-
-**Tugas pertama:** upload satu file fiktif melalui request admin dan simpan metadata.
-
-**Selesai jika:** file dapat diunggah dan diunduh oleh admin yang berhak; akses tanpa izin
-ditolak; validasi file dan kegagalan penyimpanan ditangani.
-
-<a id="anggota-8"></a>
-## Anggota 8 — Kontak, Pesan, pengujian
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/kontak/page.tsx
 frontend/app/components/ContactForm.tsx
-frontend/app/components/NewsletterForm.tsx
 frontend/app/components/admin/MessagesModule.tsx
+frontend/app/lib/cms/messages.ts
+frontend/app/prestasi/page.tsx
+frontend/app/components/Achievements.tsx
+frontend/app/components/admin/AchievementsModule.tsx
+frontend/app/lib/cms/catalog.ts
+frontend/app/lib/use-catalog.ts
 frontend/app/styles/public/contact.css
+frontend/app/styles/public/achievements.css
+frontend/app/styles/admin/catalog.css
 ```
 
-### File baru untuk tahap utama
+**BARU:**
 
 ```text
 frontend/app/lib/api/messages.ts
-frontend/app/styles/admin/messages.css
+frontend/app/lib/api/achievements.ts
 backend/src/modules/messages/message.routes.ts
 backend/src/modules/messages/message.schema.ts
 backend/src/modules/messages/message.service.ts
 backend/src/modules/messages/message.repository.ts
+backend/src/modules/achievements/achievement.routes.ts
+backend/src/modules/achievements/achievement.schema.ts
+backend/src/modules/achievements/achievement.service.ts
+backend/src/modules/achievements/achievement.repository.ts
 backend/src/db/schema/messages.ts
+backend/src/db/schema/achievements.ts
 backend/tests/messages.test.ts
-docs/testing/manual-checklist.md
+backend/tests/achievements.test.ts
 ```
 
-### Checklist pekerjaan
+- [ ] Selesaikan pesan dahulu: kirim publik dengan validasi/rate limit, baca/status admin.
+- [ ] Berikutnya prestasi: daftar terbit, daftar admin, tambah/edit/hapus/draft.
+- [ ] Hubungkan filter kategori/tahun dan ringkasan beranda ke data terbit.
+- [ ] Draft tidak boleh tampil pada endpoint publik, termasuk saat parameter dimanipulasi.
+- [ ] Gunakan aset ilustrasi yang disediakan; jangan mengklaim contoh sebagai prestasi nyata.
+- [ ] Koordinasikan catalog.ts/use-catalog.ts dengan 2 dan ringkasan beranda dengan 1.
 
-- [ ] Simpan pesan publik dengan validasi dan pembatasan request.
-- [ ] Tampilkan pesan hanya kepada admin yang berhak.
-- [ ] Simpan status dibaca/selesai dan tampilkan kegagalan jika request gagal.
-- [ ] Uji alur pendaftaran → admin → detail → dokumen menggunakan data fiktif.
-- [ ] Catat langkah reproduksi, hasil yang diharapkan, hasil aktual, dan pemilik bug.
+**Selesai jika:** pesan dan prestasi tersimpan di database, draft privat, serta
+publikasi tampil konsisten. Newsletter tahap lanjutan; tidak ada tugas mengirim
+email nyata. Pengujian seluruh tim bukan tanggung jawab tunggal anggota 8.
 
-Pengujian oleh anggota 8 membantu tim; setiap pemilik fitur tetap bertanggung jawab
-terhadap pengujian dan perbaikan fiturnya sendiri.
+## Anggota 9 Auth izin akses dan backend Pengaturan
 
-Tahap lanjutan newsletter menggunakan pola empat file yang sama di
-`backend/src/modules/newsletter/`, schema `backend/src/db/schema/newsletter.ts`,
-dan client `frontend/app/lib/api/newsletter.ts`. Tidak perlu membuat folder kosong
-sebelum tahap tersebut dimulai.
-
-**Tugas pertama:** simpan satu pesan Kontak dan tampilkan pada Pesan masuk.
-
-**Selesai jika:** pesan tersimpan, status bisa dikelola, dan checklist pengujian lintas menu tersedia.
-
-<a id="anggota-9"></a>
-## Anggota 9 — Login, izin akses, backend Pengaturan
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/components/admin/AdminLogin.tsx
+frontend/app/lib/api-client.ts
 backend/src/modules/auth/auth.routes.ts
 backend/src/modules/auth/auth.service.ts
 backend/src/modules/auth/auth.repository.ts
 backend/src/db/schema/auth.ts
 backend/src/scripts/create-admin.ts
+backend/src/config/env.ts
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/auth.ts
 frontend/app/components/admin/AdminAuthProvider.tsx
 backend/src/modules/auth/auth.guard.ts
+backend/src/modules/applicant-auth/applicant-auth.routes.ts
+backend/src/modules/applicant-auth/applicant-auth.schema.ts
+backend/src/modules/applicant-auth/applicant-auth.service.ts
+backend/src/modules/applicant-auth/applicant-auth.repository.ts
+backend/tests/applicant-auth.test.ts
 backend/src/modules/settings/settings.routes.ts
 backend/src/modules/settings/settings.schema.ts
 backend/src/modules/settings/settings.service.ts
@@ -652,38 +513,34 @@ backend/tests/auth.test.ts
 backend/tests/settings.test.ts
 ```
 
-### Checklist pekerjaan
+- [ ] Uji fondasi login/session/logout dengan database; tidak menulis ulang tanpa alasan.
+- [ ] Buat guard role dan proteksi request cookie pengubah data.
+- [ ] Pemilik fitur memasang guard pada routenya sendiri; 9 mereview penerapannya.
+- [ ] Sediakan Pengaturan publik dan simpan terproteksi: berkas wajib, toggle buka/tutup dan informasi jadwal manual.
+- [ ] Rancang akses pendaftar untuk online/offline, login/logout, pemulihan, dan session terpisah; review bersama 5 dan 10.
+- [ ] Kontrak alur penerbitan/pemulihan akses belum dipilih; selesaikan sebelum endpoint koreksi diaktifkan.
+- [ ] PPDB ditutup ditolak server; input offline terotorisasi tetap diperbolehkan.
+- [ ] Samakan batas file dengan kontrak bersama 7; jangan menganggap UI membatasi server.
+- [ ] Session kedaluwarsa dan logout menghapus akses; tidak cukup menyembunyikan tombol.
 
-- [ ] Uji pembuatan admin, login, session valid/kedaluwarsa, dan logout dengan database.
-- [ ] Sediakan guard untuk pemeriksaan login serta role di endpoint admin.
-- [ ] Sepakati hak super_admin, admin_ppdb, dan editor per fitur.
-- [ ] Sediakan identitas session melalui AdminAuthProvider untuk dashboard.
-- [ ] Buat GET pengaturan publik dan PUT pengaturan terproteksi.
-- [ ] Sepakati bentuk respons dengan anggota 1, termasuk status PPDB untuk anggota 5.
-- [ ] Periksa perlindungan request pengubah data pada autentikasi berbasis cookie.
-- [ ] Bersama anggota 10, periksa error 4xx agar tidak berubah menjadi 500 tanpa sengaja.
+**Selesai jika:** tes izin lulus dan Pengaturan tersimpan. Akun/password nyata tidak
+masuk repo; demonstrasi memakai akun development masing-masing.
 
-Anggota 1 memiliki SettingsModule, SchoolSettingsProvider, dan client settings.ts.
-Anggota 9 menyediakan backend Pengaturan. Pemilik setiap API harus memasang guard;
-menyembunyikan menu saja tidak melindungi data.
+## Anggota 10 Dashboard setup dan koordinasi integrasi
 
-**Tugas pertama:** buktikan login → session valid → logout → session ditolak.
-
-**Selesai jika:** identitas admin berasal dari session, akses endpoint dibatasi sesuai role,
-dan pengaturan dapat disimpan serta dibaca ulang.
-
-<a id="anggota-10"></a>
-## Anggota 10 — Dashboard, setup, integrasi
-
-### File yang sudah ada
+**ADA:**
 
 ```text
 frontend/app/components/AdminDashboard.tsx
 frontend/app/components/admin/DashboardModule.tsx
 frontend/app/components/admin/types.ts
+frontend/app/lib/api-client.ts
+frontend/app/lib/cms/types.ts
 backend/src/app.ts
 backend/src/db/client.ts
 backend/src/db/schema/index.ts
+backend/drizzle/
+compose.dev.yaml
 compose.yaml
 backend/Dockerfile
 .github/workflows/quality.yml
@@ -691,7 +548,7 @@ package.json
 package-lock.json
 ```
 
-### File baru yang disarankan
+**BARU:**
 
 ```text
 frontend/app/lib/api/dashboard.ts
@@ -700,218 +557,190 @@ backend/src/modules/dashboard/dashboard.schema.ts
 backend/src/modules/dashboard/dashboard.service.ts
 backend/src/modules/dashboard/dashboard.repository.ts
 backend/tests/dashboard.test.ts
-compose.dev.yaml
 .dockerignore
-docs/LOCAL_SETUP.md
 ```
 
-Panduan pembagian dan workflow sudah berada di dokumen ini. Pisahkan menjadi dokumen
-lain hanya bila diperlukan; hindari beberapa daftar tugas yang isinya tidak sinkron.
+- [ ] Verifikasi setup bersih di komputer lain menggunakan compose.dev.yaml yang sudah ada.
+- [ ] Koordinasikan pendaftaran route, ekspor schema, dan migration berurutan.
+- [ ] Shell admin hanya mengurus navigasi/layout/session; request domain milik pemilik menu.
+- [ ] Buat ringkasan server, bukan mengambil seluruh biodata untuk menghitung angka.
+- [ ] Role selain super_admin tidak meminta endpoint ringkasan lintas domain.
+- [ ] Tampilkan indikator yang memiliki sumber nyata; hilangkan klaim statistik contoh saat integrasi.
+- [ ] Review dependency, CI, serta rencana Docker/VPS setelah alur utama teruji.
+- [ ] Data disimpan tanpa penghapusan otomatis; rencanakan kapasitas, backup/restore dan monitoring storage.
 
-### Checklist pekerjaan
+**Selesai jika:** setup dapat diulang dan dashboard memiliki angka server yang sesuai
+data. Tidak membuat tabel dashboard atau mengambil alih seluruh API yang tertunda.
 
-- [ ] Uji instalasi dari checkout bersih, termasuk perintah migration pada npm workspace.
-- [ ] Perbaiki jalur koneksi database lokal dan dokumentasikan cara menjalankan yang teruji.
-- [ ] Periksa Docker context, dependency, dan runtime; jangan menganggap image siap sebelum diuji.
-- [ ] Kurangi state data lintas menu di AdminDashboard; koordinasikan perubahan props dengan pemilik fitur.
-- [ ] Gunakan session anggota 9 untuk nama/role admin; tanggal memakai waktu sebenarnya.
-- [ ] Buat ringkasan jumlah dari database tanpa mengambil seluruh data pribadi hanya untuk statistik.
-- [ ] Ganti indikator contoh dengan hasil terverifikasi atau label yang tidak mengklaim status palsu.
-- [ ] Daftarkan route dan ekspor schema dari pemilik fitur.
-- [ ] Koordinasikan migration serta review integrasi dan quality check.
+## Batas pekerjaan bersama
 
-AdminDashboard mengatur navigasi/layout/session. Modul menu masing-masing mengurus
-request data fiturnya. Anggota 10 mengubah sambungannya, sedangkan pemilik modul
-mengerjakan pengambilan dan penyimpanan data.
+| Operasi atau file                               | Pemilik                        | Aturan                                                                              |
+| ----------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------- |
+| POST /applications                              | 5                              | Memanggil service berkas 7, bukan menulis storage kedua                             |
+| GET daftar/detail dan PATCH pendaftar           | 6                              | Dipakai Pendaftar dan Data siswa; jangan membuat handler ganda                      |
+| POST /applications/offline                      | 6                              | Nomor dan mapper bersama 5                                                          |
+| Aturan transisi penerimaan                      | 5                              | Endpoint PATCH milik 6 menggunakan service ini                                      |
+| Upload/download/review dokumen                  | 7                              | Session/role dari 9, UI dari 5 dan 6                                                |
+| Application types dan schema tabel              | 5, review 6                    | Perubahan field harus disetujui konsumen                                            |
+| DocumentReview.tsx dan StudentProfileDrawer.tsx | 6                              | 7 tidak membuat panel tandingan                                                     |
+| FilePreview.tsx                                 | 5, review 6                    | Dipakai form dan admin                                                              |
+| catalog.ts dan use-catalog.ts                   | 2 dan 8, review 10             | Jangan dua PR merombak file yang sama bersamaan; pemisahan opsional lewat PR khusus |
+| frontend/app/lib/api-client.ts                  | 10, review 9                   | Helper HTTP bersama; timeout serta penanganan JSON/biner jelas                      |
+| AdminDashboard.tsx                              | 10                             | Perubahan navigasi/props dikomunikasikan pemilik menu                               |
+| SiteHeader.tsx dan SiteFooter.tsx               | 1, review 10                   | Hindari regresi sticky dan navigasi mobile                                          |
+| backend/src/app.ts dan db/schema/index.ts       | 10                             | Pemilik fitur menyiapkan usulan registrasi/ekspor                                   |
+| backend/drizzle/                                | 10                             | Generate berurutan setelah schema terbaru digabung                                  |
+| contracts/openapi.yaml                          | Pemilik operasi, koordinasi 10 | x-owner memberi nomor penanggung jawab                                              |
+| package.json dan package-lock.json              | 10                             | Jangan menambah dependency sendiri tanpa review                                     |
+| globals.css dan aggregator CSS                  | 10                             | CSS domain tetap milik anggota fitur                                                |
 
-Tidak membuat tabel duplikat dashboard; statistik berasal dari tabel domain yang
-sudah ada. Jangan menghitung target, persentase, atau sisa kuota dari angka contoh
-tanpa keputusan aturan yang jelas.
+## Kesepakatan integrasi PPDB
 
-**Tugas pertama:** pastikan setup berhasil di komputer anggota lain dan koneksi database terverifikasi.
+- API menerima extracurriculars berupa array opsional. [] berarti belum memilih;
+  boleh lebih dari satu. Jangan mengirim program atau extracurricular lama.
+- Frontend sekarang masih memilih satu kegiatan; 5 dan 6 mengubahnya menjadi
+  multiselect. Pilihan lama Belum menentukan dipetakan ke [], nama tunggal ke [nama].
+- Simpan snapshot nama agar rename/nonaktif tidak mengubah daftar pilihan lama.
+- API menggunakan source; frontend mockup menggunakan registrationSource.
+  Mapper mengonversi Website/Offline secara eksplisit.
+- ID API berupa nomor NH-...; UUID database internal tidak dipakai sebagai bukti izin.
+- API dokumen menggunakan kind; frontend mockup memakai key. photo hanya metadata
+  lama, bukan slot upload baru.
+- Enam slot: skl, ijazah, kk, ktp, kip, akta. Admin menentukan berkas wajib;
+  PIP/KIP selalu opsional. Simpan snapshot persyaratan per pendaftaran.
+- Satu request multipart awal berisi data JSON dan file. Sesudahnya, koreksi
+  melalui area pribadi pendaftar terautentikasi, bukan nomor pendaftaran saja.
+- Pendaftar mengganti berkas yang perlu diperbaiki; status kembali Menunggu
+  pemeriksaan dan admin memverifikasi. Review berkas tidak otomatis menerima siswa.
+- Buka/tutup PPDB oleh admin; informasi tanggal diisi manual, tanpa scheduler.
+- Tidak ada syarat usia/kelayakan tambahan; validasi format/tanggal tetap berlaku.
+- Data dan berkas tersimpan tanpa penghapusan otomatis, dengan backup/restore.
+- Offline boleh belum lengkap; receivedDocumentKinds menandai fisik diterima.
+  hasFile=false berarti tidak ada file digital untuk ditinjau.
+- Kontrak target, mapping, keamanan, dan batas retry dijelaskan di
+  [panduan kontrak](../contracts/README.md). Implementasi harus memiliki test,
+  bukan hanya menyalin definisi YAML.
 
-**Selesai jika:** setup dapat diulang, dashboard memakai data sebenarnya, dan modul terintegrasi.
+## Urutan pengerjaan dengan pendekatan Agile
 
-## Kepemilikan file bersama
+Sprint berikut adalah urutan hasil, bukan janji durasi tetap. Isi tanggal setelah
+anggota menyepakati kapasitas. Issue boleh dipecah lebih kecil bila belum selesai.
 
-Pemilik adalah penanggung jawab review. Anggota lain tetap boleh berkontribusi melalui
-perubahan kecil yang direview, bukan menyalin file secara manual.
+| Tahap          | Fokus                                                            | Bukti untuk lanjut                                          |
+| -------------- | ---------------------------------------------------------------- | ----------------------------------------------------------- |
+| Persiapan      | Nama, reviewer, aturan sekolah, setup dan baca kontrak           | Semua bisa membuka demo; satu mesin berhasil database/login |
+| Sprint 1       | Satu alur baca dan tulis sederhana bersama, misalnya guru        | Tabel → API → UI → buka ulang dari browser lain             |
+| Sprint 2       | Klub, artikel, direktori, settings, pesan; fondasi file privat   | PR kecil dengan test; pilihan PPDB/API dokumen siap dipakai |
+| Sprint 3       | Submit PPDB + file, offline, detail, review; prestasi dan agenda | Alur lengkap dengan data dummy termasuk kegagalan           |
+| Sprint 4       | Dashboard, test lintas menu, perbaikan mobile/desktop            | Kriteria selesai fitur dan review keamanan terpenuhi        |
+| Kesiapan rilis | VPS, HTTPS, backup/restore, izin, konfigurasi production         | Bukti uji dan persetujuan koordinator/sekolah               |
 
-| File/area | Pemilik utama | Aturan |
-| --- | --- | --- |
-| AdminDashboard.tsx | 10 | Pemilik menu menyampaikan perubahan props dan integrasi |
-| frontend/app/lib/api-client.ts | 10, review 9 untuk autentikasi | Dipakai semua client; tidak dibuat ulang per anggota |
-| SchoolSettingsProvider.tsx | 1 | Bentuk respons disepakati dengan 9 |
-| StudentProfileDrawer.tsx | 6 | 7 menyediakan API; layout tetap oleh 6 |
-| backend/src/app.ts | 10 | Modul mengekspor fungsi registrasi; wiring digabung terkontrol |
-| backend/src/db/schema/index.ts | 10 | Pemilik fitur menyiapkan schema dan usulan ekspor |
-| backend/drizzle/ | 10 sebagai koordinator | Generate migration berurutan setelah schema direview |
-| contracts/openapi.yaml | Pemilik fitur, koordinasi 10 | Sepakati request/response sebelum integrasi |
-| package.json dan lockfile | 10 | Perubahan dependency disepakati bersama |
-| CSS global dan aggregator CSS | 10 | Style khusus menu milik masing-masing anggota |
-| SiteHeader.tsx, SiteFooter.tsx | 1 | Navigasi bersama direview dengan 10 |
+Tiap sprint dimulai memilih issue sesuai kapasitas, ada demo hasil, lalu evaluasi
+hambatan. Gunakan board Backlog → Siap → Dikerjakan → Review → Selesai; status
+Terblokir menyebut ketergantungan dan penanggung jawab, bukan menyembunyikan masalah.
 
-Schema baru `applications.ts` dan `documents.ts` merupakan pemisahan file
-`admissions.ts`. Pertahankan identitas tabel/kolom/relasi dan perbarui import. Pemisahan
-file semata tidak seharusnya menghasilkan operasi drop/recreate tabel. Review SQL
-hasil generate sebelum menjalankannya.
+## Langkah Git per anggota
 
-Style agenda/pendaftar/pesan yang masih bercampur di stylesheet lama dipisahkan
-bertahap. Jangan hanya menambahkan override baru sehingga aturan lama terus menumpuk.
-
-## Kontrak API yang perlu disepakati
-
-Sumber kontrak: [openapi.yaml](../contracts/openapi.yaml). Kontrak adalah kesepakatan
-yang perlu dirapikan; daftar endpoint di dalamnya bukan bukti semua API sudah dibuat.
-
-| Temuan | Keputusan/pengerjaan yang diperlukan | Pemilik |
-| --- | --- | --- |
-| registrationSource di frontend, source di API, nilai database berbeda kapitalisasi | Pemetaan eksplisit dan tipe respons yang konsisten | 5–6 |
-| Frontend memakai NH-... sebagai ID; database memiliki UUID dan registrationNumber | Rekomendasi kompatibilitas: ID API tetap nomor pendaftaran, UUID internal; server melakukan lookup | 5–6–7 |
-| key / kind / documentType berbeda antar-lapisan | Tetapkan bentuk API dan mapper dokumen | 6–7 |
-| Kontrak 5 MB, konfigurasi backend default 8 MB | Pilih satu batas; samakan UI, server, kontrak | 7–9 |
-| Pendaftaran offline belum punya endpoint khusus | Tambahkan endpoint admin dan schema request yang sesuai kebutuhan offline | 6 |
-| Download/verifikasi dokumen belum lengkap | Tambahkan API, izin, dan bentuk respons | 7 |
-| Daftar artikel admin dan detail slug belum lengkap | Tambahkan aturan daftar draft dan detail publik | 4 |
-| Filter kelengkapan dokumen belum ada di API daftar | Filter server harus berlaku pada keseluruhan hasil, bukan satu halaman saja | 6–7 |
-| Edit identitas lebih luas daripada field PATCH saat ini | Lengkapi allowlist field dan validasi; jangan menerima semua kolom database | 6 |
-| Kepala sekolah kosong perlu diizinkan | Sesuaikan contains/minContains, tetap maksimum satu | 3 |
-| Mode PPDB ditutup harus berlaku di server | Sepakati apakah input offline admin memiliki aturan berbeda | 5–6–9 |
-
-Usulan endpoint tambahan berikut belum tersedia. Seluruhnya menggunakan prefix
-`/api/v1` dan ditulis ke kontrak sebelum implementasi:
-
-```text
-POST  /applications/offline
-GET   /applications/{applicationId}/documents
-GET   /applications/{applicationId}/documents/{documentId}/download
-PATCH /applications/{applicationId}/documents/{documentId}
-GET   /dashboard/summary
-```
-
-PATCH data/status pendaftar tetap memiliki satu handler milik anggota 6. Handler
-tersebut menggunakan aturan status anggota 5. Tidak perlu membuat handler duplikat
-untuk menu Pendaftar dan Data siswa.
-
-API daftar sebaiknya memiliki pagination dan respons yang disepakati. Bentuk
-database boleh berbeda dengan UI; mapper menerjemahkan tanggal, ID, dan enum.
-Gunakan tanggal lahir sebagai tanggal kalender, bukan waktu yang bergeser zona.
-
-## Urutan pengerjaan dan belajar
-
-### Tahap 1 — Setup dan pemahaman bersama
-
-Semua anggota belajar menjalankan frontend, mencari komponen menunya, serta memakai
-Git dasar. Anggota 10 menyiapkan database; anggota 9 memverifikasi login. Pemilik
-fitur menyepakati kontrak dan membaca tipe data yang akan digunakan.
-
-Untuk frontend dari root project:
+Untuk anggota yang belum memiliki clone:
 
 ```bash
-npm install
-npm run dev
+git clone https://github.com/alewirawan/PROJECT-PKM-SMP-NURUL-HUDA.git
+cd PROJECT-PKM-SMP-NURUL-HUDA
+npm ci
 ```
 
-Website: `http://localhost:3000`. Admin: `http://localhost:3000/admin`.
+Sebelum membuat branch, pastikan git status tidak berisi perubahan yang belum
+disimpan. Jangan menjalankan clone ulang di dalam project-k yang sudah terhubung.
 
-Langkah backend mengikuti panduan setup setelah koreksi koneksi lokal selesai dan
-teruji. Jangan menganggap perintah migration berhasil hanya karena file SQL ada.
-Jangan membagikan `.env` atau password lewat repository.
+Contoh tugas Blog:
 
-### Tahap 2 — Satu contoh lengkap bersama
+```bash
+git switch main
+git pull --ff-only origin main
+git switch -c feature/blog-public-list
+```
 
-Kerjakan contoh sederhana, misalnya satu guru: tabel → API → halaman Struktur.
-Tujuannya agar anggota memahami request, respons, validasi, dan penyimpanan.
-Anggota pemula kemudian mengerjakan fungsi kecil dengan pendampingan/review.
+Setelah implementasi, review git diff dan stage file yang tepat, bukan seluruh
+folder artifacts. Commit lalu push branch sendiri dan ajukan pull request.
+Jangan force-push main, menghapus migration yang sudah dipakai, atau menyelesaikan
+konflik dengan membuang pekerjaan anggota lain. Koordinator mereview merge;
+aturan proteksi branch GitHub perlu dikonfigurasi terpisah bila belum ada.
 
-### Tahap 3 — Fungsi pertama per anggota
+## Template issue dan kriteria selesai
 
-| Anggota | Hasil pertama |
-| --- | --- |
-| 1 | Konten profil rapi dan daftar informasi yang mengikuti Pengaturan |
-| 2 | Daftar agenda dari database |
-| 3 | Satu guru dari database tampil di website |
-| 4 | Daftar artikel terbit dari database |
-| 5 | Pendaftaran publik tersimpan dan mendapat nomor server |
-| 6 | Daftar/detail pendaftar dari API |
-| 7 | Satu dokumen fiktif tersimpan melalui request admin |
-| 8 | Pesan Kontak masuk ke admin |
-| 9 | Login/session/logout teruji dengan database |
-| 10 | Setup berhasil di komputer lain |
-
-### Tahap 4 — Lengkapi alur, integrasi, dan demonstrasi
-
-Lanjutkan edit, filter, status, upload/download, serta penanganan error setelah fungsi
-pertama berhasil. Lakukan demonstrasi singkat secara rutin. Newsletter dan upload
-foto publik tidak mendahului alur utama pendaftaran/admin yang belum selesai.
-
-Sebelum deploy ke VPS, lakukan tahap khusus pengujian container, HTTPS, session,
-izin, backup/restore, dan data yang akan ditampilkan. Selesainya satu menu tidak
-berarti seluruh aplikasi siap production.
-
-## Alur Git dan kriteria selesai
-
-### Alur kerja
-
-1. Gunakan satu repository untuk frontend/backend/kontrak.
-2. Buat satu tugas kecil, lalu branch per tugas; contoh `feature/blog-list-api`.
-3. Implementasikan, uji, dan catat perubahan kontrak bila ada.
-4. Ajukan pull request dengan tujuan, file penting, cara mencoba, dan batas validasi.
-5. Reviewer memeriksa; koordinator membantu penggabungan file bersama.
-6. Ambil perubahan terbaru sebelum memulai tugas berikutnya.
-
-Perubahan migration digabung berurutan dari schema terbaru. Jangan membuat banyak
-initial migration secara terpisah, menghapus riwayat migration yang telah dipakai,
-atau menyelesaikan konflik lockfile dengan membuang perubahan anggota lain.
-
-### Template tugas
+Gunakan [template tugas](../.github/ISSUE_TEMPLATE/tugas.md) dan
+[template PR](../.github/pull_request_template.md). Keduanya tersedia sebagai file
+lokal; pilihan template GitHub aktif setelah masuk ke branch default repository.
 
 ```text
-Judul: Menampilkan artikel terbit dari database
-Pemilik: Anggota 4
+Judul: A4 menampilkan artikel terbit dari API
+Pemilik: nama anggota 4
+Reviewer: nama anggota 3
 Menu: Blog
-File frontend: frontend/app/components/PublicBlog.tsx
-File backend: backend/src/modules/posts/
-Ketergantungan: koneksi database dan kontrak respons artikel
-Hasil: halaman Blog membaca artikel terbit dari API
-Pengujian: ada artikel, tidak ada artikel, API gagal, draft tidak terbuka
-Status: Belum mulai / Dikerjakan / Direview / Selesai
+File ADA: frontend/app/components/PublicBlog.tsx
+File BARU: frontend/app/lib/api/posts.ts; backend/src/modules/posts/
+Kontrak: GET /posts
+Ketergantungan: koneksi database dan schema artikel
+Hasil: artikel terbit terlihat; draft tidak bocor
+Test: data ada, kosong, API gagal, akses draft ditolak
+Bukti: langkah mencoba, hasil test, screenshot desktop/mobile tanpa data nyata
+Status: Backlog
 ```
 
-### Kriteria selesai setiap fitur
+Checklist berikut berlaku untuk fitur integrasi lengkap. Tugas latihan, tampilan,
+atau dokumentasi mengikuti kriteria kartu masing-masing dan tidak wajib membuat
+API/database. Selesainya satu kartu tampilan tidak berarti seluruh fitur selesai.
 
-- [ ] Data tersimpan di database dan tersedia setelah dibuka ulang dari browser lain.
-- [ ] Pesan sukses muncul setelah server benar-benar berhasil.
-- [ ] Loading, data kosong, input salah, dan request gagal ditangani.
-- [ ] Hak akses diperiksa backend; data pribadi tidak terbuka melalui endpoint publik.
-- [ ] UI diperiksa di mobile dan desktop, termasuk form/panel panjang.
-- [ ] Pengujian relevan dilakukan; tidak mengklaim alur lengkap hanya dari health endpoint.
-- [ ] Kontrak dan panduan penggunaan yang terpengaruh diperbarui.
-- [ ] Tidak ada data pribadi nyata, password, atau file rahasia pada commit/artifact.
-- [ ] Pemilik dapat mendemonstrasikan dan menjelaskan kode bagiannya.
+Setiap fitur integrasi baru selesai bila:
 
-Pemeriksaan workspace yang tersedia:
+- [ ] Data disimpan/dibaca server, bukan hanya state/browser mockup.
+- [ ] Loading, kosong, input salah, timeout, dan kegagalan ditangani.
+- [ ] Sukses ditampilkan setelah server berhasil; retry tidak menggandakan data.
+- [ ] Hak akses diuji di endpoint, bukan hanya lewat tampilan.
+- [ ] UI diperiksa pada mobile dan desktop, termasuk form serta panel panjang.
+- [ ] Kontrak dan mapping frontend konsisten, termasuk field wajib.
+- [ ] Pemilik dapat menjelaskan dan mendemonstrasikan kode bagiannya.
+- [ ] Reviewer menyetujui; tidak ada secret, dokumen nyata, ZIP, atau cache dalam commit.
+
+Pemeriksaan kode saat implementasi:
 
 ```bash
 npm run check
 npm run build --workspace=@nurul-huda/backend
 ```
 
-Saat panduan dibuat, `npm run check` menjalankan lint/typecheck/test kedua workspace;
-test frontend juga membangun frontend. Perintah build backend di atas memeriksa
-hasil kompilasi backend secara terpisah. Test baru per fitur harus benar-benar
-menguji perilaku penting, bukan hanya keberadaan file.
+Jika mengubah kontrak, jalankan juga pemeriksaan OpenAPI dan kasus schema
+sesuai [panduan kontrak](../contracts/README.md). Test tersebut belum dimasukkan
+ke npm run check; koordinator menjalankannya secara terpisah saat review kontrak.
 
-### Referensi project
+Tes otomatis tidak menggantikan uji database nyata, file privat, dan interaksi
+browser. Jangan klaim siap production hanya karena halaman terbuka atau health
+merespons.
 
-- [README utama](../README.md)
-- [Panduan instalasi](../PANDUAN-INSTALASI.md)
-- [Struktur frontend saat ini](FRONTEND_STRUCTURE.md)
-- [Panduan backend](../backend/README.md)
-- [Kontrak integrasi](../contracts/README.md)
-- [OpenAPI](../contracts/openapi.yaml)
+## Keputusan kebutuhan yang sudah ditetapkan
 
-Panduan struktur frontend lama masih berfokus pada mockup `lib/cms/`. Saat integrasi
-diterapkan, perbarui panduan tersebut agar membedakan mockup dan pemanggilan API.
-Status checklist dalam dokumen ini dimulai belum selesai; isi berdasarkan bukti
-pekerjaan tim, bukan berdasarkan folder yang sudah dibuat saja.
+Berkas wajib dapat diatur admin. PIP/KIP hanya jika punya. Jadwal diatur manual,
+tidak ada syarat usia/kelayakan tambahan, dan ekstrakurikuler boleh beberapa serta
+opsional. Admin mengambil keputusan penerimaan. Pendaftar memperbaiki berkas lalu
+admin memverifikasi. Masa simpan tanpa penghapusan otomatis. Keputusan ini menjadi
+target implementasi; frontend dan backend sekarang belum menerapkannya seluruhnya.
+
+## Hal yang harus diputuskan saat rapat pertama
+
+- Nama, kemampuan, waktu tersedia, reviewer, serta tanggal sprint tiap anggota.
+- Isi awal daftar berkas wajib dan tanggal jadwal; sistemnya dapat diatur admin.
+- Pilihan mekanisme akses pribadi serta pemulihan akses pendaftar (9 bersama 5 dan 10).
+- Akun admin yang bertanggung jawab; keputusan penerimaan/verifikasi tetap oleh admin.
+- Apakah prioritas pertama tetap PPDB sebelum newsletter dan foto publik.
+
+Panduan ini tidak membuat issue/branch protection secara otomatis, menjalankan
+migration, mengubah backend, atau melakukan deployment. PDF panduan tim bertanggal
+25 September 2026 dan ZIP lama adalah arsip, bukan acuan tugas versi terbaru.
+
+## Referensi
+
+- [Instalasi lokal](../PANDUAN-INSTALASI.md)
+- [Struktur frontend](FRONTEND_STRUCTURE.md)
+- [Kontrak API](../contracts/README.md)
+- [OpenAPI target](../contracts/openapi.yaml)
+- [Fondasi backend](../backend/README.md)
