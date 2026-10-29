@@ -7,6 +7,11 @@ resource lain masih berstatus planned. Kontrak tidak
 menjalankan database, migration, atau upload.
 
 Pembagian path dan pemilik ada di [panduan tim](../docs/README-TIM-PKM.md).
+Schema PostgreSQL seluruh modul sudah tersedia di backend/src/db/schema/;
+lihat [tabel, mapping dan langkah migration](../backend/README.md#schema-seluruh-project).
+Status planned pada operasi tetap berlaku sampai handler dan integrasinya dibuat.
+Nama field API tidak diubah mengikuti nama kolom database; gunakan mapper,
+khususnya status PPDB, nomor pendaftaran, snapshot kegiatan dan metadata dokumen.
 Jika belum terbiasa dengan API, baca [Panduan Anggota](../docs/PANDUAN-ANGGOTA.md)
 terlebih dahulu, lalu pelajari hanya operasi yang berkaitan dengan tugasmu.
 Setiap operasi memiliki x-owner. x-implementation-status membedakan foundation

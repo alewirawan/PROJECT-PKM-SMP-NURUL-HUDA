@@ -44,6 +44,14 @@ Gunakan instalasi dari root workspace agar dependency tidak terduplikasi di
 
 ## Status backend
 
+Schema database seluruh scope project sudah tersedia: 23 tabel PostgreSQL,
+relasi, constraint, arsip berkas, akun pendaftar, dan migration yang menjaga data
+lama. Setelah pull, jalankan `npm run db:migrate --workspace=@nurul-huda/backend`
+dan `npm run db:verify --workspace=@nurul-huda/backend` pada database lokal yang
+sudah dikonfigurasi. Lihat [diagram database](backend/database.dbml) dan
+[panduan schema serta alur data](backend/README.md#schema-seluruh-project).
+Tabel siap digunakan tidak berarti seluruh endpoint menu sudah selesai.
+
 Backend foundation sudah tersedia menggunakan Fastify, TypeScript, PostgreSQL,
 dan Drizzle ORM. Fondasi ini mencakup schema awal, migration, autentikasi admin,
 health check, security middleware, test, serta Docker setup. Panduan detail ada di

@@ -1,11 +1,37 @@
 # Panduan Kerja Tim PKM SMP Nurul Huda
 
-Diperbarui: 15 Oktober 2026. Tim: 10 anggota. Repository:
+Diperbarui: 29 Oktober 2026. Tim: 10 anggota. Repository:
 https://github.com/alewirawan/PROJECT-PKM-SMP-NURUL-HUDA
 
 Panduan ini membagi pekerjaan berdasarkan menu dan hasil yang harus dapat
-didemonstrasikan. Frontend sudah berupa simulasi; backend baru fondasi. Anggota
+didemonstrasikan. Frontend tersedia; auth, klub dan agenda sudah terintegrasi.
+Schema database seluruh modul tersedia, sedangkan handler lainnya dilanjutkan anggota.
+Anggota
 melanjutkan source yang tersedia, bukan membuat ulang website.
+
+## Schema bersama yang sudah tersedia
+
+Seluruh file di bawah sudah ADA. Jika path schema yang sama masih tercantum
+dalam daftar BARU pada rencana modul di bawah, lanjutkan file ini; jangan membuat
+tabel kedua. Bagian route/service/repository yang belum ada tetap tugas pemilik.
+Jalankan migration setelah pull, bukan db:generate untuk sekadar menyamakan database.
+
+| Anggota | File di backend/src/db/schema/ | Fokus integrasi berikutnya |
+| --- | --- | --- |
+| 1 dan 9 | settings.ts | Tampilan Pengaturan dan service yang membaca/menyimpan satu konfigurasi sekolah |
+| 2 | clubs.ts, agenda.ts | Pertahankan client/API yang sudah terintegrasi |
+| 3 | directory.ts | Simpan dua daftar dalam transaksi, map urutan array ke sortOrder |
+| 4 | posts.ts | Artikel draft/terbit, slug unik, content berupa array paragraf |
+| 5 dan 6 | applications.ts | Biodata, pilihan kegiatan historis, snapshot kebijakan, history dan idempotency |
+| 7 | documents.ts | Slot kosong/fisik, metadata tiap versi, review dan storage privat |
+| 8 | messages.ts, achievements.ts | Pesan, prestasi dan newsletter tahap lanjutan |
+| 9 | auth.ts, applicant-auth.ts | Session admin dan pendaftar terpisah; aktivasi/pemulihan belum diaktifkan |
+| 9 dan 10 | audit.ts, relations.ts, index.ts | Audit tindakan, relasi query, export bersama dan review migration |
+
+`admissions.ts` hanya export kompatibilitas menuju applications.ts/documents.ts.
+Panduan 23 tabel, kolom/relasi, status database/API, alur transaksi, migration data
+lama dan cara pengujian ada di [panduan backend](../backend/README.md#schema-seluruh-project).
+Diagram yang dapat dibaca/import tersedia di [database.dbml](../backend/database.dbml).
 
 Nama anggota, kemampuan, dan jadwal diisi saat rapat awal. Nomor di bawah adalah
 peran kerja, bukan nama orang atau penilaian kemampuan. Penugasan teknis ini masih

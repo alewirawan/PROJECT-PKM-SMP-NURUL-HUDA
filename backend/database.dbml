@@ -1,0 +1,476 @@
+Project smp_nurul_huda {
+  database_type: 'PostgreSQL'
+}
+
+Enum achievement_category {
+  "Akademik"
+  "Olahraga"
+  "Seni"
+  "Literasi"
+  "Keagamaan"
+}
+
+Enum achievement_level {
+  "Sekolah"
+  "Kecamatan"
+  "Kabupaten"
+  "Kota"
+  "Provinsi"
+  "Nasional"
+}
+
+Enum admin_role {
+  "super_admin"
+  "admin_ppdb"
+  "editor"
+}
+
+Enum agenda_type {
+  "Akademik"
+  "PPDB"
+  "Kegiatan"
+  "Rapat"
+}
+
+Enum agenda_visibility {
+  "Publik"
+  "Internal"
+}
+
+Enum applicant_token_purpose {
+  "activation"
+  "recovery"
+}
+
+Enum application_status {
+  "verification"
+  "verified"
+  "interview"
+  "accepted"
+  "rejected"
+}
+
+Enum document_kind {
+  "skl"
+  "ijazah"
+  "kk"
+  "ktp"
+  "kip"
+  "akta"
+  "photo"
+}
+
+Enum document_review_status {
+  "missing"
+  "pending"
+  "verified"
+  "needs_correction"
+}
+
+Enum document_status {
+  "uploaded"
+  "verified"
+  "rejected"
+}
+
+Enum leader_level {
+  "principal"
+  "leadership"
+  "support"
+}
+
+Enum message_status {
+  "Baru"
+  "Dibaca"
+  "Selesai"
+}
+
+Enum post_status {
+  "Terbit"
+  "Draft"
+}
+
+Enum registration_source {
+  "website"
+  "offline"
+}
+
+Enum teacher_cluster {
+  "Sains"
+  "Bahasa"
+  "Sosial"
+  "Kreatif & Karakter"
+}
+
+Table achievements {
+  id "uuid" [pk, not null]
+  title "varchar(120)" [not null]
+  award "varchar(120)" [not null]
+  level "achievement_level" [not null]
+  year "varchar(4)" [not null]
+  category "achievement_category" [not null]
+  description "varchar(600)" [not null]
+  image "varchar(500)" [not null]
+  published "boolean" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (published, year, category)
+  }
+}
+
+Table admin_sessions {
+  token_hash "varchar(64)" [pk, not null]
+  admin_id "uuid" [not null]
+  expires_at "timestamp with time zone" [not null]
+  created_at "timestamp with time zone" [not null]
+  last_seen_at "timestamp with time zone" [not null]
+  ip_address "varchar(64)"
+  user_agent "varchar(500)"
+  indexes {
+    (admin_id)
+    (expires_at)
+  }
+}
+
+Table admins {
+  id "uuid" [pk, not null]
+  email "varchar(254)" [not null, unique]
+  password_hash "varchar(255)" [not null]
+  display_name "varchar(120)" [not null]
+  role "admin_role" [not null]
+  active "boolean" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (email)
+  }
+}
+
+Table admission_periods {
+  academic_year "varchar(9)" [pk, not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table agenda {
+  id "varchar(120)" [pk, not null]
+  title "varchar(160)" [not null]
+  date "date" [not null]
+  time "varchar(5)" [not null]
+  location "varchar(160)" [not null]
+  type "agenda_type" [not null]
+  completed "boolean" [not null]
+  visibility "agenda_visibility" [not null]
+  indexes {
+    (visibility, date)
+  }
+}
+
+Table applicant_access_tokens {
+  token_hash "varchar(64)" [pk, not null]
+  account_id "uuid" [not null]
+  purpose "applicant_token_purpose" [not null]
+  issued_by "uuid"
+  created_at "timestamp with time zone" [not null]
+  expires_at "timestamp with time zone" [not null]
+  consumed_at "timestamp with time zone"
+  indexes {
+    (account_id, purpose)
+    (expires_at)
+  }
+}
+
+Table applicant_accounts {
+  id "uuid" [pk, not null]
+  application_id "uuid" [not null, unique]
+  password_hash "varchar(255)"
+  activated_at "timestamp with time zone"
+  disabled_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table applicant_sessions {
+  token_hash "varchar(64)" [pk, not null]
+  account_id "uuid" [not null]
+  created_at "timestamp with time zone" [not null]
+  expires_at "timestamp with time zone" [not null]
+  indexes {
+    (account_id)
+    (expires_at)
+  }
+}
+
+Table application_choices {
+  id "uuid" [pk, not null]
+  application_id "uuid" [not null]
+  club_id "varchar(120)"
+  name_snapshot "varchar(80)" [not null]
+  sort_order "integer" [not null]
+  selected_at "timestamp with time zone" [not null]
+  indexes {
+    (club_id)
+  }
+}
+
+Table application_document_slots {
+  id "uuid" [pk, not null]
+  application_id "uuid" [not null]
+  kind "document_kind" [not null]
+  current_version_id "uuid"
+  status "document_review_status" [not null]
+  received_physically "boolean" [not null]
+  review_note "varchar(400)"
+  reviewed_at "timestamp with time zone"
+  reviewed_by "uuid"
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (application_id, kind) [unique]
+    (id, application_id) [unique]
+    (status, application_id)
+  }
+}
+
+Table application_documents {
+  id "uuid" [pk, not null]
+  application_id "uuid" [not null]
+  slot_id "uuid" [not null]
+  document_type "varchar(40)" [not null]
+  original_name "varchar(255)" [not null]
+  storage_key "varchar(500)" [not null]
+  mime_type "varchar(120)" [not null]
+  file_size "integer" [not null]
+  schema_version "integer" [not null]
+  status "document_status" [not null]
+  uploaded_at "timestamp with time zone" [not null]
+  verified_at "timestamp with time zone"
+  verified_by "uuid"
+  indexes {
+    (id, slot_id) [unique]
+    (storage_key) [unique]
+    (application_id)
+    (slot_id, uploaded_at)
+  }
+}
+
+Table application_status_history {
+  id "uuid" [pk, not null]
+  application_id "uuid" [not null]
+  from_status "application_status"
+  to_status "application_status" [not null]
+  changed_by "uuid"
+  reason "varchar(1000)"
+  changed_at "timestamp with time zone" [not null]
+  indexes {
+    (application_id, changed_at)
+  }
+}
+
+Table applications {
+  id "uuid" [pk, not null]
+  registration_number "varchar(64)" [not null]
+  student_name "varchar(160)" [not null]
+  nisn "varchar(10)"
+  origin_school "varchar(180)" [not null]
+  birth_place "varchar(100)"
+  birth_date "date"
+  gender "varchar(20)"
+  address "text"
+  parent_name "varchar(160)"
+  parent_occupation "varchar(120)"
+  phone "varchar(30)"
+  email "varchar(254)"
+  program "varchar(120)"
+  academic_year "varchar(9)"
+  document_requirements "jsonb"
+  schema_version "integer" [not null]
+  status "application_status" [not null]
+  source "registration_source" [not null]
+  notes "text"
+  submitted_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (registration_number) [unique]
+    (student_name)
+    (nisn)
+    (status)
+    (submitted_at)
+    (academic_year, status, submitted_at, id)
+    (source, submitted_at, id)
+  }
+}
+
+Table audit_events {
+  id "uuid" [pk, not null]
+  admin_id "uuid"
+  applicant_account_id "uuid"
+  action "varchar(80)" [not null]
+  resource_type "varchar(80)" [not null]
+  resource_id "varchar(120)"
+  request_id "varchar(120)"
+  created_at "timestamp with time zone" [not null]
+  indexes {
+    (resource_type, resource_id, created_at)
+    (admin_id, created_at)
+    (applicant_account_id, created_at)
+  }
+}
+
+Table clubs {
+  id "varchar(120)" [pk, not null]
+  name "varchar(80)" [not null]
+  description "varchar(300)" [not null]
+  active "boolean" [not null]
+}
+
+Table contact_messages {
+  id "uuid" [pk, not null]
+  name "varchar(120)" [not null]
+  email "varchar(254)" [not null]
+  topic "varchar(120)" [not null]
+  message "varchar(3000)" [not null]
+  status "message_status" [not null]
+  submitted_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (status, submitted_at)
+  }
+}
+
+Table document_reviews {
+  id "uuid" [pk, not null]
+  slot_id "uuid" [not null]
+  version_id "uuid"
+  status "document_review_status" [not null]
+  received_physically "boolean" [not null]
+  note "varchar(400)" [not null]
+  reviewed_by "uuid"
+  reviewed_at "timestamp with time zone" [not null]
+  indexes {
+    (slot_id, reviewed_at)
+  }
+}
+
+Table newsletter_subscriptions {
+  id "uuid" [pk, not null]
+  email "varchar(254)" [not null]
+  consent_at "timestamp with time zone" [not null]
+  unsubscribed_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table posts {
+  id "uuid" [pk, not null]
+  title "varchar(180)" [not null]
+  slug "text" [not null, unique]
+  category "varchar(60)" [not null]
+  image "varchar(500)" [not null]
+  excerpt "varchar(220)" [not null]
+  content "jsonb" [not null]
+  author "varchar(120)" [not null]
+  created_by "uuid"
+  status "post_status" [not null]
+  published_at "timestamp with time zone"
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (status, updated_at, id)
+  }
+}
+
+Table school_leaders {
+  id "varchar(120)" [pk, not null]
+  teacher_id "varchar(120)"
+  name "varchar(120)" [not null]
+  role "varchar(120)" [not null]
+  initials "varchar(3)" [not null]
+  focus "varchar(240)" [not null]
+  tone "varchar(30)" [not null]
+  level "leader_level" [not null]
+  portrait_index "integer" [not null]
+  sort_order "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (level, sort_order, id)
+  }
+}
+
+Table school_settings {
+  id "integer" [pk, not null]
+  school_name "varchar(120)" [not null]
+  tagline "varchar(160)" [not null]
+  email "varchar(254)" [not null]
+  ppdb_email "varchar(254)" [not null]
+  phone "varchar(30)" [not null]
+  whatsapp "varchar(30)" [not null]
+  address "varchar(500)" [not null]
+  academic_year "varchar(9)" [not null]
+  registration_open "boolean" [not null]
+  registration_opens_at "timestamp with time zone"
+  registration_closes_at "timestamp with time zone"
+  document_requirements "jsonb" [not null]
+  data_retention "varchar(16)" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+}
+
+Table submission_requests {
+  key "uuid" [pk, not null]
+  payload_hash "varchar(64)" [not null]
+  application_id "uuid"
+  state "varchar(16)" [not null]
+  receipt "jsonb"
+  created_at "timestamp with time zone" [not null]
+  expires_at "timestamp with time zone" [not null]
+  indexes {
+    (expires_at)
+  }
+}
+
+Table teachers {
+  id "varchar(120)" [pk, not null]
+  name "varchar(120)" [not null]
+  initials "varchar(3)" [not null]
+  subject "varchar(120)" [not null]
+  cluster "teacher_cluster" [not null]
+  years "integer" [not null]
+  note "varchar(300)" [not null]
+  tone "varchar(30)" [not null]
+  portrait_index "integer" [not null]
+  sort_order "integer" [not null]
+  created_at "timestamp with time zone" [not null]
+  updated_at "timestamp with time zone" [not null]
+  indexes {
+    (sort_order, id)
+  }
+}
+
+Ref: admin_sessions.admin_id > admins.id [delete: cascade]
+Ref: applicant_access_tokens.account_id > applicant_accounts.id [delete: cascade]
+Ref: applicant_access_tokens.issued_by > admins.id [delete: set null]
+Ref: applicant_accounts.application_id > applications.id [delete: restrict]
+Ref: applicant_sessions.account_id > applicant_accounts.id [delete: cascade]
+Ref: application_choices.application_id > applications.id [delete: restrict]
+Ref: application_choices.club_id > clubs.id [delete: set null]
+Ref: application_document_slots.application_id > applications.id [delete: restrict]
+Ref: application_document_slots.reviewed_by > admins.id [delete: set null]
+Ref: application_document_slots.(current_version_id, id) > application_documents.(id, slot_id) [delete: restrict]
+Ref: application_documents.application_id > applications.id [delete: restrict]
+Ref: application_documents.verified_by > admins.id [delete: set null]
+Ref: application_documents.(slot_id, application_id) > application_document_slots.(id, application_id) [delete: restrict]
+Ref: application_status_history.application_id > applications.id [delete: restrict]
+Ref: application_status_history.changed_by > admins.id [delete: set null]
+Ref: applications.academic_year > admission_periods.academic_year [delete: restrict]
+Ref: audit_events.admin_id > admins.id [delete: restrict]
+Ref: audit_events.applicant_account_id > applicant_accounts.id [delete: restrict]
+Ref: document_reviews.slot_id > application_document_slots.id [delete: restrict]
+Ref: document_reviews.reviewed_by > admins.id [delete: set null]
+Ref: document_reviews.(version_id, slot_id) > application_documents.(id, slot_id) [delete: restrict]
+Ref: posts.created_by > admins.id [delete: set null]
+Ref: school_leaders.teacher_id > teachers.id [delete: set null]
+Ref: school_settings.academic_year > admission_periods.academic_year [delete: restrict]
+Ref: submission_requests.application_id > applications.id [delete: restrict]
