@@ -82,7 +82,11 @@ for (const [route, item] of Object.entries(document.paths)) {
     );
     assert.equal(
       operation["x-implementation-status"],
-      route.startsWith("/auth/") ? "foundation" : "planned",
+      route.startsWith("/auth/")
+        ? "foundation"
+        : operation["x-owner"] === 2
+          ? "implemented"
+          : "planned",
     );
     if (operation.security) assert.ok(operation["x-roles"].length);
   }

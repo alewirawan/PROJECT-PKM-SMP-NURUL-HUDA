@@ -16,9 +16,54 @@ deployment adalah satu VPS untuk satu sekolah.
 - endpoint health dan readiness;
 - test untuk health, 404, dan validasi login;
 - Dockerfile dan Compose PostgreSQL.
+- modul ekstrakurikuler (tambah, edit, nonaktif) dan agenda (tambah, edit, hapus);
+- daftar publik terfilter, izin super_admin/editor, serta pemeriksaan Origin untuk mutasi konten;
+- migration `0001_many_colossus.sql` untuk tabel klub dan agenda.
 
-CRUD pendaftar, dokumen, direktori, artikel, agenda, pesan, dan settings berikutnya
+CRUD pendaftar, dokumen, direktori, artikel, pesan, dan settings berikutnya
 dibuat per modul dengan mengikuti `../contracts/openapi.yaml`.
+
+## Ekstrakurikuler dan agenda
+
+Jalankan migration yang sudah tersedia sebelum memakai modul ini. Tabel baru
+awalnya kosong; tambahkan konten lewat admin, bukan mengimpor data demo otomatis.
+
+| Endpoint (prefix /api/v1) | Akses |
+| --- | --- |
+| GET /clubs | Publik; hanya kegiatan aktif |
+| GET /admin/clubs | super_admin/editor; termasuk nonaktif |
+| POST /clubs, PATCH /clubs/:clubId | super_admin/editor |
+| GET /agenda | Publik; hanya visibility=Publik |
+| GET /admin/agenda | super_admin/editor; termasuk internal |
+| POST /agenda, PATCH /agenda/:agendaId, DELETE /agenda/:agendaId | super_admin/editor |
+
+PATCH klub menerima sebagian field. PATCH agenda mengirim seluruh AgendaInput.
+Mutasi harus membawa cookie session dan header Origin yang cocok dengan
+FRONTEND_ORIGINS. Browser mengirim Origin otomatis. Klien CLI harus mengirimkannya
+secara eksplisit. Role admin_ppdb tidak boleh mengelola konten ini.
+
+Di frontend, atur NEXT_PUBLIC_API_BASE_URL ke alamat API dengan prefix /api/v1,
+lalu restart dev server. Gunakan hostname konsisten untuk frontend/backend
+(misalnya localhost untuk keduanya) agar cookie same-site bekerja. Tanpa URL API,
+kedua modul berjalan sebagai demo browser. Dalam mode API, kegagalan tidak diganti
+dengan data demo. Modul lain masih mengikuti status implementasi masing-masing.
+
+Konfigurasi CSP frontend saat ini mengizinkan API HTTP lokal hanya melalui
+http://localhost:4000. Gunakan alamat ini untuk pengujian browser; port HTTP
+lain memerlukan penyesuaian CSP yang direview bersama anggota 10. Daftarkan
+origin frontend yang persis sama pada FRONTEND_ORIGINS backend.
+Setelah menambahkan metode HTTP baru, uji OPTIONS/preflight dan aksi browser,
+bukan hanya app.inject; CORS harus mengizinkan PATCH/DELETE untuk edit/hapus.
+
+Tes PostgreSQL opsional hanya boleh memakai database lokal terpisah bernama
+team2_test (atau team2_test_suffix). Jangan arahkan ke database kerja/produksi.
+Tes menjalankan migration dan menambahkan data fiktif:
+
+```bash
+TEST_DATABASE_URL=postgres://USER@127.0.0.1:PORT/team2_test npm run test --workspace=@nurul-huda/backend
+```
+
+Tanpa TEST_DATABASE_URL, unit/API tests tetap berjalan dan tes database dilewati.
 
 ## Struktur
 

@@ -8,6 +8,13 @@
       "when": 1790289548598,
       "tag": "0000_good_otto_octavius",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793285658378,
+      "tag": "0001_many_colossus",
+      "breakpoints": true
     }
   ]
 }

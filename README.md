@@ -49,6 +49,11 @@ dan Drizzle ORM. Fondasi ini mencakup schema awal, migration, autentikasi admin,
 health check, security middleware, test, serta Docker setup. Panduan detail ada di
 [`backend/README.md`](backend/README.md).
 
+Bagian anggota 2 sudah terintegrasi: pengelolaan ekstrakurikuler dan agenda,
+daftar publik terfilter, serta penyimpanan PostgreSQL. Jalankan migration
+yang tersedia dan konfigurasi URL API untuk memakai penyimpanan server.
+Tanpa URL API, mode demo browser tetap tersedia.
+
 Selama endpoint resource belum diintegrasikan, konten publik masih disimpan melalui
 `localStorage`, sedangkan data pribadi pendaftar, pesan, dan newsletter hanya
 disimpan di `sessionStorage` hingga tab ditutup. Ini adapter mockup, bukan database

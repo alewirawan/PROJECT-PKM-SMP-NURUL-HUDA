@@ -194,12 +194,32 @@ backend/tests/clubs.test.ts
 backend/tests/agenda.test.ts
 ```
 
-- [ ] Kerjakan klub dahulu: daftar aktif, daftar admin, tambah/edit/nonaktif.
-- [ ] Nama kegiatan unik; pilihan Belum menentukan bukan record kegiatan.
-- [ ] Sediakan client multiselect opsional untuk 5 dan 6; daftar pilihan historis tidak ikut berubah saat rename.
-- [ ] Setelah klub selesai, kerjakan Agenda dan kontrol Publik/Internal di UI admin.
-- [ ] Rapat/internal tidak boleh bocor dari endpoint publik.
-- [ ] Gunakan API dan izin role; narasi Program boleh tetap statis.
+- [x] Klub: daftar aktif, daftar admin, tambah/edit/nonaktif.
+- [x] Nama kegiatan unik; pilihan Belum menentukan bukan record kegiatan.
+- [x] Client dan komponen multiselect opsional tersedia untuk 5 dan 6; daftar pilihan historis tidak ikut berubah saat rename.
+- [x] Agenda dan kontrol Publik/Internal di UI admin.
+- [x] Rapat/internal disaring dari endpoint publik.
+- [x] API dan izin role; narasi Program tetap statis.
+
+Implementasi anggota 2 tersedia sejak 29 Oktober 2026. Daftar BARU di atas
+sekarang sudah dibuat. Tambahan file: `components/PublicAgenda.tsx`,
+`components/ExtracurricularPicker.tsx`, `lib/use-clubs.ts`, `lib/use-agenda.ts`,
+dan `lib/use-content-list.ts` di dalam `frontend/app/`. Registrasi route ada di
+`backend/src/app.ts`, ekspor tabel di `backend/src/db/schema/index.ts`, dan
+migration tabel ada di `backend/drizzle/0001_many_colossus.sql`.
+
+Serah-terima ke 5/6: gunakan `ExtracurricularPicker` dengan `value: string[]`
+dan `onChange(names: string[])`. Nilai kosong adalah `[]`; pilihan boleh beberapa.
+Komponen menampilkan pilihan historis tanpa mengubah nama tersimpan.
+Form online/offline lama masih memakai satu pilihan; pemasangan komponen dan
+perubahan field pendaftaran menjadi `extracurriculars` tetap dikerjakan 5/6.
+`useCatalog()` sekarang membaca daftar klub aktif dari API bila dikonfigurasi,
+serta menyediakan `clubsLoading`/`clubsError`. Jalur prestasi anggota 8 tidak diubah.
+
+Integrasi bersama: `auth/auth.guard.ts` menyediakan pemeriksaan session,
+super_admin/editor dan Origin untuk modul konten. Anggota 9 dapat memakai atau
+menyatukannya dengan guard umum; anggota 10 mereview registrasi route dan
+migration. Petunjuk aktivasi API dan tes database ada di `backend/README.md`.
 
 **Batas:** jangan edit field PPDB milik 5/6 tanpa koordinasi. catalog.ts dan
 use-catalog.ts dipakai juga oleh 8; perubahan bersama direview 10.

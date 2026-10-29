@@ -527,7 +527,7 @@ paths:
       description: >-
         Hanya visibility=Publik. Rapat/internal tidak otomatis terbuka. UI lama perlu kontrol
         visibilitas saat integrasi.
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
     post:
       tags:
@@ -555,7 +555,7 @@ paths:
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin
@@ -592,7 +592,7 @@ paths:
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin
@@ -608,7 +608,7 @@ paths:
         "204": { description: Agenda dihapus }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin
@@ -1087,7 +1087,7 @@ paths:
           }
         "429": { $ref: "#/components/responses/RateLimited" }
       description: Hanya active=true. Nama merupakan nilai pilihan frontend tahap pertama.
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
     post:
       tags:
@@ -1117,7 +1117,7 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationError" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin
@@ -1142,7 +1142,7 @@ paths:
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin
@@ -1185,7 +1185,7 @@ paths:
       description: >-
         Gunakan active=false, bukan hard delete. Nama pada daftar pilihan historis pendaftar tidak
         ditimpa saat rename/nonaktif.
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin
@@ -1261,7 +1261,7 @@ paths:
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 2
       x-roles:
         - super_admin

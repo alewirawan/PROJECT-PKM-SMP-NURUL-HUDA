@@ -60,6 +60,7 @@ export type Agenda = {
   location: string;
   type: "Akademik" | "PPDB" | "Kegiatan" | "Rapat";
   completed: boolean;
+  visibility: "Publik" | "Internal";
 };
 
 export type ContactMessage = {

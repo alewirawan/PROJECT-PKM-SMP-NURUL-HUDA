@@ -27,4 +27,14 @@ Tanpa backend, tombol admin masuk ke mode demo lokal tanpa password hardcoded.
 Saat `NEXT_PUBLIC_API_BASE_URL` tersedia, login memakai `/auth/login` dan session
 cookie HttpOnly sesuai kontrak OpenAPI.
 
+Ekstrakurikuler dan Agenda sudah memakai API ketika URL backend dikonfigurasi.
+Agenda publik tampil di halaman Program; agenda Internal hanya tersedia di admin.
+Kegagalan API ditampilkan, bukan diganti dengan data contoh. Modul lain masih
+mengikuti status integrasinya masing-masing.
+
+Komponen `app/components/ExtracurricularPicker.tsx` menerima `value: string[]`
+dan `onChange(names: string[])` untuk integrasi form anggota 5/6. Komponen ini
+opsional, mendukung beberapa pilihan, dan mempertahankan nama pilihan historis.
+Form PPDB lama belum diubah ke multiselect dalam pekerjaan anggota 2.
+
 Salin `.env.example` menjadi `.env.local`, lalu isi `NEXT_PUBLIC_API_BASE_URL` ketika backend sudah tersedia. Jangan simpan token atau credential di repository.
