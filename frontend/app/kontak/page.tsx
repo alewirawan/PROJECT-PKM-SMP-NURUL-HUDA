@@ -17,28 +17,28 @@ export default function ContactPage() {
         <PageHero
           eyebrow="Hubungi kami"
           title="Kami senang mendengar dari Anda."
-          description="Tanyakan program belajar, proses pendaftaran, atau jadwalkan kunjungan untuk merasakan langsung suasana Nurul Huda."
+          description="Tanyakan program belajar, proses pendaftaran, atau jadwalkan kunjungan untuk melihat langsung suasana belajar di Nurul Huda."
         />
         <section className="contact-layout">
           <div className="contact-map">
-            <div className="map-grid" />
-            <span className="map-road one" />
-            <span className="map-road two" />
-            <div className="map-pin">
-              <b>N</b>
-              <span>SMP Nurul Huda</span>
-            </div>
-          </div>
+  <iframe
+    src="https://maps.google.com/maps?q=SMP+Nurul+Huda+Cisoka&z=16&output=embed"
+    loading="lazy"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+    style={{ border: 0, width: "100%", height: "100%", minHeight: 320 }}
+  />
+</div>
           <div className="contact-details">
-            <p className="section-kicker">Kunjungi kampus</p>
+            <p className="section-kicker">Kunjungi sekolah</p>
             <h2>Rumah belajar kami terbuka untuk Anda.</h2>
             <div className="contact-list">
               <article>
                 <span>Alamat</span>
                 <p>
-                  Jl. Cakrawala Pendidikan No. 17
+                 Jl. Megu – Cisoka No. 8 ,Jl. Cisoka-Megu Kp. Secang RT 05/04, Desa Cempaka, Kecamatan Cisoka
                   <br />
-                  Bandung, Jawa Barat 40123
+                  Kabupaten Tangerang, Banten 15730.
                 </p>
               </article>
               <article>
@@ -52,17 +52,17 @@ export default function ContactPage() {
               <article>
                 <span>Email</span>
                 <p>
-                  halo@nurulhuda.sch.id
+                  nurulhudacisoka.smp@gmail.com
                   <br />
-                  ppdb@nurulhuda.sch.id
+                  
                 </p>
               </article>
               <article>
                 <span>Jam layanan</span>
                 <p>
-                  Senin–Jumat, 07.00–16.00
+                  Senin–Jumat, 07.00–12.00
                   <br />
-                  Sabtu, 08.00–12.00
+                 
                 </p>
               </article>
             </div>
@@ -73,8 +73,7 @@ export default function ContactPage() {
             <p className="section-kicker">Kirim pesan</p>
             <h2>Ada yang ingin ditanyakan?</h2>
             <p>
-              Isi formulir berikut. Pesan demo akan langsung tersedia di
-              dashboard admin untuk ditindaklanjuti.
+              Isi formulir berikut.
             </p>
           </div>
           <ContactForm />
@@ -86,26 +85,23 @@ export default function ContactPage() {
           </div>
           <div className="faq-list">
             <details open>
-              <summary>Apakah tersedia program beasiswa?</summary>
+              <summary>Kapan pendaftaran PPDB dibuka?</summary>
               <p>
-                Ya. Nurul Huda menyediakan beasiswa prestasi akademik,
-                nonakademik, dan dukungan finansial berdasarkan proses seleksi.
+                Pendaftaran Peserta Didik Baru (PPDB) dibuka setiap tahun menjelang tahun ajaran baru setiap tanggal 1 mei. Informasi mengenai jadwal pendaftaran, persyaratan, dan tahapan seleksi dapat diperoleh melalui panitia penerimaan siswa baru SMP Nurul Huda
               </p>
             </details>
             <details>
-              <summary>Apakah calon siswa dapat melakukan school tour?</summary>
+              <summary>Bagaimana cara mendaftar sebagai calon siswa baru?</summary>
               <p>
-                Bisa. Kunjungan tersedia setiap Selasa dan Kamis dengan
-                perjanjian melalui tim penerimaan siswa.
+                Calon siswa dapat melakukan pendaftaran dengan menghubungi panitia PPDB atau datang langsung ke SMP Nurul Huda untuk mendapatkan informasi mengenai prosedur pendaftaran dan persyaratan yang harus dipenuhi.
               </p>
             </details>
             <details>
               <summary>
-                Apakah sekolah menyediakan layanan antar-jemput?
+                Apa saja ekstrakurikuler yang tersedia?
               </summary>
               <p>
-                Tersedia rute terbatas untuk wilayah Bandung Utara, Tengah, dan
-                Timur. Rute final menyesuaikan jumlah peminat.
+                Smp Nurul Huda menyediakan berbagai ekstrakurikuler, yaitu PMR,Pramuka,Rohis,Seni Tari,Futsal dan Badminton
               </p>
             </details>
           </div>
