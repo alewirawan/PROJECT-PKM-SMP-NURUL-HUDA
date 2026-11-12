@@ -34,7 +34,7 @@ export function FilePreview({
     >
       <header>
         <div>
-          <small>Pratinjau lokal - tidak dikirim ke server</small>
+          <small>Pratinjau lokal</small>
           <h2 id="file-preview-title">{file.name}</h2>
         </div>
         <button

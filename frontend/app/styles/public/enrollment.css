@@ -370,3 +370,88 @@
     font-size: 16px;
   }
 }
+
+.extracurricular-picker > span {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.extracurricular-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.extracurricular-options label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #d9e0d9;
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 0;
+}
+.extracurricular-options input { width: auto; }
+.document-required-label {
+  display: inline-block;
+  margin-top: 5px;
+  color: #94381e;
+  font-size: 11px;
+  font-weight: 700;
+}
+.applicant-portal {
+  width: min(1000px, calc(100% - 40px));
+  margin: 70px auto;
+}
+.applicant-portal-card {
+  border: 1px solid var(--line);
+  background: var(--white);
+  padding: clamp(20px, 4vw, 38px);
+  margin-top: 22px;
+}
+.applicant-portal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.applicant-document-row {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 16px;
+  min-width: 0;
+}
+.applicant-document-row p { overflow-wrap: anywhere; }
+.applicant-document-row label { display: block; margin-top: 12px; }
+.applicant-document-row input[type="file"] { max-width: 100%; }
+.applicant-status {
+  display: inline-block;
+  border-radius: 20px;
+  background: #edf3ee;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.applicant-note {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fff4e9;
+  color: #75421f;
+  font-size: 13px;
+}
+@media (max-width: 680px) {
+  .extracurricular-options, .applicant-portal-grid { grid-template-columns: 1fr; }
+}
+.applicant-portal-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+}
+.applicant-portal-summary small { color: #60766b; }
+.applicant-portal-summary h3 { overflow-wrap: anywhere; margin: 8px 0; }
+.applicant-portal-card > h3 { margin: 20px 0; }
+.applicant-document-row > p { margin: 10px 0; }
+.applicant-document-row input[type="file"] { display: block; margin: 8px 0; }
