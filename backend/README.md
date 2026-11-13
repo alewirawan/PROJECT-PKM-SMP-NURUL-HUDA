@@ -3,7 +3,41 @@
 Backend dasar menggunakan Fastify, TypeScript, PostgreSQL, dan Drizzle ORM. Target
 deployment adalah satu VPS untuk satu sekolah.
 
+Jalur resmi development tim menggunakan [Panduan Docker](../PANDUAN-INSTALASI.md).
+compose.dev.yaml sekarang menjalankan PostgreSQL, backend, dan frontend bersama.
+Backend otomatis menjalankan migration dan db:verify saat container dimulai;
+perintah npm pada dokumentasi teknis ini dijalankan melalui layanan backend,
+misalnya `docker compose --env-file backend/.env -f compose.dev.yaml run --rm backend npm run db:verify --workspace=@nurul-huda/backend`.
+
 ## Schema seluruh project
+
+### Perbaikan integrasi 6 November 2026
+
+Blog, klub, dan agenda aktif bersamaan. Pada jalur Docker, migration dan db:verify
+dijalankan otomatis saat backend dimulai. Ikuti bagian setelah pull di bawah.
+Jangan mengganti journal atau menjalankan `0001_posts.sql` secara manual.
+Migration resmi tetap 0000 → 0001_many_colossus → 0002_chunky_scalphunter.
+
+Perintah migration juga mengenali database yang sempat memakai journal Blog
+0000 → 0001_posts. Dalam satu transaksi, tabel artikel lama dipertahankan di
+`migration_recovery.posts`, schema bersama dipasang, kemudian artikel disalin
+ke tabel aktif dengan ID, isi, status, dan tanggal yang sama. Data pendaftaran
+dan berkas tetap melalui upgrade arsip yang sudah tersedia. Jika data tidak
+memenuhi constraint atau riwayatnya berbeda, transaksi dibatalkan untuk diperiksa.
+Backup database tetap diperlukan sebelum migration pada database berisi data nyata.
+Schema `migration_recovery` tidak dihapus otomatis dan tidak digunakan aplikasi.
+File `0001_posts.sql` dipertahankan hanya untuk mengenali riwayat tersebut.
+
+Untuk menghindari pengulangan konflik, pull sebelum mengerjakan file bersama,
+pertahankan route yang sudah terdaftar, dan tambahkan migration baru tanpa
+mengganti journal/snapshot yang sudah dibagikan. Jalankan seluruh `npm run check`,
+termasuk tes modul anggota lain yang masih tersedia.
+
+API Blog tersedia untuk daftar publik, detail slug, daftar admin, tambah, edit,
+dan hapus. Mutasi memakai role super_admin/editor serta Origin yang diizinkan.
+`publishedAt` dikirim sebagai ISO datetime; isi artikel memakai array paragraf
+yang disimpan sebagai JSONB. Draft lama tanpa publishedAt ditampilkan dengan
+tanggal pencatatan sampai editor menentukan tanggal publikasinya.
 
 Database tetap PostgreSQL 17 sesuai Compose project, dengan Drizzle sebagai
 definisi tabel dan migration SQL sebagai riwayat perubahan. Schema mencakup
@@ -29,25 +63,24 @@ pengganti migration yang sudah direview.
 
 ### Setelah anggota melakukan pull
 
-Dari root repository, jika database lokal sudah tersedia dan DATABASE_URL pada
-`backend/.env` sudah benar:
+Dari root repository, setelah pekerjaan sendiri di-commit pada branch tugas,
+Docker Desktop aktif, dan backend/.env sudah tersedia:
 
 ```bash
-git pull --ff-only
-npm ci
-npm run db:migrate --workspace=@nurul-huda/backend
-npm run db:verify --workspace=@nurul-huda/backend
-npm run dev:backend
+docker compose --env-file backend/.env -f compose.dev.yaml stop
+git switch main
+git pull --ff-only origin main
+docker compose --env-file backend/.env -f compose.dev.yaml up --build -d --force-recreate --wait
 ```
 
-Untuk komputer baru, ikuti bagian Menjalankan lokal di bawah untuk menyiapkan
-PostgreSQL dan akun admin. Migration membuat tabel, bukan membuat server database
-atau akun admin. Jangan menimpa `.env` yang sudah dimiliki anggota.
+Untuk komputer baru, ikuti [panduan instalasi](../PANDUAN-INSTALASI.md).
+Compose menyalakan database; migration membuat tabel; akun admin dibuat terpisah
+melalui perintah interaktif pada panduan tersebut. Jangan menimpa `.env`.
 
 Data contoh bersifat opsional dan hanya untuk database development lokal:
 
 ```bash
-npm run db:seed:demo --workspace=@nurul-huda/backend -- --confirm-demo
+docker compose --env-file backend/.env -f compose.dev.yaml run --rm backend npm run db:seed:demo --workspace=@nurul-huda/backend -- --confirm-demo
 ```
 
 Seed menambahkan profil contoh, periode, klub, agenda, guru/struktur, draft artikel,
@@ -157,7 +190,7 @@ harus mengisi updatedAt sendiri. Record arsip tetap membutuhkan backup dan uji r
 ### Batas implementasi dan pengujian
 
 Tersedianya tabel tidak membuat API menu lain otomatis berjalan. Auth admin,
-health, klub dan agenda sudah memiliki handler. Handler PPDB, direktori, artikel,
+health, klub, agenda dan artikel sudah memiliki handler. Handler PPDB, direktori,
 pesan, prestasi, pengaturan, akun pendaftar dan dashboard tetap dilanjutkan anggota
 pemiliknya. Alur aktivasi/pemulihan akun pendaftar masih harus disepakati;
 tabel token tidak mengaktifkan pengiriman email atau pemulihan otomatis.
@@ -288,7 +321,7 @@ modules/applications/
 Route menangani HTTP, service menangani aturan bisnis, dan repository menjadi
 satu-satunya lapisan yang mengakses database.
 
-## Menjalankan lokal
+## Alternatif manual (bukan jalur standar tim)
 
 Dari root project:
 
@@ -299,16 +332,10 @@ cp backend/.env.example backend/.env
 
 Ubah `DATABASE_URL` dan credential lokal. Jangan commit `.env`.
 
-Jalankan PostgreSQL melalui Compose:
-
-```bash
-docker compose --env-file backend/.env -f compose.dev.yaml up -d
-```
-
-Sebelum menyalakan database pertama kali, isi `POSTGRES_PASSWORD` dan password di
-`DATABASE_URL` pada `backend/.env` dengan nilai yang sama. Compose development
-membuka PostgreSQL hanya ke `127.0.0.1:5432`, sehingga API dapat berjalan langsung
-di komputer anggota. Setelah database healthy, jalankan:
+Jalur manual memerlukan PostgreSQL lokal terpisah yang sesuai DATABASE_URL.
+Compose development tidak membuka port PostgreSQL ke host; jangan menganggap
+database container tersedia di localhost:5432. Anggota yang mengikuti Docker
+tidak perlu menjalankan bagian alternatif ini. Setelah database lokal siap, jalankan:
 
 ```bash
 npm run db:migrate --workspace=@nurul-huda/backend

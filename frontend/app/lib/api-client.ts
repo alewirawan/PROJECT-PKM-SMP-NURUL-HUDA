@@ -1,8 +1,6 @@
 /**
- * Backend integration seam.
- *
- * The current mockup still reads from local-cms.ts. When the backend is ready,
- * use requestApi() from repository functions instead of calling localStorage.
+ * Shared HTTP client for backend-backed CMS repositories.
+ * Requests include the HttpOnly admin session cookie when the browser has one.
  */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "");
 
@@ -27,6 +25,9 @@ export async function requestApi<T>(
 ): Promise<T> {
   if (!API_BASE_URL)
     throw new ApiError(0, "NEXT_PUBLIC_API_BASE_URL belum dikonfigurasi.");
+  const requestBase = typeof window === "undefined"
+    ? process.env.API_BASE_URL?.replace(/\/$/, "") || API_BASE_URL
+    : API_BASE_URL;
   const { timeoutMs = 12_000, ...requestInit } = init;
   const controller = new AbortController();
   const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
@@ -42,7 +43,7 @@ export async function requestApi<T>(
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`,
+      `${requestBase}${path.startsWith("/") ? path : `/${path}`}`,
       {
         ...requestInit,
         headers,

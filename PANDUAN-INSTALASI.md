@@ -1,314 +1,397 @@
-# Cara Menjalankan Project SMP Nurul Huda
+# Panduan menjalankan project SMP Nurul Huda
 
-Panduan paket tim: 28 September 2026.
+Diperbarui 10 November 2026. Panduan ini untuk development lokal.
+Docker Compose menjalankan PostgreSQL, backend, dan frontend bersama.
+`compose.dev.yaml` adalah file yang digunakan tim; `compose.yaml` adalah rancangan
+deployment terpisah.
 
-Pembagian tugas dan kontrak diperbarui 15 Oktober 2026. Gunakan
-[panduan tim terkini](docs/README-TIM-PKM.md); PDF lama tetap arsip. Pembaruan
-dokumentasi tidak mengimplementasikan API fitur atau menjalankan database.
+## Pilih sesuai kondisi
 
-**Untuk pertama kali, ikuti bagian A: demo frontend.** Backend dan database belum
-diperlukan hanya untuk melihat website serta mencoba menu admin simulasi.
+| Kondisi | Baca |
+| --- | --- |
+| Baru install Docker | [Buka project](#2-buka-folder-project), lalu lanjutkan langkah berikutnya. |
+| Belum install Docker | [Instalasi aplikasi](#1-install-git-dan-docker). |
+| Sudah pernah berhasil | [Menjalankan lagi](#menjalankan-lagi-dan-berhenti). |
+| Ingin mengambil kode teman | [Pull dan branch](#pull-dan-pekerjaan-pada-branch). |
+| Ingin mengirim pekerjaan | [Pemeriksaan dan push](#pemeriksaan-dan-push). |
+| Ingin melihat tabel | [Membuka database](#membuka-database). |
+| Ada error | [Jika gagal](#jika-gagal). |
 
-## Isi paket
+## 1. Install Git dan Docker
 
-```text
-smp-nurul-huda/
-├── frontend/              source website dan dashboard admin
-├── backend/               fondasi API Fastify dan schema database
-├── contracts/             rancangan kontrak API
-├── docs/README-TIM-PKM.md  pembagian tugas 10 anggota dan path file
-├── artifacts/             PDF pembagian tugas tim
-├── compose.dev.yaml       PostgreSQL khusus development lokal
-├── PANDUAN-INSTALASI.md    dokumen ini
-├── package.json           jalankan npm dari folder yang memuat file ini
-└── package-lock.json      versi dependency yang dipakai bersama
-```
+### Windows
 
-Folder `node_modules`, hasil build, database, dan `.env` tidak disertakan.
-Masing-masing anggota menginstal dependency dan membuat konfigurasi lokal sendiri.
-
-## A. Menjalankan demo frontend — mulai dari sini
-
-### 1. Siapkan aplikasi
-
-- Node.js versi 22.13.0 atau lebih baru sesuai persyaratan project; npm sudah
-  termasuk dalam instalasi Node.js.
-- Editor seperti Visual Studio Code.
-- Koneksi internet saat instalasi dependency dan bila tooling perlu mengunduh aset.
-
-Cek melalui terminal:
-
-```bash
-node -v
-npm -v
-```
-
-Jika perintah belum dikenali, pasang Node.js lalu tutup dan buka kembali terminal.
-
-### 2. Ekstrak ZIP dan buka folder yang benar
-
-Ekstrak seluruh ZIP terlebih dahulu. Jangan menjalankan file dari tampilan isi ZIP.
-Buka folder hasil ekstrak bernama `smp-nurul-huda` melalui **File → Open Folder**
-di VS Code, lalu pilih **Terminal → New Terminal**.
-
-Pastikan folder terminal memuat `package.json`, `frontend`, dan `backend`.
-Jika hasil ekstrak menghasilkan folder bertingkat, masuk lagi ke folder tersebut.
-
-macOS/Linux:
-
-```bash
-pwd
-ls
-```
-
-Windows PowerShell:
+1. Install [Git for Windows](https://git-scm.com/downloads/win).
+2. Jika WSL belum terpasang, buka **PowerShell → Run as Administrator**, jalankan
+   perintah berikut, lalu restart Windows:
 
 ```powershell
-Get-Location
-Get-ChildItem
+wsl --install
 ```
 
-Contoh berpindah folder jika diperlukan — sesuaikan dengan lokasi ekstrak:
+Jika WSL sudah ada, periksa `wsl --version` dan perbarui dengan `wsl --update`
+jika diminta Docker. Rujukan: [panduan WSL Microsoft](https://learn.microsoft.com/en-us/windows/wsl/install).
 
-```text
-cd "/lokasi/hasil-ekstrak/smp-nurul-huda"
-```
+3. Download dan install [Docker Desktop untuk Windows](https://docs.docker.com/desktop/setup/install/windows-install/).
+   Gunakan backend WSL 2 dan Linux containers. Ikuti persyaratan RAM, versi
+   Windows, dan virtualisasi pada halaman resmi. Restart jika installer meminta.
+4. Buka Docker Desktop dan tunggu engine berjalan. Membuka aplikasi Docker saja
+   belum menyalakan project.
+5. Untuk perintah project berikutnya, gunakan **Command Prompt (CMD)** biasa.
+   Di VS Code: Terminal → New Terminal → pilih profil Command Prompt.
+   Jangan menyalin perintah `copy` atau `cd /d` Windows ke Git Bash/macOS.
 
-### 3. Instal dependency dari root
+### macOS
+
+Install [Git](https://git-scm.com/downloads/mac) dan
+[Docker Desktop untuk macOS](https://docs.docker.com/desktop/setup/install/mac-install/).
+Pilih installer Apple Silicon atau Intel sesuai Mac, lalu buka Docker Desktop.
+Tidak perlu WSL. Gunakan Terminal atau terminal VS Code.
+
+### Periksa instalasi
+
+Buka terminal baru setelah instalasi, lalu:
 
 ```bash
-npm ci
-```
-
-`npm ci` memakai versi pada `package-lock.json`. Tunggu sampai selesai tanpa error.
-Untuk paket ini jangan menginstal terpisah dari folder frontend atau backend.
-Jika nanti tim memang mengubah dependency, koordinator memperbarui lockfile lewat
-`npm install` dan membagikan perubahannya.
-
-### 4. Jalankan website
-
-```bash
-npm run dev
-```
-
-Biarkan terminal tersebut tetap terbuka. Buka alamat yang ditampilkan terminal,
-biasanya:
-
-- Website: `http://localhost:3000`
-- Admin: `http://localhost:3000/admin`
-
-Pada halaman admin, pilih **Masuk ke mode demo**. Tidak ada email/password demo
-yang harus dihafalkan.
-
-**Jangan menyalin `frontend/.env.example` untuk tahap demo.** Jika URL backend
-diaktifkan, form admin akan mencoba login ke server yang harus sudah berjalan.
-
-### 5. Menghentikan dan menjalankan lagi
-
-Tekan **Ctrl+C** pada terminal untuk menghentikan server. Saat ingin membuka lagi:
-
-```bash
-npm run dev
-```
-
-Tidak perlu mengulang `npm ci` setiap kali menjalankan. Instal ulang hanya ketika
-dependency/lockfile berubah atau instalasi sebelumnya bermasalah.
-
-### Yang bisa dicoba pada demo
-
-Beranda, Tentang, Program, Struktur & Guru, Prestasi, Blog, Kontak, Pendaftaran, serta menu
-admin sudah memiliki tampilan. Perubahan masih disimpan dalam browser lokal;
-data pendaftar/pesan simulasi tidak menjadi database bersama antaranggota.
-Gunakan data fiktif. Menutup tab dapat menghapus data simulasi yang memakai
-sessionStorage. Pilihan ekstrakurikuler dan form PPDB empat langkah sudah tersedia;
-berkas dummy hanya dipilih/ditinjau lokal, bukan diunggah, dan hilang dari memori
-saat refresh. Login demo tidak berarti backend seluruh fitur sudah tersedia.
-
-## B. Menjalankan backend — untuk anggota yang mengerjakan API
-
-Bagian ini opsional untuk membuka frontend. Backend saat ini baru memiliki auth,
-health, koneksi database, schema, dan migration awal. CRUD fitur sekolah belum
-lengkap; mengaktifkan login backend belum otomatis menyimpan semua menu ke database.
-
-### 1. Siapkan PostgreSQL
-
-Pilihan panduan ini: Docker Desktop dengan container PostgreSQL 17. Pastikan Docker
-Desktop sudah berjalan dan perintah berikut dikenali:
-
-```bash
+git --version
+docker version
 docker compose version
 ```
 
-Jika sudah memiliki PostgreSQL lokal, boleh gunakan database development khusus
-dan sesuaikan DATABASE_URL. Jangan memakai database production untuk latihan.
+Git dan Compose harus menampilkan versi. `docker version` harus menampilkan
+bagian Client dan Server tanpa error koneksi. Tidak perlu memasang Node.js,
+PostgreSQL, XAMPP, atau pgAdmin secara terpisah.
 
-### 2. Buat konfigurasi backend
+## 2. Buka folder project
 
-Dari root project, macOS/Linux:
+Semua perintah Compose/Git di panduan ini dijalankan dari **root project**:
+folder yang berisi `compose.dev.yaml`, `package.json`, `frontend`, dan `backend`.
+
+### Belum punya project
+
+Windows CMD, contoh lokasi di luar OneDrive:
+
+```bat
+mkdir C:\PKM
+cd /d C:\PKM
+git clone https://github.com/alewirawan/PROJECT-PKM-SMP-NURUL-HUDA.git
+cd PROJECT-PKM-SMP-NURUL-HUDA
+```
+
+Jika C:\PKM sudah ada, lewati `mkdir`.
+
+macOS, contoh lokasi di luar iCloud:
 
 ```bash
-cp backend/.env.example backend/.env
+mkdir -p ~/Projects
+cd ~/Projects
+git clone https://github.com/alewirawan/PROJECT-PKM-SMP-NURUL-HUDA.git
+cd PROJECT-PKM-SMP-NURUL-HUDA
 ```
 
-Windows PowerShell:
+Jika GitHub meminta login atau menolak akses, gunakan akun GitHub yang diundang
+ke repository dan terima undangannya. Jangan memasukkan token ke URL clone.
 
-```powershell
-Copy-Item backend/.env.example backend/.env
+### Sudah punya project
+
+Buka folder project yang sudah ada di VS Code, lalu buka terminal.
+Contoh Windows CMD untuk lokasi di atas:
+
+```bat
+cd /d "C:\PKM\PROJECT-PKM-SMP-NURUL-HUDA"
 ```
 
-Buka `backend/.env` di editor. Ganti dua bagian password agar nilainya sama:
-
-```env
-POSTGRES_PASSWORD=ganti-password-lokal-unik
-DATABASE_URL=postgres://nurul_huda:ganti-password-lokal-unik@127.0.0.1:5432/nurul_huda
-```
-
-Contoh di atas adalah placeholder, bukan credential yang sudah dibuat. Gunakan
-password lokal sendiri; untuk memudahkan tahap awal gunakan huruf dan angka tanpa
-spasi. Karakter khusus dalam URL memerlukan encoding yang benar. Jangan mengirim
-`.env` ke grup atau memasukkannya ke Git.
-
-### 3. Jalankan database development
+Sesuaikan path dengan lokasi sendiri. Jangan membuat clone kedua di dalam project.
+Periksa `git status`; simpan/commit perubahan sendiri pada branch tugas dahulu.
+Jika folder bersih, ambil main terbaru:
 
 ```bash
-docker compose --env-file backend/.env -f compose.dev.yaml up -d
-docker compose --env-file backend/.env -f compose.dev.yaml ps
+git switch main
+git pull --ff-only origin main
 ```
 
-Tunggu status PostgreSQL healthy. Database dipublikasikan hanya pada
-`127.0.0.1:5432`. Konfigurasi ini terpisah dari rancangan Compose deployment.
-Untuk tahap lokal jangan mengganti perintah ini dengan `docker compose up` tanpa
-nama file, karena konfigurasi dan cara menjalankannya berbeda.
+Jika pull gagal, baca error dan jangan lanjut seolah update berhasil.
+Jangan memakai reset/force untuk membuang perubahan.
 
-Password pada volume database ditetapkan saat pertama kali dibuat. Mengubah
-POSTGRES_PASSWORD setelah database berisi data tidak otomatis mengganti password
-database tersebut. Koordinasikan perubahan credential; jangan menghapus volume
-sebagai langkah troubleshooting biasa.
+Cek folder: di Windows jalankan `dir compose.dev.yaml`; di macOS/Linux gunakan
+`ls compose.dev.yaml`. Jika file tidak ditemukan, perbaiki lokasi terminal.
 
-### 4. Buat tabel dan akun admin
+## 3. Siapkan backend/.env sekali saja
 
-Jalankan dari root:
+Jika `backend/.env` sudah ada, gunakan file tersebut. Jangan menimpanya.
 
-```bash
-npm run db:migrate --workspace=@nurul-huda/backend
-npm run admin:create --workspace=@nurul-huda/backend
+Windows CMD, hanya saat file belum ada:
+
+```bat
+copy backend\.env.example backend\.env
+notepad backend\.env
 ```
-
-Script meminta email, nama, role, dan password minimal 12 karakter. Password tidak
-ditampilkan saat diketik. Gunakan akun development sendiri. Membuat admin cukup
-sekali untuk database yang sama; tidak perlu membuat ulang saat menyalakan server.
-
-### 5. Jalankan API
-
-```bash
-npm run dev:backend
-```
-
-Biarkan terminal terbuka, lalu periksa:
-
-- `http://localhost:4000/api/v1/health` — proses server hidup.
-- `http://localhost:4000/api/v1/ready` — koneksi database siap.
-
-Jika health berhasil tetapi ready berstatus disconnected/HTTP 503, koneksi
-PostgreSQL belum berhasil. Health saja bukan bukti migration/login sudah siap.
-
-### 6. Hubungkan login frontend
-
-Buka terminal kedua pada root project. Salin konfigurasi frontend.
 
 macOS/Linux:
 
 ```bash
-cp frontend/.env.example frontend/.env.local
+cp -n backend/.env.example backend/.env
 ```
 
-Windows PowerShell:
+Buka file hasil salinan di editor. Pastikan namanya `.env`, bukan `.env.txt`.
+Cari baris:
 
-```powershell
-Copy-Item frontend/.env.example frontend/.env.local
+```dotenv
+POSTGRES_PASSWORD=change-me
 ```
 
-Isinya:
+Ganti `change-me` dengan password database development sendiri. Untuk memudahkan
+penulisan .env, gunakan huruf besar/kecil dan angka, minimal 16 karakter.
+Simpan file. Jangan membagikan password atau commit .env.
 
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
-```
+- Jika volume database sudah pernah dibuat, gunakan password yang digunakan
+  pertama kali. Mengubah .env tidak mengubah password database lama.
+- Pada jalur Docker, cukup atur POSTGRES_PASSWORD. Entrypoint membentuk
+  DATABASE_URL container otomatis; jangan mengganti localhost menjadi nama
+  container secara manual dalam file ini.
+- Nilai DATABASE_URL pada contoh hanya digunakan saat backend dijalankan manual
+  di luar Docker. Jalur tersebut bukan langkah instalasi tim.
+- Frontend menerima alamat API otomatis dari Compose. Tidak perlu membuat
+  frontend/.env.local atau mengubah file kode untuk koneksi lokal.
 
-Jalankan atau restart frontend:
+Password database berbeda dari password akun admin website yang dibuat nanti.
+
+## 4. Jalankan ketiga layanan
+
+Hentikan dev server lama project dengan Ctrl+C jika masih memakai port 3000/4000.
+Pastikan Docker Desktop masih berjalan, kemudian dari root project:
 
 ```bash
-npm run dev
+docker compose --env-file backend/.env -f compose.dev.yaml up --build -d --wait
 ```
 
-Buka `http://localhost:3000/admin` dan masuk dengan akun yang dibuat pada langkah 4.
-Gunakan `localhost` secara konsisten untuk alamat frontend/API. Jika frontend
-berjalan pada port lain, perbarui FRONTEND_ORIGINS di backend/.env lalu restart API.
+Build pertama membutuhkan internet dan bisa beberapa menit. Docker mengunduh
+image serta memasang dependency Linux. Urutan startup:
 
-Untuk kembali ke mode demo, kosongkan NEXT_PUBLIC_API_BASE_URL di .env.local lalu
-restart frontend. Fitur konten/pendaftaran tetap mockup sampai tim mengintegrasikannya.
+1. PostgreSQL siap menerima koneksi.
+2. Backend menjalankan migration dan memeriksa 23 tabel.
+3. API siap, kemudian frontend dijalankan.
 
-### 7. Menghentikan database
+Tunggu sampai perintah selesai tanpa error. Jangan membuka terminal kedua untuk
+menjalankan `npm install`, `npm ci`, atau `npm run dev` di host.
 
-Hentikan server frontend/backend dengan Ctrl+C, lalu bila database tidak digunakan:
+## 5. Pastikan berhasil
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml ps
+```
+
+Harus ada tiga layanan: `postgres`, `backend`, `frontend`, semuanya
+**Up (healthy)**. Jika masih starting, tunggu sebentar lalu periksa kembali.
+Jika exited/unhealthy atau perintah sebelumnya gagal, baca [Jika gagal](#jika-gagal).
+
+| Yang dibuka | Alamat |
+| --- | --- |
+| Website | http://localhost:3000 |
+| Admin | http://localhost:3000/admin |
+| Kesiapan API dan koneksi database | http://localhost:4000/api/v1/ready |
+
+Gunakan localhost secara konsisten agar cookie login bekerja.
+Tanda healthy mengonfirmasi layanan hidup; integrasi setiap fitur memiliki
+[status sendiri](#fitur-yang-belum-selesai).
+
+## 6. Buat akun admin
+
+Jalankan sekali per database lokal:
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml run --rm backend npm run admin:create --workspace=@nurul-huda/backend
+```
+
+Jawab pertanyaan email, nama, role, password, dan konfirmasi password.
+Untuk development dengan semua hak admin, tekan Enter pada pilihan role agar
+memakai `super_admin`. Password minimal 12 karakter; karakter tidak ditampilkan
+saat diketik. Gunakan terminal interaktif, bukan panel Output VS Code.
+
+Setelah muncul pesan berhasil, login di http://localhost:3000/admin.
+Akun ini berbeda dari akun GitHub/Docker dan password PostgreSQL.
+Tidak ada akun bawaan. Jangan membuat ulang akun yang sama setiap startup.
+Jika email sudah terdaftar, gunakan akun yang sebelumnya dibuat.
+
+## Data contoh opsional
+
+Database baru tidak otomatis memiliki artikel/kegiatan/pendaftar.
+Jika ingin contoh lokal:
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml run --rm backend npm run db:seed:demo --workspace=@nurul-huda/backend -- --confirm-demo
+```
+
+Seed tidak menimpa record lama, tidak membuat akun admin, pendaftar atau dokumen
+asli, dan tidak membuka PPDB otomatis. Artikel contoh berupa draft: terbitkan
+dari admin agar terlihat publik. Data seed modul yang belum terintegrasi belum
+tentu muncul di tampilan.
+
+## Menjalankan lagi dan berhenti
+
+Buka Docker Desktop, buka terminal di root project, lalu:
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml up -d --wait
+```
+
+Tidak perlu clone, menyalin .env, atau membuat admin ulang.
+
+Untuk berhenti:
 
 ```bash
 docker compose --env-file backend/.env -f compose.dev.yaml stop
 ```
 
-Perintah stop mempertahankan data. Jangan menambahkan perintah penghapusan volume.
+Database dan upload memakai named volumes. stop/down tanpa penghapusan volume
+tidak menghapus data. Jangan gunakan `down -v` atau volume prune pada database kerja.
+Volume database tetap bernama `nurul-huda-local_postgres_dev_data`.
+Database PostgreSQL yang sebelumnya dipasang langsung di laptop tidak otomatis
+dipindahkan ke Docker.
 
-## C. Pemeriksaan sebelum membagikan perubahan kode
+## Pull dan pekerjaan pada branch
 
-```bash
-npm run check
-npm run build --workspace=@nurul-huda/backend
-```
+Simpan/commit pekerjaan sendiri di branch tugas dahulu, kemudian cek
+`git status`. Jangan reset/discard perubahan untuk memaksa pull.
 
-`check` menjalankan lint, typecheck, dan test. Test frontend juga menjalankan build
-frontend. Build backend diperiksa dengan perintah kedua. Tidak perlu menjalankan
-perintah deploy untuk menggunakan project secara lokal.
-
-Untuk melihat hasil build frontend secara lokal:
+### Ambil main terbaru
 
 ```bash
-npm run build --workspace=@nurul-huda/frontend
-npm start
+docker compose --env-file backend/.env -f compose.dev.yaml stop
+git switch main
+git pull --ff-only origin main
+docker compose --env-file backend/.env -f compose.dev.yaml up --build -d --force-recreate --wait
 ```
 
-Ikuti URL yang dicetak terminal; port preview bisa berbeda dari development.
-Untuk aktivitas coding sehari-hari cukup `npm run dev`.
+--force-recreate memastikan backend menjalankan migration lagi setelah pull.
+Migration yang sudah tercatat tidak diulang; volume database lama tetap digunakan.
 
-## D. Kendala yang sering muncul
+### Mulai tugas baru atau lanjutkan tugas lama
 
-| Pesan/gejala                                         | Yang perlu diperiksa                                                                                                           |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| ENOENT package.json                                  | Terminal berada pada folder yang salah; cari folder yang berisi package.json root                                              |
-| npm/node tidak dikenali                              | Instal Node.js dan buka ulang terminal                                                                                         |
-| npm.ps1 cannot be loaded                             | Pada Windows, gunakan terminal Command Prompt di VS Code atau jalankan npm.cmd; tidak perlu mengubah kebijakan keamanan global |
-| Dependency install gagal/ECONNRESET                  | Periksa koneksi, proxy, dan pesan error; simpan lockfile, coba npm ci kembali setelah koneksi pulih                            |
-| Port 3000 sudah dipakai                              | Buka URL yang dicetak terminal; jika memakai API, sesuaikan FRONTEND_ORIGINS dengan port tersebut                              |
-| Form admin meminta email/password padahal ingin demo | NEXT_PUBLIC_API_BASE_URL sudah diaktifkan; kosongkan lalu restart frontend                                                     |
-| Cannot find module                                   | Pastikan npm ci selesai dari root dan Node memenuhi persyaratan                                                                |
-| docker tidak dikenali/daemon unavailable             | Docker Desktop belum terpasang atau belum berjalan; frontend demo tidak memerlukan Docker                                      |
-| Port database 5432 bentrok                           | Ada PostgreSQL lain; gunakan DB development yang sesuai, atau ubah port host di compose.dev.yaml dan DATABASE_URL bersama-sama |
-| Backend ready gagal                                  | Periksa container, DATABASE_URL, port, dan kesamaan password                                                                   |
-| Login gagal                                          | Periksa migration, akun admin, kesamaan hostname, dan FRONTEND_ORIGINS                                                         |
-| Data berbeda antaranggota                            | Data mockup berada di browser masing-masing; tiap database lokal juga terpisah                                                 |
-| Ada peringatan audit/deprecation                     | Baca peringatannya; jangan menjalankan npm audit fix --force tanpa review koordinator                                          |
+Untuk tugas baru, buat branch dari main yang baru diperbarui:
 
-Launcher frontend paket ini tidak lagi memakai sintaks environment khusus Unix.
-Namun seluruh kombinasi sistem operasi anggota belum diuji. Jika ada error, kirim
-pesan error dan versi Node/npm ke koordinator, tanpa isi `.env` atau data pribadi.
+```bash
+git switch -c tugas/nomor-nama-fitur
+```
 
-## E. Pembagian tugas dan dokumen
+Ganti nomor-nama-fitur dengan tugas sendiri. Untuk branch tugas yang sudah ada,
+jangan jalankan `switch -c` lagi. Setelah memperbarui main, jalankan:
 
-- [Panduan lengkap 10 anggota](docs/README-TIM-PKM.md).
-- [Versi PDF panduan tim](artifacts/Panduan-Kerja-Tim-PKM-SMP-Nurul-Huda.pdf).
-- [Struktur frontend](docs/FRONTEND_STRUCTURE.md).
-- [Panduan backend](backend/README.md).
-- [Kontrak API](contracts/openapi.yaml).
+```bash
+git switch nama-branch-tugas
+git merge main
+```
 
-Panduan tugas Markdown diperbarui 15 Oktober 2026; PDF tetap versi 25 September 2026. Catatan setup di dokumen ini diperbarui 28 September 2026; gunakan dokumen
-ini untuk perintah menjalankan, bukan PDF lama.
-Folder fitur baru dalam panduan tugas tetap rencana, bukan klaim telah dibuat.
-Arsip source ini untuk pengembangan lokal, belum merupakan paket siap production.
+Jika ada konflik, selesaikan bersama pemilik file sebelum melanjutkan.
+Setelah berpindah branch atau menyelesaikan merge, jalankan kembali perintah
+rebuild/recreate agar kode pada image mengikuti branch aktif.
+
+Edit file di VS Code seperti biasa. Perubahan app/src dibaca melalui bind mount
+dan watcher; dependency Windows/macOS tidak dimount ke container.
+Setelah mengubah dependency, package-lock.json, konfigurasi, atau migration,
+gunakan perintah rebuild/recreate. Jangan mengganti migration yang sudah dibagikan.
+
+## Pemeriksaan dan push
+
+Pastikan sedang di branch tugas, kemudian jalankan pemeriksaan di image terbaru:
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml build checks
+docker compose --env-file backend/.env -f compose.dev.yaml run --rm checks
+```
+
+Jika pemeriksaan berhasil, review perubahan dan kirim file tugas:
+
+```bash
+git status
+git diff
+git add path-file-yang-dikerjakan
+git commit -m "Jelaskan perubahan"
+git push -u origin nama-branch
+```
+
+Ganti path dan nama branch dengan milikmu; jangan salin placeholder tersebut
+secara literal. Buat Pull Request di GitHub untuk direview sebelum digabung.
+Jika check gagal, perbaiki penyebabnya.
+
+Git dijalankan di laptop. Docker tidak melakukan push kode/image otomatis.
+Jangan commit .env, node_modules, upload, data siswa, atau hasil build.
+Isi database lokal tidak ikut git push dan tidak tersinkron antaranggota.
+Branch protection perlu diatur pemilik repository; panduan tidak mengaktifkannya.
+
+## Membuka database
+
+Sesudah postgres healthy, buka PostgreSQL melalui terminal:
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml exec postgres psql -U nurul_huda -d nurul_huda
+```
+
+Nama database di atas sesuai konfigurasi default. Jika tim sengaja mengubah
+POSTGRES_DB, sesuaikan argumen -d.
+
+Di prompt PostgreSQL:
+
+| Keperluan | Perintah |
+| --- | --- |
+| Daftar tabel | `\dt` |
+| Struktur kolom artikel | `\d posts` |
+| Sepuluh judul artikel | `SELECT id, title FROM posts LIMIT 10;` |
+| Keluar | `\q` |
+
+SQL seperti SELECT diakhiri titik koma. Hasil 0 rows berarti belum ada data.
+Perintah pemeriksaan ini tidak mengubah data.
+
+pgAdmin belum disertakan; http://localhost:5050 belum tersedia. PostgreSQL
+berjalan di jaringan internal Docker dan port 5432 tidak dibuka ke laptop.
+Akun admin website bukan akun akses langsung database.
+
+## Fitur yang belum selesai
+
+Status pada main per 10 November 2026:
+
+- Auth admin, Blog, Ekstrakurikuler, dan Agenda sudah memakai API.
+- Pembaruan Beranda/Tentang/frontend Pengaturan sudah tersedia.
+  Client memanggil GET/PUT /api/v1/settings, tetapi backend endpoint tersebut
+  belum tersedia. Di mode Docker, pengaturan gagal dimuat/disimpan dan informasi
+  status PPDB yang bergantung padanya belum siap. Ini bukan kegagalan instalasi.
+- Prestasi di beranda mode API masih menampilkan pesan belum tersedia.
+- PPDB, direktori, data siswa, berkas, pesan, dan prestasi belum terintegrasi
+  lengkap; sebagian tampilan masih simulasi browser.
+
+Jangan menghapus database atau install ulang Docker untuk mengatasi endpoint
+yang belum dibuat. Keberadaan 23 tabel dan status healthy bukan bukti seluruh
+alur fitur selesai.
+
+## Jika gagal
+
+Jalankan dari root project:
+
+```bash
+docker compose --env-file backend/.env -f compose.dev.yaml ps -a
+docker compose --env-file backend/.env -f compose.dev.yaml logs --tail=80 postgres backend frontend
+```
+
+Bagikan pesan error dan log yang relevan setelah menyamarkan data pribadi atau
+credential. Jangan kirim .env, password, token, atau output konfigurasi berisi secret.
+
+| Gejala | Langkah |
+| --- | --- |
+| docker/git tidak dikenal | Pastikan aplikasi sudah dipasang, lalu buka terminal baru. |
+| Cannot connect to Docker daemon / error pipe Docker | Buka Docker Desktop dan tunggu engine siap; periksa docker version. |
+| WSL/virtualization error | Ikuti petunjuk Docker Desktop; perbarui WSL dan pastikan virtualisasi aktif sesuai panduan resmi. |
+| compose.dev.yaml tidak ditemukan | Terminal belum berada di root project. Cek lokasi dengan dir/ls. |
+| backend/.env tidak ditemukan / POSTGRES_PASSWORD belum diisi | Ikuti langkah 3; cek bukan .env.txt dan simpan file. |
+| Port 3000/4000 sudah dipakai | Hentikan dev server/container lama project; jangan menyalakan npm dev bersamaan. |
+| Password database ditolak | Gunakan password volume lama; perubahan .env tidak mengganti password PostgreSQL. Jangan hapus volume. |
+| Migration gagal / backend exited | Baca log backend; jangan menghapus migration atau tabel untuk melewati error. |
+| npm ci gagal ketika build | Periksa pesan tahap build dan koneksi internet. Instalasi npm berlangsung di Docker. |
+| Login gagal | Pastikan akun admin dibuat, backend healthy, dan alamat browser memakai localhost. |
+| Password tidak terlihat ketika membuat admin | Normal: input password disembunyikan. Ketik, lalu Enter. |
+| Blog kosong | Database belum memiliki artikel terbit; buat artikel atau terbitkan draft seed. |
+| Pengaturan 404/gagal dimuat, prestasi belum tersedia | Lihat status fitur di atas; backend modul tersebut belum selesai. |
+| Kode/dependency setelah pull belum sesuai | Gunakan up --build -d --force-recreate --wait dari root. |
+| git pull ditolak karena perubahan/konflik | Simpan commit pada branch tugas; koordinasikan konflik tanpa reset atau force push. |
+
+Untuk troubleshooting, sertakan OS, perintah yang dijalankan, status layanan,
+dan potongan error. Pesan “tidak jalan” saja belum cukup untuk menentukan sebab.

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { posts } from "./data";
-
 type SitemapPost = { slug: string; updatedAt?: string };
 
 async function getPublishedPosts(): Promise<SitemapPost[]> {
@@ -12,15 +11,15 @@ async function getPublishedPosts(): Promise<SitemapPost[]> {
     const response = await fetch(`${apiBase}/posts`, {
       headers: { Accept: "application/json" },
     });
-    if (!response.ok) return posts;
+    if (!response.ok) return [];
     const data = (await response.json()) as unknown;
     return Array.isArray(data)
       ? data.filter((item): item is SitemapPost =>
           Boolean(item && typeof item === "object" && "slug" in item),
         )
-      : posts;
+      : [];
   } catch {
-    return posts;
+    return [];
   }
 }
 

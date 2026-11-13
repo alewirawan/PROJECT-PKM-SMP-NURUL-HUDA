@@ -2,7 +2,7 @@
 
 Revisi 1.2.0, 15 Oktober 2026. [openapi.yaml](openapi.yaml) adalah target request,
 response, akses, dan validasi untuk implementasi tim. Fondasi backend hanya
-memiliki auth dan health. Klub dan agenda anggota 2 sudah diimplementasikan;
+memiliki auth dan health. Klub/agenda anggota 2 dan artikel anggota 4 sudah diimplementasikan;
 resource lain masih berstatus planned. Kontrak tidak
 menjalankan database, migration, atau upload.
 

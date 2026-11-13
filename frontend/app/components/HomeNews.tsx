@@ -2,23 +2,60 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import {
-  getBlogPosts,
-  listenCmsUpdates,
-  seedCmsPosts,
-  type CmsPost,
-} from "../lib/local-cms";
+import { useCallback, useEffect, useState } from "react";
+import { listPublicPosts } from "../lib/cms/posts";
+import type { CmsPost } from "../lib/cms/types";
 
+type Status = "loading" | "ready" | "error";
+
+/**
+ * Berita terbaru di beranda. Sumber data: listPublicPosts() milik anggota 4
+ * (API bila dikonfigurasi, adapter demo bila tidak). Penempatan dan keadaan
+ * loading/kosong/gagal milik anggota 1; jangan membuat daftar berita kedua.
+ */
 export function HomeNews() {
-  const [items, setItems] = useState<CmsPost[]>(
-    seedCmsPosts.filter((post) => post.status === "Terbit").slice(0, 3),
-  );
+  const [items, setItems] = useState<CmsPost[]>([]);
+  const [status, setStatus] = useState<Status>("loading");
+  const [attempt, setAttempt] = useState(0);
+
   useEffect(() => {
-    const load = () => setItems(getBlogPosts(false).slice(0, 3));
-    load();
-    return listenCmsUpdates(load);
+    let active = true;
+    listPublicPosts()
+      .then((posts) => {
+        if (!active) return;
+        setItems(posts.slice(0, 3));
+        setStatus("ready");
+      })
+      .catch(() => {
+        if (active) setStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, [attempt]);
+
+  const retry = useCallback(() => {
+    setStatus("loading");
+    setAttempt((value) => value + 1);
   }, []);
+
+  if (status === "loading")
+    return (
+      <p className="news-state" role="status">
+        Memuat berita terbaru…
+      </p>
+    );
+  if (status === "error")
+    return (
+      <div className="news-state is-error" role="alert">
+        <p>Berita terbaru belum dapat ditampilkan.</p>
+        <button type="button" className="button" onClick={retry}>
+          Coba lagi
+        </button>
+      </div>
+    );
+  if (items.length === 0)
+    return <p className="news-state">Belum ada berita yang diterbitkan.</p>;
 
   return (
     <div className="news-grid">
