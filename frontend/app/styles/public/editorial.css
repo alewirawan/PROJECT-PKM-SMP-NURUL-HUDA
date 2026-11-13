@@ -394,3 +394,11 @@
 .admin-logo .brand-logo {
   height: 40px;
 }
+
+/* Tagline panjang tidak boleh menabrak menu header (anggota 1). */
+.site-header .brand small {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
