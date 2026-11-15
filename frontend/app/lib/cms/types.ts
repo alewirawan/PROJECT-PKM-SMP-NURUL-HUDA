@@ -21,6 +21,7 @@ export type StudentDocument = {
   size?: number;
   mimeType?: string;
   reviewNote?: string;
+  receivedPhysically?: boolean;
 };
 
 export type CmsPost = Post & {
@@ -50,6 +51,7 @@ export type Application = {
   submittedAt: string;
   registrationSource?: RegistrationSource;
   documents?: StudentDocument[];
+  reEnrollmentStatus?: "pending" | "completed" | null;
   notes?: string;
 };
 

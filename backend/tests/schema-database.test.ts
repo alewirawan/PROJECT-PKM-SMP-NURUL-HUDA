@@ -54,13 +54,79 @@ describe.skipIf(!url)("full school database", () => {
     return row!;
   }
 
-  it("creates all 23 tables and migrations can be rerun", async () => {
+  it("creates all 25 tables and migrations can be rerun", async () => {
     const rows =
       await database.client`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
-    expect(rows).toHaveLength(23);
+    expect(rows).toHaveLength(25);
     await migrate(database.db, {
       migrationsFolder: fileURLToPath(new URL("../drizzle", import.meta.url)),
     });
+  });
+
+  it("keeps re-enrollment separate and prevents duplicate student records", async () => {
+    const notAccepted = await application();
+    await expect(
+      database.db.insert(s.applicationReEnrollments).values({
+        applicationId: notAccepted.id,
+        status: "completed",
+        confirmedAt: new Date(),
+      }),
+    ).rejects.toThrow();
+
+    const accepted = await application({
+      status: "accepted",
+      nisn: "0087654321",
+    });
+    const [reEnrollment] = await database.db
+      .insert(s.applicationReEnrollments)
+      .values({ applicationId: accepted.id })
+      .returning();
+
+    expect(reEnrollment?.status).toBe("pending");
+    expect(reEnrollment?.confirmedAt).toBeNull();
+    expect(
+      await database.db
+        .select()
+        .from(s.students)
+        .where(eq(s.students.applicationId, accepted.id)),
+    ).toHaveLength(0);
+
+    const student = {
+      applicationId: accepted.id,
+      studentName: accepted.studentName,
+      nisn: accepted.nisn,
+      birthPlace: accepted.birthPlace,
+      birthDate: accepted.birthDate,
+      gender: accepted.gender,
+      address: accepted.address,
+    };
+    await expect(
+      database.db.insert(s.students).values(student),
+    ).rejects.toThrow();
+
+    await expect(
+      database.db.insert(s.applicationReEnrollments).values({
+        applicationId: accepted.id,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      database.db.insert(s.applicationReEnrollments).values({
+        applicationId: accepted.id,
+        status: "completed",
+      }),
+    ).rejects.toThrow();
+
+    const [confirmed] = await database.db
+      .update(s.applicationReEnrollments)
+      .set({ status: "completed", confirmedAt: new Date() })
+      .where(eq(s.applicationReEnrollments.applicationId, accepted.id))
+      .returning();
+    expect(confirmed?.status).toBe("completed");
+
+    await database.db.insert(s.students).values(student);
+    await expect(
+      database.db.insert(s.students).values(student),
+    ).rejects.toThrow();
   });
 
   it("seeds repeatably without overwriting existing settings", async () => {

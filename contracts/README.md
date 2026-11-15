@@ -1,15 +1,18 @@
 # Kontrak integrasi SMP Nurul Huda
 
 Revisi 1.2.0, 15 Oktober 2026. [openapi.yaml](openapi.yaml) adalah target request,
-response, akses, dan validasi untuk implementasi tim. Fondasi backend hanya
-memiliki auth dan health. Klub/agenda anggota 2 dan artikel anggota 4 sudah diimplementasikan;
-resource lain masih berstatus planned. Kontrak tidak
-menjalankan database, migration, atau upload.
+response, akses, dan validasi untuk implementasi tim. Backend memiliki auth,
+health, klub/agenda, artikel, daftar PPDB, workflow penerimaan/daftar ulang,
+Data Siswa, dan ringkasan Dashboard. API PPDB, workflow, Data Siswa, dan
+Dashboard memerlukan migration 0003; migration database harus ditinjau dan
+dijalankan secara eksplisit pada database target. Resource lain tetap mengikuti
+status `x-implementation-status`.
+Kontrak tidak menjalankan database, migration, atau upload.
 
 Pembagian path dan pemilik ada di [panduan tim](../docs/README-TIM-PKM.md).
 Schema PostgreSQL seluruh modul sudah tersedia di backend/src/db/schema/;
 lihat [tabel, mapping dan langkah migration](../backend/README.md#schema-seluruh-project).
-Status planned pada operasi tetap berlaku sampai handler dan integrasinya dibuat.
+Status `planned` pada operasi tetap berlaku sampai handler dan integrasinya dibuat.
 Nama field API tidak diubah mengikuti nama kolom database; gunakan mapper,
 khususnya status PPDB, nomor pendaftaran, snapshot kegiatan dan metadata dokumen.
 Jika belum terbiasa dengan API, baca [Panduan Anggota](../docs/PANDUAN-ANGGOTA.md)
@@ -27,7 +30,8 @@ yang otomatis berjalan karena ditulis di YAML.
 - Review memiliki catatan serta pemeriksa/waktu yang ditentukan server.
 - PPDB publik menerima satu multipart berisi identitas dan berkas.
 - API offline, daftar berkas, review, download, Prestasi, Ekstrakurikuler,
-  daftar admin artikel/agenda, detail slug, dan ringkasan dashboard dicantumkan.
+  daftar admin artikel/agenda, detail slug, dan ringkasan dashboard dicantumkan;
+  status implementasinya ditandai per operasi.
 - Struktur organisasi boleh kosong; kepala sekolah maksimal satu.
 - Penghapusan permanen pendaftar tidak termasuk tahap pertama.
 - Respons Application/ContactMessage memiliki schema sendiri sehingga field

@@ -4,9 +4,98 @@ import type { AppConfig } from "../../config/env.js";
 import { AppError, UnauthorizedError } from "../../shared/errors/app-error.js";
 import type { AuthRepository } from "./auth.repository.js";
 
+declare module "fastify" {
+  interface FastifyRequest {
+    adminId: string | null;
+  }
+}
+
 export function createContentGuard(
   repository: AuthRepository,
   config: AppConfig,
+) {
+  return createRoleGuard(
+    repository,
+    config,
+    ["super_admin", "editor"],
+    "Akun tidak memiliki izin mengelola konten.",
+    true,
+  );
+}
+
+export function createDashboardReadGuard(
+  repository: AuthRepository,
+  config: AppConfig,
+) {
+  return createRoleGuard(
+    repository,
+    config,
+    ["super_admin", "admin_ppdb"],
+    "Akun tidak memiliki izin melihat ringkasan dashboard.",
+    false,
+  );
+}
+
+export function createApplicationsReadGuard(
+  repository: AuthRepository,
+  config: AppConfig,
+) {
+  return createRoleGuard(
+    repository,
+    config,
+    ["super_admin", "admin_ppdb"],
+    "Akun tidak memiliki izin melihat data pendaftar PPDB.",
+    false,
+  );
+}
+
+export function createStudentsReadGuard(
+  repository: AuthRepository,
+  config: AppConfig,
+) {
+  return createRoleGuard(
+    repository,
+    config,
+    ["super_admin", "admin_ppdb"],
+    "Akun tidak memiliki izin melihat data siswa.",
+    false,
+  );
+}
+
+export function createApplicationsWriteGuard(
+  repository: AuthRepository,
+  config: AppConfig,
+) {
+  return createRoleGuard(
+    repository,
+    config,
+    ["super_admin", "admin_ppdb"],
+    "Akun tidak memiliki izin mengelola penerimaan PPDB.",
+    true,
+    true,
+  );
+}
+
+export function createSettingsWriteGuard(
+  repository: AuthRepository,
+  config: AppConfig,
+) {
+  return createRoleGuard(
+    repository,
+    config,
+    ["super_admin"],
+    "Hanya super admin yang dapat mengubah pengaturan sekolah.",
+    true,
+  );
+}
+
+function createRoleGuard(
+  repository: AuthRepository,
+  config: AppConfig,
+  allowedRoles: readonly ("super_admin" | "admin_ppdb" | "editor")[],
+  forbiddenMessage: string,
+  requireTrustedOriginForWrites: boolean,
+  captureAdminId = false,
 ) {
   return async (request: FastifyRequest) => {
     const token = request.cookies[config.SESSION_COOKIE_NAME];
@@ -15,14 +104,10 @@ export function createContentGuard(
       createHash("sha256").update(token).digest("hex"),
     );
     if (!session) throw new UnauthorizedError();
-    if (!["super_admin", "editor"].includes(session.role)) {
-      throw new AppError(
-        "Akun tidak memiliki izin mengelola konten.",
-        403,
-        "FORBIDDEN",
-      );
-    }
+    if (!allowedRoles.includes(session.role))
+      throw new AppError(forbiddenMessage, 403, "FORBIDDEN");
     if (
+      requireTrustedOriginForWrites &&
       !["GET", "HEAD", "OPTIONS"].includes(request.method) &&
       (!request.headers.origin ||
         !config.FRONTEND_ORIGINS.includes(request.headers.origin))
@@ -33,5 +118,6 @@ export function createContentGuard(
         "FORBIDDEN",
       );
     }
+    if (captureAdminId) request.adminId = session.adminId;
   };
 }

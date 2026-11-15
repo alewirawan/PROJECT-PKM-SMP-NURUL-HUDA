@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
 import { type FormEvent, useRef, useState } from "react";
+import { ApiError, hasBackendApi } from "../lib/api-client";
 import {
-  addApplication,
-  documentLabels,
-  requiredDocumentsComplete,
-  type Application,
-} from "../lib/local-cms";
-import { retainDemoFiles } from "../lib/registration-files";
-import { useSchoolSettings } from "./SchoolSettingsProvider";
+  submitPublicApplication,
+  type PublicApplicationReceipt,
+} from "../lib/api/applications";
+import type { DocumentRequirements } from "../lib/cms/types";
+import { useSchoolSettingsState } from "./SchoolSettingsProvider";
 import {
   StudentFields,
   initialRegistration,
@@ -21,18 +20,43 @@ import {
 import { RegistrationReview } from "./registration/RegistrationReview";
 
 const steps = ["Data siswa", "Orang tua", "Berkas", "Periksa & kirim"];
+
+function missingDocuments(
+  requirements: DocumentRequirements,
+  files: SelectedFiles,
+) {
+  const missingKinds = requirements.requiredKinds.filter((kind) => !files[kind]);
+  const graduationMissing =
+    requirements.requireOneGraduationDocument && !files.skl && !files.ijazah;
+  return { missingKinds, graduationMissing };
+}
+
 export function RegistrationForm() {
-  const settings = useSchoolSettings();
+  const settingsState = useSchoolSettingsState();
+  const { settings } = settingsState;
+  const backendConfigured = hasBackendApi();
   const [form, setForm] = useState(initialRegistration);
   const [files, setFiles] = useState<SelectedFiles>({});
   const [step, setStep] = useState(1);
-  const [submitted, setSubmitted] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<PublicApplicationReceipt | null>(
+    null,
+  );
   const [error, setError] = useState("");
   const [consent, setConsent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const submitting = useRef(false);
+  const idempotencyKey = useRef<string | null>(null);
+
   function update(key: keyof RegistrationValues, value: string) {
+    idempotencyKey.current = null;
+    setError("");
     setForm((current) => ({ ...current, [key]: value }));
+  }
+  function updateFiles(next: SelectedFiles) {
+    idempotencyKey.current = null;
+    setError("");
+    setFiles(next);
   }
   function go(next: number) {
     setError("");
@@ -44,97 +68,125 @@ export function RegistrationForm() {
         ?.focus();
     });
   }
-  const documents = () =>
-    documentLabels.map((doc) => ({
-      ...doc,
-      status: files[doc.key]
-        ? ("Menunggu pemeriksaan" as const)
-        : ("Belum ada" as const),
-      ...(files[doc.key]
-        ? {
-            fileName: files[doc.key]!.name,
-            size: files[doc.key]!.size,
-            mimeType: files[doc.key]!.type,
-          }
-        : {}),
-    }));
-  function submit(event: FormEvent<HTMLFormElement>) {
+  function requirementsError() {
+    const missing = missingDocuments(settings.documentRequirements, files);
+    if (!missing.missingKinds.length && !missing.graduationMissing) return "";
+    const labels = missing.missingKinds
+      .map((kind) =>
+        ({
+          skl: "SKL",
+          ijazah: "Ijazah",
+          kk: "Kartu Keluarga",
+          ktp: "KTP orang tua/wali",
+          akta: "Akta kelahiran",
+        })[kind],
+      )
+      .join(", ");
+    return missing.graduationMissing
+      ? labels
+        ? `Lengkapi berkas wajib: ${labels}, serta salah satu SKL atau ijazah.`
+        : "Unggah salah satu SKL atau ijazah."
+      : `Lengkapi berkas wajib: ${labels}.`;
+  }
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step < 4) {
-      if (step === 3 && !requiredDocumentsComplete(documents())) {
-        setError(
-          "Lengkapi KK, KTP orang tua/wali, akta kelahiran, dan salah satu SKL atau ijazah.",
-        );
+      if (step === 3 && requirementsError()) {
+        setError(requirementsError());
         return;
       }
       go(step + 1);
       return;
     }
     if (submitting.current) return;
-    if (!requiredDocumentsComplete(documents())) {
+    if (!backendConfigured) {
+      setError(
+        "Pendaftaran belum dapat dikirim karena backend belum dikonfigurasi.",
+      );
+      return;
+    }
+    if (settingsState.status !== "ready") {
+      setError(
+        settingsState.error ??
+          "Pengaturan PPDB belum berhasil dimuat dari server.",
+      );
+      return;
+    }
+    if (!settings.registrationOpen) {
+      setError("Pendaftaran PPDB sedang ditutup.");
+      return;
+    }
+    const documentError = requirementsError();
+    if (documentError) {
       go(3);
-      setError("Berkas wajib belum lengkap.");
+      setError(documentError);
       return;
     }
     if (!consent) {
-      setError("Konfirmasi penggunaan data dummy terlebih dahulu.");
+      setError("Persetujuan orang tua/wali diperlukan untuk mengirim data.");
       return;
     }
+
     submitting.current = true;
-    const id =
-      "NH-" +
-      new Date().getFullYear() +
-      "-" +
-      crypto.randomUUID().slice(0, 8).toUpperCase();
+    setIsSubmitting(true);
+    idempotencyKey.current ??= crypto.randomUUID();
+    const { extracurricular, ...studentData } = form;
     try {
-      const record: Application = {
-        ...form,
-        program: "",
-        id,
-        status: "Verifikasi",
-        registrationSource: "Website",
-        documents: documents(),
-        submittedAt: new Date().toISOString(),
-      };
-      addApplication(record);
-      retainDemoFiles(id, files);
-      setSubmitted(id);
+      const receipt = await submitPublicApplication(
+        {
+          ...studentData,
+          extracurriculars:
+            extracurricular === "Belum menentukan" ? [] : [extracurricular],
+        },
+        files,
+        idempotencyKey.current,
+      );
+      setSubmitted(receipt);
       setFiles({});
       setForm(initialRegistration);
       setConsent(false);
-    } catch {
+      idempotencyKey.current = null;
+    } catch (reason) {
       setError(
-        "Penyimpanan simulasi gagal. Data belum dihapus; coba kembali atau periksa penyimpanan browser.",
+        reason instanceof ApiError
+          ? reason.message
+          : reason instanceof Error
+            ? `Pendaftaran gagal dikirim: ${reason.message}`
+            : "Pendaftaran gagal dikirim. Data tetap tersimpan pada formulir ini; coba lagi.",
       );
     } finally {
       submitting.current = false;
+      setIsSubmitting(false);
     }
   }
+
   if (submitted)
     return (
       <div className="form-success" role="status">
         <span className="success-mark">✓</span>
-        <p className="section-kicker">Simulasi berhasil</p>
-        <h2>Pendaftaran sudah dicatat.</h2>
-        <strong>{submitted}</strong>
+        <p className="section-kicker">Pendaftaran tersimpan</p>
+        <h2>Data berhasil dikirim ke PPDB.</h2>
+        <strong>{submitted.id}</strong>
         <p>
-          Metadata tersimpan sementara pada tab ini. File hanya tersedia di
-          memori sampai halaman dimuat ulang; tidak ada upload ke server.
+          Status: {submitted.status}. Simpan nomor pendaftaran ini untuk
+          keperluan komunikasi dengan sekolah.
         </p>
-        <Link className="button button-dark" href="/admin">
-          Lihat di admin pada tab ini
+        <Link className="button button-dark" href="/">
+          Kembali ke website
         </Link>
-        <button
-          className="button registration-back"
-          onClick={() => {
-            setSubmitted(null);
-            setStep(1);
-          }}
-        >
-          Isi pendaftaran lain
-        </button>
       </div>
     );
+
+  const statusMessage = !backendConfigured
+    ? "Pengiriman belum tersedia karena backend belum dikonfigurasi. Data formulir tidak disimpan di browser."
+    : settingsState.status === "loading"
+      ? "Memuat pengaturan PPDB dari server…"
+      : settingsState.status === "error"
+        ? `Pengaturan PPDB gagal dimuat${settingsState.error ? `: ${settingsState.error}` : "."}`
+        : !settings.registrationOpen
+          ? "Pendaftaran PPDB sedang ditutup."
+          : "";
+
   return (
     <form
       className="registration-form registration-wizard"
@@ -145,11 +197,11 @@ export function RegistrationForm() {
         <span>Formulir PPDB</span>
         <strong>{settings.academicYear}</strong>
       </div>
-      <div className="demo-alert">
-        <b>Simulasi frontend.</b> Gunakan data dan berkas dummy. Isian tetap ada
-        saat berpindah langkah, tetapi hilang jika halaman dimuat ulang sebelum
-        dikirim.
-      </div>
+      {statusMessage && (
+        <p className="form-help" role="status">
+          {statusMessage}
+        </p>
+      )}
       <ol
         className="wizard-progress"
         aria-label={"Langkah " + step + " dari 4"}
@@ -167,7 +219,13 @@ export function RegistrationForm() {
       </ol>
       {step === 1 && <StudentFields form={form} update={update} />}
       {step === 2 && <StudentFields form={form} update={update} parent />}
-      {step === 3 && <DocumentFields files={files} setFiles={setFiles} />}
+      {step === 3 && (
+        <DocumentFields
+          files={files}
+          setFiles={updateFiles}
+          requirements={settings.documentRequirements}
+        />
+      )}
       {step === 4 && (
         <>
           <RegistrationReview form={form} files={files} edit={go} />
@@ -176,10 +234,10 @@ export function RegistrationForm() {
               type="checkbox"
               required
               checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
+              onChange={(event) => setConsent(event.target.checked)}
             />
-            Saya menggunakan data dan berkas dummy serta memahami bahwa ini
-            bukan pendaftaran resmi.
+            Saya orang tua/wali dan menyetujui data ini digunakan untuk proses
+            PPDB.
           </label>
         </>
       )}
@@ -194,12 +252,27 @@ export function RegistrationForm() {
             type="button"
             className="button registration-back"
             onClick={() => go(step - 1)}
+            disabled={isSubmitting}
           >
             Kembali
           </button>
         )}
-        <button className="button button-accent submit-button" type="submit">
-          {step === 4 ? "Kirim pendaftaran demo" : "Lanjut: " + steps[step]}
+        <button
+          className="button button-accent submit-button"
+          type="submit"
+          disabled={
+            isSubmitting ||
+            (step === 4 &&
+              (!backendConfigured ||
+                settingsState.status !== "ready" ||
+                !settings.registrationOpen))
+          }
+        >
+          {isSubmitting
+            ? "Mengirim…"
+            : step === 4
+              ? "Kirim pendaftaran"
+              : "Lanjut: " + steps[step]}
         </button>
       </div>
     </form>

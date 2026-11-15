@@ -81,6 +81,61 @@ describe("backend foundation", () => {
     expect(response.json()).toMatchObject({ code: "UNAUTHORIZED" });
   });
 
+  it("registers protected PPDB, student, and dashboard API routes", async () => {
+    const app = await buildApp(config);
+    apps.push(app);
+    const requests = [
+      { method: "GET", url: "/api/v1/applications" },
+      { method: "GET", url: "/api/v1/students/" },
+      { method: "GET", url: "/api/v1/students/00000000-0000-4000-8000-000000000001" },
+      { method: "GET", url: "/api/v1/admin/dashboard/summary" },
+      {
+        method: "POST",
+        url: "/api/v1/applications/NH-2026-42/accept",
+        headers: { origin: "http://localhost:3000" },
+      },
+      {
+        method: "POST",
+        url: "/api/v1/applications/NH-2026-42/complete-re-enrollment",
+        headers: { origin: "http://localhost:3000" },
+      },
+    ] as const;
+
+    for (const request of requests) {
+      const response = await app.inject(request);
+      expect(response.statusCode, request.url).toBe(401);
+      expect(response.json()).toMatchObject({ code: "UNAUTHORIZED" });
+    }
+  });
+
+  it("registers public multipart PPDB intake with route-specific upload limits", async () => {
+    const app = await buildApp(config);
+    apps.push(app);
+    const boundary = "app-test-boundary";
+    const payload = Buffer.concat([
+      Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="data"; filename="data.json"\r\nContent-Type: application/json\r\n\r\n{"studentName":""}\r\n`,
+      ),
+      Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="kk"; filename="kk.pdf"\r\nContent-Type: application/pdf\r\n\r\n%PDF-1.7\r\n`,
+      ),
+      Buffer.from(`--${boundary}--\r\n`),
+    ]);
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/applications",
+      headers: {
+        "content-type": `multipart/form-data; boundary=${boundary}`,
+        "idempotency-key": "e708a75a-8b2c-4c7f-99dc-7da19fe8464d",
+      },
+      payload,
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json()).toMatchObject({ code: "VALIDATION_ERROR" });
+  });
+
   it("validates publishedAt and the required article fields", async () => {
     const app = await buildApp(config);
     apps.push(app);

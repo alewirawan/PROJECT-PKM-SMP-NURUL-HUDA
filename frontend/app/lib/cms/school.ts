@@ -17,7 +17,7 @@ export const defaultSettings: SchoolSettings = {
   academicYear: "2026/2027",
   registrationOpen: true,
   documentRequirements: {
-    requiredKinds: ["skl", "kk", "ktp", "akta"],
+    requiredKinds: [],
     requireOneGraduationDocument: false,
   },
   registrationOpensAt: null,

@@ -3,15 +3,40 @@ import { useState } from "react";
 import { FileCheck2, Upload } from "lucide-react";
 import { documentLabels } from "../../lib/cms/student-documents";
 import type { StudentDocument } from "../../lib/cms/types";
-import { validateDemoFile } from "../../lib/registration-files";
+import type { DocumentRequirements } from "../../lib/cms/types";
+import { validateRegistrationFile } from "../../lib/registration-files";
 import { FilePreview } from "./FilePreview";
 export type SelectedFiles = Partial<Record<StudentDocument["key"], File>>;
+
+function requirementLabel(
+  key: StudentDocument["key"],
+  requirements: DocumentRequirements,
+) {
+  if (
+    requirements.requiredKinds.includes(
+      key as (typeof requirements.requiredKinds)[number],
+    )
+  )
+    return "Wajib";
+  if (
+    (key === "skl" || key === "ijazah") &&
+    requirements.requireOneGraduationDocument &&
+    !requirements.requiredKinds.some(
+      (kind) => kind === "skl" || kind === "ijazah",
+    )
+  )
+    return "Wajib pilih salah satu";
+  return "Opsional";
+}
+
 export function DocumentFields({
   files,
   setFiles,
+  requirements,
 }: {
   files: SelectedFiles;
   setFiles: (files: SelectedFiles) => void;
+  requirements: DocumentRequirements;
 }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<File | null>(null);
@@ -19,10 +44,8 @@ export function DocumentFields({
     <fieldset>
       <legend>03 - Berkas pendaftaran</legend>
       <p className="form-help">
-        Gunakan berkas dummy. PDF, JPG, atau PNG; maksimal 5 MB per berkas.
-        Dalam simulasi ini KK, KTP orang tua/wali, akta, dan salah satu
-        SKL/ijazah perlu dipilih. PIP/KIP opsional. Aturan final mengikuti
-        sekolah.
+        PDF, JPG, atau PNG; maksimal 5 MB per berkas. Persyaratan mengikuti
+        pengaturan PPDB terbaru dari sekolah. PIP/KIP selalu opsional.
       </p>
       <div className="registration-upload-grid">
         {documentLabels.map(({ key, label }) => (
@@ -34,13 +57,7 @@ export function DocumentFields({
               {files[key] ? <FileCheck2 size={22} /> : <Upload size={22} />}
               <div>
                 <h3>{label}</h3>
-                <small>
-                  {key === "skl" || key === "ijazah"
-                    ? "Pilih salah satu SKL / ijazah"
-                    : key === "kip"
-                      ? "Jika memiliki"
-                      : "Wajib pada simulasi"}
-                </small>
+                <small>{requirementLabel(key, requirements)}</small>
               </div>
             </div>
             <label>
@@ -53,7 +70,7 @@ export function DocumentFields({
                   const file = event.target.files?.[0];
                   event.target.value = "";
                   if (!file) return;
-                  const error = validateDemoFile(file);
+                  const error = validateRegistrationFile(file);
                   setErrors((current) => ({ ...current, [key]: error }));
                   if (!error) setFiles({ ...files, [key]: file });
                 }}
@@ -69,8 +86,8 @@ export function DocumentFields({
                 <p className="selected-file">
                   {files[key]!.name}
                   <small>
-                    {Math.ceil(files[key]!.size / 1024)} KB · Dipilih lokal,
-                    belum diunggah
+                    {Math.ceil(files[key]!.size / 1024)} KB · Akan dikirim
+                    dengan formulir
                   </small>
                 </p>
                 <div className="file-actions">

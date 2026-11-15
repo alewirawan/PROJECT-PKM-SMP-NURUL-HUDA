@@ -137,7 +137,9 @@ export function useSchoolSettingsState() {
 export function describeRegistration(state: SettingsState):
   | { kind: "loading" }
   | { kind: "error" }
+  | { kind: "demo" }
   | { kind: "open" | "closed"; academicYear: string } {
+  if (state.source === "demo") return { kind: "demo" };
   if (state.status === "loading") return { kind: "loading" };
   if (state.status === "error") return { kind: "error" };
   return {

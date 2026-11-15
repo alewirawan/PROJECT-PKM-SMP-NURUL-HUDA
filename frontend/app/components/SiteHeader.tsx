@@ -76,6 +76,8 @@ export function SiteHeader({ active = "" }: { active?: string }) {
           {registration.kind === "loading" && "Memuat informasi PPDB…"}
           {registration.kind === "error" &&
             "Informasi PPDB sementara tidak dapat dimuat"}
+          {registration.kind === "demo" &&
+            "Mode demo — status pendaftaran resmi belum tersedia"}
           {registration.kind === "open" &&
             `PPDB Tahun Ajaran ${registration.academicYear} telah dibuka`}
           {registration.kind === "closed" &&

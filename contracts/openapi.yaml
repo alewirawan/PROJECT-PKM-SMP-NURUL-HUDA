@@ -20,6 +20,8 @@ tags:
     description: Login dan session admin
   - name: Applications
     description: Pendaftaran dan dokumen siswa
+  - name: Students
+    description: Data siswa yang telah menyelesaikan daftar ulang
   - name: Directory
     description: Struktur organisasi dan tenaga pendidik
   - name: Content
@@ -140,7 +142,7 @@ paths:
           }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 6
       x-roles:
         - super_admin
@@ -187,7 +189,7 @@ paths:
         sebelum penerimaan; 201 hanya setelah metadata dan file tersimpan. Bersihkan file sementara
         saat gagal. Akses koreksi sesudah submit hanya melalui session pendaftar terautentikasi,
         bukan nomor pendaftaran saja. Terapkan rate limit, batas resource, dan deduplikasi retry.
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 5
   /applications/{applicationId}:
     parameters:
@@ -247,6 +249,102 @@ paths:
         "409": { $ref: "#/components/responses/Conflict" }
         "422": { $ref: "#/components/responses/ValidationError" }
       x-implementation-status: planned
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /applications/{applicationId}/accept:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    post:
+      tags:
+        - Applications
+      operationId: acceptApplication
+      summary: Tetapkan pendaftar terverifikasi sebagai diterima
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Status penerimaan,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        type: object,
+                        additionalProperties: false,
+                        required: [applicationId, status, changed],
+                        properties:
+                          {
+                            applicationId: { type: string, pattern: "^NH-[A-Z0-9-]+$" },
+                            status: { const: accepted },
+                            changed: { type: boolean },
+                          },
+                      },
+                  },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+      description: >-
+        Hanya status Terverifikasi atau Wawancara yang dapat diterima. Perubahan status dan
+        riwayatnya disimpan dalam satu transaksi.
+      x-implementation-status: implemented
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /applications/{applicationId}/complete-re-enrollment:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    post:
+      tags:
+        - Applications
+      operationId: completeApplicationReEnrollment
+      summary: Selesaikan daftar ulang dan catat siswa
+      security:
+        - { cookieSession: [] }
+      responses:
+        "201":
+          {
+            description: Siswa baru dicatat setelah daftar ulang selesai,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: "#/components/schemas/CompleteReEnrollmentResult",
+                      },
+                  },
+              },
+          }
+        "200":
+          {
+            description: Daftar ulang sebelumnya telah selesai,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: "#/components/schemas/CompleteReEnrollmentResult",
+                      },
+                  },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+      description: >-
+        Pendaftar hanya dicatat sebagai siswa bila statusnya diterima. Konfirmasi daftar ulang
+        dan pembuatan siswa dilakukan atomik; pengiriman ulang aman dan tidak membuat siswa ganda.
+      x-implementation-status: implemented
       x-owner: 6
       x-roles:
         - super_admin
@@ -778,7 +876,7 @@ paths:
               },
           }
         "429": { $ref: "#/components/responses/RateLimited" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 9
     put:
       tags:
@@ -807,7 +905,7 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
         "422": { $ref: "#/components/responses/ValidationError" }
-      x-implementation-status: planned
+      x-implementation-status: implemented
       x-owner: 9
       x-roles:
         - super_admin
@@ -1271,6 +1369,110 @@ paths:
       x-roles:
         - super_admin
         - editor
+  /admin/dashboard/summary:
+    get:
+      tags:
+        - Dashboard
+      operationId: getAdminDashboardSummary
+      summary: Hitung ringkasan dashboard admin
+      security:
+        - { cookieSession: [] }
+      responses:
+        "200":
+          {
+            description: Jumlah data tanpa mengambil biodata siswa,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: "#/components/schemas/AdminDashboardSummary",
+                      },
+                  },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+      x-implementation-status: implemented
+      x-owner: 10
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /students:
+    get:
+      tags:
+        - Students
+      operationId: listStudents
+      summary: Cari, filter, dan paginasi data siswa
+      security:
+        - { cookieSession: [] }
+      parameters:
+        - { in: query, name: q, schema: { type: string, maxLength: 100 } }
+        - {
+            in: query,
+            name: status,
+            schema: { type: string, enum: [active, inactive], default: active },
+          }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+        - {
+            in: query,
+            name: limit,
+            schema: { type: integer, minimum: 1, maximum: 100, default: 25 },
+          }
+      responses:
+        "200":
+          {
+            description: Halaman data siswa,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/StudentPage" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      description: Alias dengan garis miring akhir juga didukung oleh backend.
+      x-implementation-status: implemented
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
+  /students/{studentId}:
+    get:
+      tags:
+        - Students
+      operationId: getStudent
+      summary: Ambil detail siswa berdasarkan UUID
+      security:
+        - { cookieSession: [] }
+      parameters:
+        - {
+            in: path,
+            name: studentId,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          {
+            description: Detail siswa,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: "#/components/schemas/StudentRecord" } },
+              },
+          }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+      x-implementation-status: implemented
+      x-owner: 6
+      x-roles:
+        - super_admin
+        - admin_ppdb
   /dashboard/summary:
     get:
       tags:
@@ -1709,6 +1911,7 @@ components:
         - id
         - source
         - status
+        - reEnrollmentStatus
         - submittedAt
         - documents
         - extracurriculars
@@ -1728,6 +1931,11 @@ components:
         id: { type: string, pattern: "^NH-[A-Z0-9-]+$" }
         source: { $ref: "#/components/schemas/RegistrationSource" }
         status: { $ref: "#/components/schemas/ApplicationStatus" }
+        reEnrollmentStatus:
+          {
+            type: [string, "null"],
+            enum: [pending, completed, null],
+          }
         submittedAt: { type: string, format: date-time }
         notes: { type: string, maxLength: 1000 }
         documents:
@@ -1766,6 +1974,101 @@ components:
         items:
           { type: array, items: { $ref: "#/components/schemas/Application" } }
         nextCursor: { type: [string, "null"] }
+    CompleteReEnrollmentResult:
+      type: object
+      additionalProperties: false
+      required: [student, reEnrollment]
+      properties:
+        student:
+          type: object
+          additionalProperties: false
+          required: [id, studentName, status, officiallyRegisteredAt]
+          properties:
+            id: { type: string, format: uuid }
+            studentName: { type: string }
+            status: { const: active }
+            officiallyRegisteredAt: { type: string, format: date-time }
+        reEnrollment:
+          type: object
+          additionalProperties: false
+          required: [status, confirmedAt]
+          properties:
+            status: { const: completed }
+            confirmedAt: { type: string, format: date-time }
+    StudentStatus:
+      type: string
+      enum: [active, inactive]
+    StudentListItem:
+      type: object
+      additionalProperties: false
+      required: [id, studentName, status, officiallyRegisteredAt]
+      properties:
+        id: { type: string, format: uuid }
+        studentName: { type: string }
+        status: { $ref: "#/components/schemas/StudentStatus" }
+        officiallyRegisteredAt: { type: string, format: date-time }
+    StudentRecord:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          id,
+          studentName,
+          status,
+          officiallyRegisteredAt,
+          nisn,
+          birthPlace,
+          birthDate,
+          gender,
+          address,
+          createdAt,
+          updatedAt,
+        ]
+      properties:
+        id: { type: string, format: uuid }
+        studentName: { type: string }
+        status: { $ref: "#/components/schemas/StudentStatus" }
+        officiallyRegisteredAt: { type: string, format: date-time }
+        nisn: { type: [string, "null"], pattern: "^[0-9]{10}$" }
+        birthPlace: { type: [string, "null"] }
+        birthDate: { type: [string, "null"], format: date }
+        gender:
+          { type: [string, "null"], enum: [Laki-laki, Perempuan, null] }
+        address: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    StudentPage:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          { type: array, items: { $ref: "#/components/schemas/StudentListItem" } }
+        pagination:
+          type: object
+          additionalProperties: false
+          required: [page, limit, total, totalPages]
+          properties:
+            page: { type: integer, minimum: 1 }
+            limit: { type: integer, minimum: 1, maximum: 100 }
+            total: { type: integer, minimum: 0 }
+            totalPages: { type: integer, minimum: 0 }
+    AdminDashboardMetric:
+      type: object
+      additionalProperties: false
+      required: [count, status]
+      properties:
+        count: { type: [integer, "null"], minimum: 0 }
+        status: { type: string, enum: [available, unavailable] }
+    AdminDashboardSummary:
+      type: object
+      additionalProperties: false
+      required: [students, teachers, ppdbApplicants, agenda]
+      properties:
+        students: { $ref: "#/components/schemas/AdminDashboardMetric" }
+        teachers: { $ref: "#/components/schemas/AdminDashboardMetric" }
+        ppdbApplicants: { $ref: "#/components/schemas/AdminDashboardMetric" }
+        agenda: { $ref: "#/components/schemas/AdminDashboardMetric" }
     SchoolDirectory:
       type: object
       additionalProperties: false

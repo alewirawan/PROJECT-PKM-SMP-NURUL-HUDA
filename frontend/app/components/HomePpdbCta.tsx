@@ -47,13 +47,15 @@ export function HomePpdbCta() {
         {registration.kind === "loading" && "Memuat status pendaftaran…"}
         {registration.kind === "error" &&
           "Status pendaftaran sementara tidak dapat dimuat."}
+        {registration.kind === "demo" &&
+          "Mode demo. Status dan pengiriman pendaftaran resmi belum tersedia."}
         {registration.kind === "open" && "Pendaftaran sedang dibuka."}
         {registration.kind === "closed" && "Pendaftaran sedang ditutup."}
         {schedule && ` ${schedule}`}
       </p>
       <div>
         <Link className="button button-accent" href="/pendaftaran">
-          {registration.kind === "closed"
+          {registration.kind === "closed" || registration.kind === "demo"
             ? "Lihat informasi PPDB"
             : "Daftar sebagai calon siswa"}
         </Link>

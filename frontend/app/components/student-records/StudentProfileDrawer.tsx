@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { X } from "lucide-react";
+import type { ReactNode } from "react";
 import type { Application, ApplicationStatus } from "../../lib/local-cms";
 import { DialogPortal } from "../DialogPortal";
 import { DocumentReview, type ReviewDocument } from "./DocumentReview";
@@ -15,11 +16,15 @@ export function StudentProfileDrawer({
   onClose,
   updateStatus,
   reviewDocument,
+  readOnly = false,
+  extraActions,
 }: {
   student: Application;
   onClose: () => void;
   updateStatus: (id: string, status: ApplicationStatus) => void;
   reviewDocument: ReviewDocument;
+  readOnly?: boolean;
+  extraActions?: ReactNode;
 }) {
   const [tab, setTab] = useState(0);
   const tabs = ["Biodata", "Orang tua/wali", "Berkas", "Status pendaftaran"];
@@ -60,7 +65,9 @@ export function StudentProfileDrawer({
           {studentInitials(student.studentName)}
         </span>
         <div>
-          <p className="admin-eyebrow">Profil calon siswa · simulasi</p>
+          <p className="admin-eyebrow">
+            Profil calon siswa · {readOnly ? "database" : "simulasi"}
+          </p>
           <h2 id="student-profile-title">{student.studentName}</h2>
           <SourceBadge source={student.registrationSource} />
         </div>
@@ -120,7 +127,11 @@ export function StudentProfileDrawer({
             </section>
           )}
           {index === 2 && (
-            <DocumentReview student={student} review={reviewDocument} />
+            <DocumentReview
+              student={student}
+              review={reviewDocument}
+              readOnly={readOnly}
+            />
           )}
           {index === 3 && (
             <section className="student-profile-section">
@@ -133,6 +144,7 @@ export function StudentProfileDrawer({
                 Status penerimaan
                 <select
                   value={student.status}
+                  disabled={readOnly}
                   onChange={(e) =>
                     updateStatus(
                       student.id,
@@ -145,6 +157,7 @@ export function StudentProfileDrawer({
                   ))}
                 </select>
               </label>
+              {extraActions}
               <aside className="student-note">
                 <b>Catatan panitia</b>
                 <p>{student.notes || "Belum ada catatan."}</p>

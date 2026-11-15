@@ -82,11 +82,13 @@ test("renders public modules and a seeded article", async () => {
   }
 });
 
-test("PPDB and directory expose their new navigation and demo boundaries", async () => {
+test("PPDB and directory expose navigation and block demo submissions", async () => {
   const ppdb = await (await render("/pendaftaran")).text();
   assert.match(ppdb, /Langkah 1 dari 4/);
   assert.match(ppdb, /Ekstrakurikuler yang diminati/);
-  assert.match(ppdb, /data dan berkas dummy/);
+  assert.match(ppdb, /backend belum dikonfigurasi/);
+  assert.match(ppdb, /Data formulir tidak disimpan di browser/);
+  assert.doesNotMatch(ppdb, /Kirim pendaftaran demo/);
   const directory = await (await render("/struktur")).text();
   assert.match(directory, /role="tablist"/);
   assert.match(directory, /Daftar Guru/);

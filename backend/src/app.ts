@@ -4,25 +4,48 @@ import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
+import type { FastifyInstance } from "fastify";
 import type { AppConfig } from "./config/env.js";
 import { createDatabase } from "./db/client.js";
 import { registerAuthRoutes } from "./modules/auth/auth.routes.js";
 import { registerHealthRoutes } from "./modules/health/health.routes.js";
 import { registerPostRoutes } from "./modules/posts/post.routes.js";
 import { createAuthRepository } from "./modules/auth/auth.repository.js";
-import { createContentGuard } from "./modules/auth/auth.guard.js";
+import {
+  createApplicationsReadGuard,
+  createApplicationsWriteGuard,
+  createContentGuard,
+  createDashboardReadGuard,
+  createSettingsWriteGuard,
+  createStudentsReadGuard,
+} from "./modules/auth/auth.guard.js";
 import { createClubRepository } from "./modules/clubs/club.repository.js";
 import { registerClubRoutes } from "./modules/clubs/club.routes.js";
 import { createAgendaRepository } from "./modules/agenda/agenda.repository.js";
 import { registerAgendaRoutes } from "./modules/agenda/agenda.routes.js";
 import { registerErrorHandlers } from "./shared/http/error-handler.js";
+import { createApplicationsRepository } from "./modules/applications/application.repository.js";
+import { registerApplicationsRoutes } from "./modules/applications/application.routes.js";
+import { createApplicationWorkflowRepository } from "./modules/applications/application-workflow.repository.js";
+import { registerApplicationWorkflowRoutes } from "./modules/applications/application-workflow.routes.js";
+import { createStudentsRepository } from "./modules/students/student.repository.js";
+import { registerStudentsRoutes } from "./modules/students/student.routes.js";
+import { createDashboardRepository } from "./modules/dashboard/dashboard.repository.js";
+import { registerDashboardRoutes } from "./modules/dashboard/dashboard.routes.js";
+import { createApplicationSubmissionRepository } from "./modules/applications/application-submission.repository.js";
+import { createApplicationSubmissionService } from "./modules/applications/application-submission.service.js";
+import { registerApplicationSubmissionRoutes } from "./modules/applications/application-submission.routes.js";
+import { createPublicDocumentStore } from "./modules/applications/public-document-store.js";
+import { createSettingsRepository } from "./modules/settings/settings.repository.js";
+import { registerSettingsRoutes } from "./modules/settings/settings.routes.js";
 
-export async function buildApp(config: AppConfig) {
+export async function buildApp(config: AppConfig): Promise<FastifyInstance> {
   const app = Fastify({
     logger: config.NODE_ENV === "test" ? false : { level: "info" },
     trustProxy: config.TRUST_PROXY,
     bodyLimit: config.MAX_UPLOAD_MB * 1024 * 1024,
   });
+  app.decorateRequest("adminId", null);
   const { client, db } = createDatabase(config.DATABASE_URL);
   app.decorate("db", db);
   app.addHook("onClose", async () => client.end());
@@ -54,9 +77,44 @@ export async function buildApp(config: AppConfig) {
     async (api) => {
       await registerHealthRoutes(api);
       await registerAuthRoutes(api, config);
-      const contentGuard = createContentGuard(createAuthRepository(db), config);
+      const authRepository = createAuthRepository(db);
+      const contentGuard = createContentGuard(authRepository, config);
+      await registerSettingsRoutes(
+        api,
+        createSettingsRepository(db),
+        createSettingsWriteGuard(authRepository, config),
+      );
       await registerClubRoutes(api, createClubRepository(db), contentGuard);
       await registerAgendaRoutes(api, createAgendaRepository(db), contentGuard);
+      await registerApplicationsRoutes(
+        api,
+        createApplicationsRepository(db),
+        createApplicationsReadGuard(authRepository, config),
+      );
+      await registerApplicationSubmissionRoutes(
+        api,
+        createApplicationSubmissionService(
+          createApplicationSubmissionRepository(
+            db,
+            createPublicDocumentStore(config.UPLOAD_DIR),
+          ),
+        ),
+      );
+      await registerApplicationWorkflowRoutes(
+        api,
+        createApplicationWorkflowRepository(db),
+        createApplicationsWriteGuard(authRepository, config),
+      );
+      await registerStudentsRoutes(
+        api,
+        createStudentsRepository(db),
+        createStudentsReadGuard(authRepository, config),
+      );
+      await registerDashboardRoutes(
+        api,
+        createDashboardRepository(db),
+        createDashboardReadGuard(authRepository, config),
+      );
       await registerPostRoutes(api, config);
     },
     { prefix: "/api/v1" },

@@ -10,6 +10,11 @@ import {
   applicationDocumentSlots,
   documentReviews,
 } from "./documents.js";
+import { admins } from "./auth.js";
+import {
+  applicationReEnrollments,
+  students,
+} from "./students.js";
 import {
   applicantAccounts,
   applicantSessions,
@@ -30,8 +35,32 @@ export const applicationsRelations = relations(
     statusHistory: many(applicationStatusHistory),
     account: one(applicantAccounts),
     submissions: many(submissionRequests),
+    student: one(students),
+    reEnrollment: one(applicationReEnrollments),
   }),
 );
+export const studentsRelations = relations(students, ({ one }) => ({
+  application: one(applications, {
+    fields: [students.applicationId],
+    references: [applications.id],
+  }),
+}));
+export const applicationReEnrollmentsRelations = relations(
+  applicationReEnrollments,
+  ({ one }) => ({
+    application: one(applications, {
+      fields: [applicationReEnrollments.applicationId],
+      references: [applications.id],
+    }),
+    confirmer: one(admins, {
+      fields: [applicationReEnrollments.confirmedBy],
+      references: [admins.id],
+    }),
+  }),
+);
+export const adminsRelations = relations(admins, ({ many }) => ({
+  confirmedReEnrollments: many(applicationReEnrollments),
+}));
 export const applicationChoicesRelations = relations(
   applicationChoices,
   ({ one }) => ({

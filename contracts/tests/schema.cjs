@@ -66,6 +66,17 @@ for (const name of Object.keys(document.components.schemas)) {
   assert.ok(ajv.getSchema(id + "#/components/schemas/" + name), name);
 }
 const operationIds = new Set();
+const implementedOperations = new Set([
+  "listApplications",
+  "createPublicApplication",
+  "acceptApplication",
+  "completeApplicationReEnrollment",
+  "getSchoolSettings",
+  "updateSchoolSettings",
+  "getAdminDashboardSummary",
+  "listStudents",
+  "getStudent",
+]);
 for (const [route, item] of Object.entries(document.paths)) {
   for (const method of ["get", "post", "put", "patch", "delete"]) {
     const operation = item[method];
@@ -82,7 +93,12 @@ for (const [route, item] of Object.entries(document.paths)) {
     );
     assert.equal(
       operation["x-implementation-status"],
-      route.startsWith("/auth/") ? "foundation" : [2, 4].includes(operation["x-owner"]) ? "implemented" : "planned",
+      route.startsWith("/auth/")
+        ? "foundation"
+        : [2, 4].includes(operation["x-owner"]) ||
+            implementedOperations.has(operation.operationId)
+          ? "implemented"
+          : "planned",
     );
     if (operation.security) assert.ok(operation["x-roles"].length);
   }
@@ -162,6 +178,70 @@ check(
   "ApplicationCreate",
   { ...student, status: "Diterima" },
   false,
+);
+const studentRecord = {
+  id: "7e6b79d5-ae9b-4a9f-88d2-2e7f8c88b3b1",
+  studentName: "Siswa Uji",
+  status: "active",
+  officiallyRegisteredAt: "2026-11-05T05:30:00.000Z",
+  nisn: null,
+  birthPlace: null,
+  birthDate: null,
+  gender: null,
+  address: null,
+  createdAt: "2026-11-05T05:30:00.000Z",
+  updatedAt: "2026-11-05T05:30:00.000Z",
+};
+check("nullable student details", "StudentRecord", studentRecord, true);
+check(
+  "student detail must include status",
+  "StudentRecord",
+  { ...studentRecord, status: undefined },
+  false,
+);
+check(
+  "student page validates server pagination",
+  "StudentPage",
+  {
+    items: [
+      {
+        id: studentRecord.id,
+        studentName: studentRecord.studentName,
+        status: studentRecord.status,
+        officiallyRegisteredAt: studentRecord.officiallyRegisteredAt,
+      },
+    ],
+    pagination: { page: 1, limit: 25, total: 1, totalPages: 1 },
+  },
+  true,
+);
+check(
+  "dashboard summary exposes counts only",
+  "AdminDashboardSummary",
+  {
+    students: { count: 1, status: "available" },
+    teachers: { count: 2, status: "available" },
+    ppdbApplicants: { count: 3, status: "available" },
+    agenda: { count: 4, status: "available" },
+  },
+  true,
+);
+check(
+  "completed enrollment contains one student",
+  "CompleteReEnrollmentResult",
+  {
+    student: {
+      id: studentRecord.id,
+      studentName: studentRecord.studentName,
+      status: "active",
+      officiallyRegisteredAt: studentRecord.officiallyRegisteredAt,
+    },
+    reEnrollment: {
+      status: "completed",
+      confirmedAt: studentRecord.officiallyRegisteredAt,
+    },
+  },
+  true,
 );
 
 const multipart = {
@@ -348,6 +428,7 @@ check(
     id: "NH-2026-DEMO",
     source: "Website",
     status: "Verifikasi",
+    reEnrollmentStatus: null,
     submittedAt: "2026-10-15T01:00:00Z",
     documents: [file],
     documentRequirements: {

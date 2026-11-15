@@ -1,5 +1,3 @@
-import { title } from "process";
-
 /**
  * Teks statis beranda (anggota 1). Jangan simpan berita, prestasi, atau
  * konfigurasi rahasia di sini: berita dari anggota 4, prestasi dari anggota 8,

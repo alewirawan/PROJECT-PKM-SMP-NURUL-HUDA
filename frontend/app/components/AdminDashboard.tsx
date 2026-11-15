@@ -35,7 +35,9 @@ import {
   type ContactMessage,
   type SchoolSettings,
 } from "../lib/local-cms";
-import { hasBackendApi, requestApi } from "../lib/api-client";
+import { ApiError, hasBackendApi, requestApi } from "../lib/api-client";
+import { listApplications } from "../lib/api/applications";
+import { listStudents } from "../lib/api/students";
 import { useAgenda } from "../lib/use-agenda";
 import { listAdminPosts } from "../lib/cms/posts";
 import { BrandMark } from "./BrandMark";
@@ -52,6 +54,9 @@ import type { AdminToast as Toast, AdminView as View } from "./admin/types";
 
 import { AchievementsModule } from "./admin/AchievementsModule";
 import { ClubsModule } from "./admin/ClubsModule";
+import { ApplicationsModule as ApplicationsBackendModule } from "./admin/ApplicationsBackendModule";
+import { DashboardModule as DashboardBackendModule } from "./admin/DashboardBackendModule";
+import { StudentRecordsModule as StudentRecordsBackendModule } from "./StudentRecordsBackendModule";
 
 const menu: { id: View; label: string; icon: LucideIcon }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -74,10 +79,54 @@ const mobilePrimaryViews: View[] = [
 ];
 const DEMO_SESSION_KEY = "nurul_huda_admin_demo";
 
+type AdminUser = {
+  id: string;
+  name: string;
+  role: string;
+};
+
+type ApplicationsLoadStatus = "loading" | "ready" | "error";
+type ApplicationsLoadError = {
+  message: string;
+  authentication: boolean;
+};
+type StudentCountState =
+  | { status: "loading" }
+  | { status: "ready"; count: number }
+  | { status: "unavailable"; message: string };
+
+function getInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase();
+}
+
+function formatRole(role: string) {
+  return role
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 export function AdminDashboard() {
   const [view, setView] = useState<View>("dashboard");
   const [applications, setApplications] =
     useState<Application[]>(seedApplications);
+  const [ppdbApplications, setPpdbApplications] = useState<Application[]>([]);
+  const [ppdbLoadStatus, setPpdbLoadStatus] =
+    useState<ApplicationsLoadStatus>("loading");
+  const [ppdbLoadError, setPpdbLoadError] =
+    useState<ApplicationsLoadError | null>(null);
+  const [ppdbRetry, setPpdbRetry] = useState(0);
+  const [studentCountRetry, setStudentCountRetry] = useState(0);
+  const [studentCount, setStudentCount] = useState<StudentCountState>({
+    status: "unavailable",
+    message: "API data siswa belum dikonfigurasi.",
+  });
   const [posts, setPosts] = useState<CmsPost[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [settings, setSettings] = useState<SchoolSettings>(() =>
@@ -86,12 +135,13 @@ export function AdminDashboard() {
   const [newsletterCount, setNewsletterCount] = useState(0);
   const [toast, setToast] = useState<Toast>(null);
   const [authenticated, setAuthenticated] = useState(false);
+  const [user, setUser] = useState<AdminUser | null>(null);
   const { agenda, error: agendaError } = useAgenda(true, authenticated);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [postPreset, setPostPreset] = useState<string | null>(null);
 
   function reload() {
-    setApplications(getApplications());
+    if (!hasBackendApi()) setApplications(getApplications());
     if (!hasBackendApi()) void listAdminPosts().then(setPosts);
     setMessages(getMessages());
     setSettings(getSchoolSettings());
@@ -102,13 +152,18 @@ export function AdminDashboard() {
     const initialize = window.setTimeout(() => {
       reload();
       if (hasBackendApi()) {
-        requestApi("/auth/session")
-          .then(() => {
+        requestApi<{ user: AdminUser }>("/auth/session")
+          .then((session) => {
+            setUser(session.user);
             setAuthenticated(true);
             void listAdminPosts().then(setPosts).catch(() => setPosts([]));
           })
-          .catch(() => setAuthenticated(false));
+          .catch(() => {
+            setUser(null);
+            setAuthenticated(false);
+          });
       } else {
+        setUser(null);
         setAuthenticated(
           window.sessionStorage.getItem(DEMO_SESSION_KEY) === "true",
         );
@@ -120,6 +175,71 @@ export function AdminDashboard() {
       stopListening();
     };
   }, []);
+
+  useEffect(() => {
+    if (view !== "applications" || !authenticated || !hasBackendApi()) return;
+    let active = true;
+    const initialize = window.setTimeout(() => {
+      if (!active) return;
+      setPpdbLoadStatus("loading");
+      setPpdbLoadError(null);
+      setPpdbApplications([]);
+
+      void listApplications()
+        .then((items) => {
+          if (!active) return;
+          setPpdbApplications(items);
+          setPpdbLoadStatus("ready");
+        })
+        .catch((error: unknown) => {
+          if (!active) return;
+          const authentication =
+            error instanceof ApiError && error.status === 401;
+          setPpdbLoadError({
+            message:
+              authentication
+                ? "Sesi Admin tidak valid atau telah berakhir. Silakan masuk kembali."
+                : error instanceof ApiError && error.status === 403
+                  ? "Akun Admin tidak memiliki izin melihat data pendaftar."
+                  : error instanceof Error
+                    ? `Daftar pendaftar gagal dimuat: ${error.message}`
+                    : "Daftar pendaftar gagal dimuat.",
+            authentication,
+          });
+          setPpdbLoadStatus("error");
+        });
+    }, 0);
+
+    return () => {
+      active = false;
+      window.clearTimeout(initialize);
+    };
+  }, [view, authenticated, ppdbRetry]);
+
+  useEffect(() => {
+    if (!authenticated || !hasBackendApi()) return;
+    let active = true;
+    void listStudents({ status: "active", page: 1, limit: 1 })
+      .then((result) => {
+        if (active)
+          setStudentCount({ status: "ready", count: result.pagination.total });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setStudentCount({
+          status: "unavailable",
+          message:
+            error instanceof ApiError
+              ? error.message
+              : error instanceof Error
+                ? error.message
+                : "Jumlah siswa aktif belum tersedia.",
+        });
+      });
+    return () => {
+      active = false;
+    };
+  }, [authenticated, studentCountRetry]);
 
   useEffect(() => {
     if (!toast) return;
@@ -145,29 +265,55 @@ export function AdminDashboard() {
         () => undefined,
       );
     window.sessionStorage.removeItem(DEMO_SESSION_KEY);
+    setUser(null);
     setAuthenticated(false);
     setView("dashboard");
   }
   function login(mode: "demo" | "backend") {
     if (mode === "demo") {
       window.sessionStorage.setItem(DEMO_SESSION_KEY, "true");
-    } else {
-      void listAdminPosts().then(setPosts).catch(() => setPosts([]));
+      setUser(null);
+      setAuthenticated(true);
+      return;
     }
-    setAuthenticated(true);
+    void requestApi<{ user: AdminUser }>("/auth/session")
+      .then((session) => {
+        setUser(session.user);
+        void listAdminPosts().then(setPosts).catch(() => setPosts([]));
+        setAuthenticated(true);
+      })
+      .catch(() => {
+        setUser(null);
+        setAuthenticated(false);
+      });
   }
 
   if (!authenticated) return <AdminLogin onLogin={login} />;
 
   const unread = messages.filter((message) => message.status === "Baru").length;
-  const countFor = (id: View) =>
-    id === "applications" || id === "students"
-      ? applications.length
-      : id === "posts"
-        ? posts.length
-        : id === "messages"
-          ? unread
-          : 0;
+  const countFor = (id: View) => {
+    if (!hasBackendApi())
+      return id === "applications" || id === "students"
+        ? applications.length
+        : id === "posts"
+          ? posts.length
+          : id === "messages"
+            ? unread
+            : 0;
+    return id === "applications"
+      ? ppdbLoadStatus === "ready"
+        ? ppdbApplications.length
+        : 0
+      : id === "students"
+        ? studentCount.status === "ready"
+          ? studentCount.count
+          : 0
+        : id === "posts"
+          ? posts.length
+          : id === "messages"
+            ? unread
+            : 0;
+  };
 
   return (
     <div className="admin-shell">
@@ -196,10 +342,10 @@ export function AdminDashboard() {
           })}
         </nav>
         <div className="sidebar-bottom">
-          <span className="admin-avatar">RA</span>
+          <span className="admin-avatar">{user ? getInitials(user.name) : ""}</span>
           <div>
-            <b>Rania A.</b>
-            <small>Super Admin</small>
+            {user && <b>{user.name}</b>}
+            <small>{user ? formatRole(user.role) : "Mode demo"}</small>
           </div>
           <button
             onClick={logout}
@@ -214,7 +360,7 @@ export function AdminDashboard() {
         <header className="admin-topbar">
           <div>
             <span className="domain-dot" /> admin.nurulhuda.sch.id{" "}
-            <em>CMS Lokal</em>
+            <em>{hasBackendApi() ? "API Backend" : "CMS Lokal"}</em>
           </div>
           <div className="admin-top-actions">
             {unread > 0 && (
@@ -327,23 +473,72 @@ export function AdminDashboard() {
         )}
         {view === "dashboard" && agendaError && <p role="alert" className="admin-form-error">{agendaError}</p>}
         {view === "dashboard" && (
-          <DashboardModule
-            applications={applications}
-            posts={posts}
-            agenda={agenda}
-            messages={messages}
-            onNavigate={navigate}
-            onCreatePost={() => startPost("Pengumuman")}
+          hasBackendApi() ? (
+            <DashboardBackendModule
+              applications={applications}
+              agenda={agenda}
+              adminName={user?.name}
+              onNavigate={navigate}
+              onCreatePost={() => startPost("Pengumuman")}
+            />
+          ) : (
+            <DashboardModule
+              applications={applications}
+              posts={posts}
+              agenda={agenda}
+              messages={messages}
+              onNavigate={navigate}
+              onCreatePost={() => startPost("Pengumuman")}
+            />
+          )
+        )}
+        {view === "applications" && hasBackendApi() && (
+          <ApplicationsBackendModule
+            applications={ppdbApplications}
+            loadStatus={ppdbLoadStatus}
+            loadError={ppdbLoadError}
+            onRetry={() => setPpdbRetry((current) => current + 1)}
+            onReauthenticate={() => void logout()}
+            onApplicationStatusChange={(id, status) =>
+              setPpdbApplications((current) =>
+                current.map((application) =>
+                  application.id === id
+                    ? { ...application, status }
+                    : application,
+                ),
+              )
+            }
+            onApplicationReEnrollmentChange={(id, status) =>
+              setPpdbApplications((current) =>
+                current.map((application) =>
+                  application.id === id
+                    ? { ...application, reEnrollmentStatus: status }
+                    : application,
+                ),
+              )
+            }
+            onStudentsChanged={() => {
+              setStudentCount({ status: "loading" });
+              setStudentCountRetry((current) => current + 1);
+            }}
+            canManagePpdb={
+              user !== null &&
+              ["super_admin", "admin_ppdb"].includes(user.role)
+            }
+            notify={notify}
           />
         )}
-        {view === "applications" && (
+        {view === "applications" && !hasBackendApi() && (
           <ApplicationsModule
             applications={applications}
             setApplications={setApplications}
             notify={notify}
           />
         )}
-        {view === "students" && (
+        {view === "students" && hasBackendApi() && (
+          <StudentRecordsBackendModule notify={notify} />
+        )}
+        {view === "students" && !hasBackendApi() && (
           <StudentRecordsModule
             applications={applications}
             setApplications={setApplications}
