@@ -7,15 +7,19 @@ import type { SchoolSettings } from "./types";
 
 export const defaultSettings: SchoolSettings = {
   schoolName: "SMP Nurul Huda",
-  tagline: "Lorem ipsum dolor sit amet",
-  email: "lorem@ipsum.test",
-  ppdbEmail: "ppdb@ipsum.test",
+  tagline: "Berprestasi. Berdaya Saing. Berakhlak.",
+  email: "smnurulhuda.cisoka@gmail.com",
+  ppdbEmail: "smnurulhuda.cisoka@gmail.com",
   phone: "081200000001",
   whatsapp: "081200000002",
-  address: "Lorem ipsum dolor sit amet, consectetur adipiscing 00000",
+  address:
+    "Jalan Cisoka - Megu, Kp. Secang RT/RW 05/04, Ds. Cempaka, Kec. Cisoka, Kab. Tangerang, Banten 15730",
   academicYear: "2026/2027",
   registrationOpen: true,
-  documentRequirements: { requiredKinds: [], requireOneGraduationDocument: false },
+  documentRequirements: {
+    requiredKinds: ["skl", "kk", "ktp", "akta"],
+    requireOneGraduationDocument: false,
+  },
   registrationOpensAt: null,
   registrationClosesAt: null,
   dataRetention: "indefinite",

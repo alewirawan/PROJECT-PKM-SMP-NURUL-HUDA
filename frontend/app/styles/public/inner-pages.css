@@ -169,3 +169,14 @@
   letter-spacing: 0.08em;
 }
 
+
+/* Visi dan misi yang panjang pada halaman Tentang (anggota 1). */
+.vision-grid h2.vision-text {
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.vision-grid h2.vision-text span {
+  display: block;
+  margin-bottom: 14px;
+}

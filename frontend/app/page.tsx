@@ -6,7 +6,6 @@ import { SiteFooter } from "./components/SiteFooter";
 import { HomeNews } from "./components/HomeNews";
 import { HomePpdbCta } from "./components/HomePpdbCta";
 import { SchoolText } from "./components/SchoolText";
-import { programs } from "./data";
 import { homeContent } from "./lib/content/home";
 
 export default function Home() {
@@ -101,11 +100,13 @@ export default function Home() {
         <section className="program-section">
           <div className="section-heading horizontal">
             <div>
-              <p className="section-kicker">Program unggulan</p>
+              <p className="section-kicker">
+                {homeContent.programSection.kicker}
+              </p>
               <h2>
-                Belajar dengan arah,
+                {homeContent.programSection.headingLines[0]}
                 <br />
-                tumbuh dengan pilihan.
+                {homeContent.programSection.headingLines[1]}
               </h2>
             </div>
             <Link className="text-link" href="/program">
@@ -113,7 +114,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="program-grid">
-            {programs.map((program) => (
+            {homeContent.programs.map((program) => (
               <article className="program-card" key={program.number}>
                 <span className="program-number">{program.number}</span>
                 <div>
@@ -137,10 +138,10 @@ export default function Home() {
           <div className="experience-images">
             <Image
               className="image-main"
-              src="/images/campus.jpg"
-              alt="Lingkungan kampus sekolah yang hijau"
+              src="/images/kampus-2.jpg"
+              alt="Gedung dan halaman SMP Nurul Huda"
               width={1600}
-              height={1048}
+              height={1200}
               sizes="(max-width: 820px) 86vw, 45vw"
             />
             <Image
@@ -178,14 +179,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="quote-section">
-          <span className="quote-mark">“</span>
-          <blockquote>{homeContent.quote.text}</blockquote>
-          <p>
-            <b>{homeContent.quote.author}</b>
-            <span>{homeContent.quote.role}</span>
-          </p>
-        </section>
+        {homeContent.quote && (
+          <section className="quote-section">
+            <span className="quote-mark">“</span>
+            <blockquote>{homeContent.quote.text}</blockquote>
+            <p>
+              <b>{homeContent.quote.author}</b>
+              <span>{homeContent.quote.role}</span>
+            </p>
+          </section>
+        )}
 
         <section className="news-section">
           <div className="section-heading horizontal">

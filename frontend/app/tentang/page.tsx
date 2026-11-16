@@ -1,207 +1,118 @@
-import { HomeAchievements } from "../components/HomeAchievements";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { SiteHeader } from "../components/SiteHeader";
+import { PageHero } from "../components/PageHero";
 import { SiteFooter } from "../components/SiteFooter";
-import { HomeNews } from "../components/HomeNews";
-import { HomePpdbCta } from "../components/HomePpdbCta";
 import { SchoolText } from "../components/SchoolText";
-import { programs } from "../data";
-import { homeContent } from "../lib/content/home";
+import { SiteHeader } from "../components/SiteHeader";
+import { aboutContent } from "../lib/content/about";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Tentang Kami",
+  description: "Cerita, visi, nilai, dan perjalanan SMP Nurul Huda.",
+};
+
+export default function AboutPage() {
   return (
     <>
-      <SiteHeader active="/" />
+      <SiteHeader active="/tentang" />
       <main>
-        <section className="hero">
-          <div className="hero-copy">
-            <p className="eyebrow">
-              <span /> Pendidikan yang tumbuh bersama zaman
-            </p>
-            <h1>
-              Membentuk generasi yang <em>berani bermimpi.</em>
-            </h1>
-            <p className="hero-lead">{homeContent.heroLead}</p>
-            <div className="hero-actions">
-              <Link className="button button-accent" href="/pendaftaran">
-                Mulai pendaftaran <span aria-hidden="true">↗</span>
-              </Link>
-              <Link className="text-link" href="/tentang">
-                Kenali sekolah kami <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-            <div className="hero-trust">
-              <div className="avatar-stack" aria-hidden="true">
-                <span>AN</span>
-                <span>KS</span>
-                <span>RM</span>
-              </div>
-              <p>
-                <strong>{homeContent.trust.score}</strong>
-                <br />
-                {homeContent.trust.caption}
-              </p>
-            </div>
-          </div>
-          <div className="hero-visual">
+        <PageHero
+          eyebrow={aboutContent.hero.eyebrow}
+          title={aboutContent.hero.title}
+          description={aboutContent.hero.description}
+        />
+        <section className="about-story">
+          <div className="about-image">
             <Image
-              src="/images/hero-classroom.jpg"
-              alt="Guru dan siswa belajar bersama di ruang kelas"
-              width={1800}
-              height={1120}
+              src="/images/kampus-1.jpg"
+              alt="Gedung dan halaman SMP Nurul Huda"
+              width={1600}
+              height={1200}
               sizes="(max-width: 820px) 100vw, 50vw"
-              priority
             />
-            <div className="hero-badge">
-              <strong>{homeContent.badge.value}</strong>
-              <span>
-                {homeContent.badge.lines[0]}
-                <br />
-                {homeContent.badge.lines[1]}
-              </span>
-            </div>
-            <div className="hero-card">
-              <span className="hero-card-icon" aria-hidden="true">
-                ✦
-              </span>
-              <div>
-                <small>{homeContent.accreditation.label}</small>
-                <strong>{homeContent.accreditation.value}</strong>
-              </div>
-            </div>
+            <span>{aboutContent.story.badge}</span>
           </div>
-        </section>
-
-        <section className="stats" aria-label="Statistik sekolah">
-          {homeContent.stats.map((stat) => (
-            <div key={stat.value}>
-              <strong>{stat.value}</strong>
-              <span>
-                {stat.lines[0]}
-                <br />
-                {stat.lines[1]}
-              </span>
-            </div>
-          ))}
-        </section>
-
-        <section className="intro-section">
-          <p className="section-kicker">
-            Belajar di <SchoolText field="schoolName" />
-          </p>
-          <h2>
-            Setiap anak punya cahaya.
-            <br />
-            Kami membantu mereka <em>menemukannya.</em>
-          </h2>
-          <p>{homeContent.intro}</p>
-        </section>
-
-        <section className="program-section">
-          <div className="section-heading horizontal">
-            <div>
-              <p className="section-kicker">Program unggulan</p>
-              <h2>
-                Belajar dengan arah,
-                <br />
-                tumbuh dengan pilihan.
-              </h2>
-            </div>
-            <Link className="text-link" href="/program">
-              Lihat semua program →
+          <div className="about-copy">
+            <p className="section-kicker">{aboutContent.story.kicker}</p>
+            <h2>{aboutContent.story.heading}</h2>
+            <p>
+              <SchoolText field="schoolName" /> {aboutContent.story.paragraphs[0]}
+            </p>
+            <p>{aboutContent.story.paragraphs[1]}</p>
+            <Link className="text-link" href="/pendaftaran">
+              Bergabung dengan Nurul Huda →
             </Link>
           </div>
-          <div className="program-grid">
-            {programs.map((program) => (
-              <article className="program-card" key={program.number}>
-                <span className="program-number">{program.number}</span>
-                <div>
-                  <h3>{program.title}</h3>
-                  <p>{program.description}</p>
-                </div>
-                <ul>
-                  {program.subjects.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-                <Link href="/program" aria-label={`Pelajari ${program.title}`}>
-                  ↗
-                </Link>
+        </section>
+        <section className="vision-grid">
+          <article>
+            <span>01</span>
+            <p className="section-kicker">Visi kami</p>
+            <h2 className="vision-text">{aboutContent.vision}</h2>
+          </article>
+          <article>
+            <span>02</span>
+            <p className="section-kicker">Misi kami</p>
+            <h2 className="vision-text">
+              {aboutContent.mission.map((item, index) => (
+                <span key={item}>
+                  {index + 1}. {item}
+                </span>
+              ))}
+            </h2>
+          </article>
+        </section>
+        <section className="values-section">
+          <div className="section-heading">
+            <p className="section-kicker">Nilai yang kami hidupi</p>
+            <h2>Kompas dalam setiap langkah.</h2>
+          </div>
+          <div className="value-grid">
+            {aboutContent.values.map((value) => (
+              <article key={value.number}>
+                <b>{value.number}</b>
+                <h3>{value.title}</h3>
+                <p>{value.text}</p>
               </article>
             ))}
           </div>
         </section>
-
-        <section className="experience-section">
-          <div className="experience-images">
+        <section className="principal-section">
+          <div>
             <Image
-              className="image-main"
-              src="/images/campus.jpg"
-              alt="Lingkungan kampus sekolah yang hijau"
+              src="/images/kampus-2.jpg"
+              alt="Halaman dan gedung kelas SMP Nurul Huda"
               width={1600}
-              height={1048}
-              sizes="(max-width: 820px) 86vw, 45vw"
+              height={1200}
+              sizes="(max-width: 820px) 100vw, 50vw"
             />
-            <Image
-              className="image-small"
-              src="/images/students.jpg"
-              alt="Siswa Nurul Huda berdiskusi bersama"
-              width={1400}
-              height={933}
-              sizes="(max-width: 820px) 42vw, 22vw"
-            />
-            <span className="round-label">
-              Ruang aman
-              <br />
-              untuk tumbuh
-            </span>
           </div>
-          <div className="experience-copy">
-            <p className="section-kicker">Pengalaman yang utuh</p>
-            <h2>Sekolah adalah tempat menemukan siapa dirimu.</h2>
-            <p>{homeContent.experience}</p>
-            <div className="feature-list">
-              {homeContent.features.map((feature) => (
-                <div key={feature.number}>
-                  <b>{feature.number}</b>
-                  <span>
-                    <strong>{feature.title}</strong>
-                    <small>{feature.text}</small>
-                  </span>
-                </div>
-              ))}
-            </div>
-            <Link className="button button-dark" href="/tentang">
-              Cerita tentang Nurul Huda
+          <blockquote>
+            <span>“</span>
+            <p>{aboutContent.principal.quote}</p>
+            <footer>
+              <b>{aboutContent.principal.name}</b>
+              <small>
+                Kepala <SchoolText field="schoolName" />
+              </small>
+            </footer>
+          </blockquote>
+        </section>
+        <section className="cta-section light">
+          <p className="section-kicker">Kenali lebih dekat</p>
+          <h2>
+            Datang, berbincang,
+            <br />
+            dan rasakan suasananya.
+          </h2>
+          <p>{aboutContent.cta}</p>
+          <div>
+            <Link className="button button-accent" href="/kontak">
+              Jadwalkan kunjungan
             </Link>
           </div>
         </section>
-
-        <section className="quote-section">
-          <span className="quote-mark">“</span>
-          <blockquote>{homeContent.quote.text}</blockquote>
-          <p>
-            <b>{homeContent.quote.author}</b>
-            <span>{homeContent.quote.role}</span>
-          </p>
-        </section>
-
-        <section className="news-section">
-          <div className="section-heading horizontal">
-            <div>
-              <p className="section-kicker">Cerita terbaru</p>
-              <h2>Kabar dari Nurul Huda</h2>
-            </div>
-            <Link className="text-link" href="/blog">
-              Baca semua cerita →
-            </Link>
-          </div>
-          <HomeNews />
-        </section>
-
-        <HomeAchievements />
-        <HomePpdbCta />
       </main>
       <SiteFooter />
     </>
