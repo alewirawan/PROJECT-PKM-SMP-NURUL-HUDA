@@ -19,27 +19,27 @@ export type Club = {
 };
 export const seedAchievements: Achievement[] = [
   {
-    id: "science-demo",
-    title: "Ide kecil, perubahan besar",
-    award: "Juara 1 Inovasi Sains",
-    level: "Kota",
+    id: "paskibra-1",
+    title: "LKBB JAWARA",
+    award: "Juara  Paskibra",
+    level: "Antar Sekiolah",
     year: "2026",
-    category: "Akademik",
+    category: "Olahraga",
     description:
-      "Contoh karya tim siswa: penyaring air sederhana dari bahan yang mudah ditemukan. Sebuah cerita tentang rasa ingin tahu dan kerja bersama.",
-    image: "/images/science.jpg",
+      "Tim Paskibra SMP Nurul Huda tampil percaya diri dalamlomba kreasi baris-berbaaris, Lewat latihan rutin,kekompakan dan kedisiplin,para siswa membawa pulang hasil terbaik untuk sekolah",
+    image: "/images/paskibra1.jpg",
     published: true,
   },
   {
-    id: "arts-demo",
-    title: "Berani tampil, merawat tradisi",
-    award: "Juara 2 Festival Seni Pelajar",
-    level: "Kabupaten",
-    year: "2026",
-    category: "Seni",
+    id: "paskibra-2",
+    title: "Kebanggan dari Barisan",
+    award: "Juara  Paskibra",
+    level: "Kecamatan",
+    year: "2024",
+    category: "Olahraga",
     description:
-      "Contoh pencapaian kelompok seni sekolah melalui latihan, kekompakan, dan kecintaan terhadap budaya.",
-    image: "/images/students.jpg",
+      "Piala-piala ini hasil kerja keras tim Paskibra,mulai dari latihan panjang sampai tampil di depan juri,semangat pantang menyerah dan kebersamaan menjadi kunci keberhasilan mereka",
+    image: "/images/paskibra2.jpg",
     published: true,
   },
   {
