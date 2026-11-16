@@ -71,7 +71,7 @@ test("renders public modules and a seeded article", async () => {
   for (const [path, marker] of [
     ["/blog", "Cerita Nurul Huda"],
     ["/struktur", "Struktur organisasi"],
-    ["/prestasi", "Ide kecil, perubahan besar"],
+    ["/prestasi", "LKBB JAWARA"],
     ["/pendaftaran", "Formulir PPDB"],
     ["/kontak", "Kirim pesan"],
     ["/blog/festival-inovasi-sains-2026", "Festival Inovasi Sains 2026"],

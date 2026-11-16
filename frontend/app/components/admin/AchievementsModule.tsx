@@ -113,6 +113,8 @@ export function AchievementsModule({ notify }: { notify: AdminNotify }) {
               onChange={(e) => setForm({ ...form, image: e.target.value })}
             >
               <option value="/images/science.jpg">Kegiatan sains</option>
+              <option value="/images/paskibra 1.jpg">Paskibra 2024</option>
+              <option value="/images/paskibra 2.jpg">Paskibra 2026</option>
               <option value="/images/students.jpg">Kegiatan siswa</option>
               <option value="/images/library.jpg">Perpustakaan</option>
               <option value="/images/campus.jpg">Sekolah</option>
