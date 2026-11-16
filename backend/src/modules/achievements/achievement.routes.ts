@@ -2,10 +2,6 @@ import type { FastifyInstance, onRequestHookHandler } from "fastify";
 import type { AchievementRepository } from "./achievement.repository.js";
 import { createAchievementService } from "./achievement.service.js";
 
-const notFound = {
-  error: { code: "NOT_FOUND", message: "Prestasi tidak ditemukan." },
-};
-
 export async function registerAchievementRoutes(
   app: FastifyInstance,
   repository: AchievementRepository,
@@ -32,7 +28,14 @@ export async function registerAchievementRoutes(
         request.params.achievementId,
         request.body,
       );
-      return record ?? reply.code(404).send(notFound);
+      return (
+        record ??
+        reply.code(404).send({
+          message: "Prestasi tidak ditemukan.",
+          code: "NOT_FOUND",
+          requestId: request.id,
+        })
+      );
     },
   );
 
@@ -41,7 +44,12 @@ export async function registerAchievementRoutes(
     { onRequest: guard },
     async (request, reply) => {
       const removed = await service.remove(request.params.achievementId);
-      return removed ? reply.code(204).send() : reply.code(404).send(notFound);
+      if (removed) return reply.code(204).send();
+      return reply.code(404).send({
+        message: "Prestasi tidak ditemukan.",
+        code: "NOT_FOUND",
+        requestId: request.id,
+      });
     },
   );
 }
