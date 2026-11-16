@@ -1,14 +1,13 @@
 import type { AchievementRepository } from "./achievement.repository.js";
-import type { AchievementInput, AchievementUpdate } from "./achievement.schema.js";
+import { achievementInput, achievementUpdate } from "./achievement.schema.js";
 
 export function createAchievementService(repo: AchievementRepository) {
   return {
     listPublic: () => repo.list(true),
     listAdmin: () => repo.list(false),
-    create: (input: AchievementInput) => repo.create(input),
-    // undefined bila id tidak ditemukan, routes yang mengubahnya jadi 404
-    update: (id: string, input: AchievementUpdate) => repo.update(id, input),
-    // false bila id tidak ditemukan
+    create: (body: unknown) => repo.create(achievementInput.parse(body)),
+    update: (id: string, body: unknown) =>
+      repo.update(id, achievementUpdate.parse(body)),
     remove: (id: string) => repo.remove(id),
   };
 }
