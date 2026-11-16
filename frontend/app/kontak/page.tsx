@@ -21,14 +21,15 @@ export default function ContactPage() {
         />
         <section className="contact-layout">
           <div className="contact-map">
-  <iframe
-    src="https://maps.google.com/maps?q=SMP+Nurul+Huda+Cisoka&z=16&output=embed"
-    loading="lazy"
-    referrerPolicy="strict-origin-when-cross-origin"
-    allowFullScreen
-    style={{ border: 0, width: "100%", height: "100%", minHeight: 320 }}
-  />
-</div>
+            <iframe
+              src="https://maps.google.com/maps?q=SMP+Nurul+Huda+Cisoka&z=16&output=embed"
+              title="Lokasi SMP Nurul Huda di Google Maps"
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+              style={{ border: 0, width: "100%", height: "100%", minHeight: 320 }}
+            />
+          </div>
           <div className="contact-details">
             <p className="section-kicker">Kunjungi sekolah</p>
             <h2>Rumah belajar kami terbuka untuk Anda.</h2>
@@ -36,7 +37,7 @@ export default function ContactPage() {
               <article>
                 <span>Alamat</span>
                 <p>
-                 Jl. Megu – Cisoka No. 8 ,Jl. Cisoka-Megu Kp. Secang RT 05/04, Desa Cempaka, Kecamatan Cisoka
+                  Jl. Megu – Cisoka No. 8 ,Jl. Cisoka-Megu Kp. Secang RT 05/04, Desa Cempaka, Kecamatan Cisoka
                   <br />
                   Kabupaten Tangerang, Banten 15730.
                 </p>
@@ -44,9 +45,9 @@ export default function ContactPage() {
               <article>
                 <span>Telepon</span>
                 <p>
-                  (022) 1234 5678
+                  0813 8202 9678(bu zeha)
                   <br />
-                  0812 3456 7890
+                  0822 1096 2310(Pak Umed)
                 </p>
               </article>
               <article>
@@ -54,7 +55,7 @@ export default function ContactPage() {
                 <p>
                   nurulhudacisoka.smp@gmail.com
                   <br />
-                  
+
                 </p>
               </article>
               <article>
@@ -62,7 +63,7 @@ export default function ContactPage() {
                 <p>
                   Senin–Jumat, 07.00–12.00
                   <br />
-                 
+
                 </p>
               </article>
             </div>
