@@ -23,33 +23,16 @@ export async function registerAchievementRoutes(
   app.patch<{ Params: { achievementId: string } }>(
     "/achievements/:achievementId",
     { onRequest: guard },
-    async (request, reply) => {
-      const record = await service.update(
-        request.params.achievementId,
-        request.body,
-      );
-      return (
-        record ??
-        reply.code(404).send({
-          message: "Prestasi tidak ditemukan.",
-          code: "NOT_FOUND",
-          requestId: request.id,
-        })
-      );
-    },
+    (request) =>
+      service.update(request.params.achievementId, request.body),
   );
 
   app.delete<{ Params: { achievementId: string } }>(
     "/achievements/:achievementId",
     { onRequest: guard },
     async (request, reply) => {
-      const removed = await service.remove(request.params.achievementId);
-      if (removed) return reply.code(204).send();
-      return reply.code(404).send({
-        message: "Prestasi tidak ditemukan.",
-        code: "NOT_FOUND",
-        requestId: request.id,
-      });
+      await service.remove(request.params.achievementId);
+      return reply.code(204).send();
     },
   );
 }

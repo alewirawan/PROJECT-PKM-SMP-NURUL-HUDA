@@ -60,7 +60,7 @@ export async function buildApp(config: AppConfig) {
       await registerAuthRoutes(api, config);
       const contentGuard = createContentGuard(createAuthRepository(db), config);
       await registerClubRoutes(api, createClubRepository(db), contentGuard);
-      await registerAchievementRoutes(app, createAchievementRepository(db), contentGuard);
+      await registerAchievementRoutes(api, createAchievementRepository(db), contentGuard);
       await registerAgendaRoutes(api, createAgendaRepository(db), contentGuard);
       await registerMessageRoutes(
         api, 
