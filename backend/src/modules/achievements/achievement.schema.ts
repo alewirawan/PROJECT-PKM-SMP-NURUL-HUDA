@@ -9,6 +9,8 @@ export const achievementImages = [
   "/images/students.jpg",
   "/images/library.jpg",
   "/images/campus.jpg",
+  "/images/paskibra1.jpg",
+  "/images/paskibra2.jpg",
 ] as const;
 
 const fields = {
