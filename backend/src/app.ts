@@ -16,6 +16,8 @@ import { registerClubRoutes } from "./modules/clubs/club.routes.js";
 import { createAgendaRepository } from "./modules/agenda/agenda.repository.js";
 import { registerAgendaRoutes } from "./modules/agenda/agenda.routes.js";
 import { registerErrorHandlers } from "./shared/http/error-handler.js";
+import { createMessageRepository } from "./modules/messages/message.repository.js";
+import { registerMessageRoutes } from "./modules/messages/message.routes.js";
 
 export async function buildApp(config: AppConfig) {
   const app = Fastify({
@@ -57,6 +59,11 @@ export async function buildApp(config: AppConfig) {
       const contentGuard = createContentGuard(createAuthRepository(db), config);
       await registerClubRoutes(api, createClubRepository(db), contentGuard);
       await registerAgendaRoutes(api, createAgendaRepository(db), contentGuard);
+      await registerMessageRoutes(
+        api, 
+        createMessageRepository(db),
+         contentGuard,
+        );
       await registerPostRoutes(api, config);
     },
     { prefix: "/api/v1" },
